@@ -1,0 +1,30 @@
+[
+  {
+    "id": "clock",
+    "title": "Clock Gallery",
+    "url": "https://clock.pcstyle.dev",
+    "description": "Creative gallery of animated clocks — doodle, mycelium, particle clouds, neon effects — interactive art timepieces.",
+    "accent": "#E6007E"
+  },
+  {
+    "id": "driftfield",
+    "title": "AimDrift",
+    "url": "https://driftfield.pcstyle.dev",
+    "description": "Interactive precision + flow aim trainer testing rhythm, accuracy, reflex — stats, multiple modes, evolving visual styles.",
+    "accent": "#00E5FF"
+  },
+  {
+    "id": "kalkulator",
+    "title": "PoliCalc",
+    "url": "https://kalkulator.pcstyle.dev",
+    "description": "Kalkulator ocen dla Politechniki Częstochowskiej: PP, ALG, PAM i więcej — open source, po polsku.",
+    "accent": "#FFD200"
+  },
+  {
+    "id": "pixlab",
+    "title": "PixelForge",
+    "url": "https://pixlab.pcstyle.dev",
+    "description": "AI-powered image studio: point-and-edit, style transfer, smart retouching, object vanish, pro tools in a modern web interface.",
+    "accent": "#7C4DFF"
+  }
+]
