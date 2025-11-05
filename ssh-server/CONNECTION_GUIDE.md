@@ -53,3 +53,6 @@ ssh -o StrictHostKeyChecking=no -p 49358 yamanote.proxy.rlwy.net
 **Connection should work now!** The simple UI is more reliable than blessed for SSH connections.
 
 
+
+
+
