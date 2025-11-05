@@ -1,6 +1,6 @@
-# pcstyle.dev SSH Contact Form Server
+# pcstyle.dev SSH Contact Server
 
-An SSH-accessible terminal contact form that allows users to send messages directly from their terminal.
+SSH-accessible terminal contact form that allows users to send messages directly from their terminal.
 
 ## 🚀 Features
 
@@ -14,41 +14,23 @@ An SSH-accessible terminal contact form that allows users to send messages direc
 ## 📦 Installation
 
 ```bash
-cd ssh-server
 npm install
 ```
 
 ## ⚙️ Configuration
 
-1. Copy the example environment file:
-```bash
-cp .env.example .env
-```
+Environment variables are pre-configured in `.env` for Railway deployment:
 
-2. Edit `.env` and configure:
 ```env
-# Your Vercel API endpoint (production)
 API_URL=https://pcstyle.dev/api/contact
-
-# For local development
-# API_URL=http://localhost:3000/api/contact
-
-# SSH server configuration
-SSH_PORT=2222        # Use 22 for production (requires root/sudo)
+SSH_PORT=22
 SSH_HOST=0.0.0.0
-
-# Optional: Require password authentication
-# SSH_PASSWORD=your_secret_password
+NODE_ENV=production
 ```
 
-3. Generate SSH host key (for production):
-```bash
-ssh-keygen -t rsa -b 4096 -f host.key -N ""
-```
+For local development, copy `.env.example` to `.env.local` and adjust values.
 
-**Note:** If you don't generate a key, the server will create one automatically (development only).
-
-## 🏃 Running the Server
+## 🏃 Running Locally
 
 ### Development (with auto-reload)
 ```bash
@@ -60,252 +42,69 @@ npm run dev
 npm start
 ```
 
-The server will start and display:
-```
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   🚀 pcstyle.dev SSH Contact Form Server                     ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
-
-✓ Listening on 0.0.0.0:2222
-✓ API endpoint: https://pcstyle.dev/api/contact
-✓ Authentication: Open access
-
-Connect with:
-  ssh -p 2222 localhost
-```
-
-## 🔌 Testing Locally
-
-1. Start your Next.js development server (in the main project):
-```bash
-npm run dev
-```
-
-2. In another terminal, start the SSH server:
-```bash
-cd ssh-server
-npm run dev
-```
-
-3. Connect via SSH:
+Connect via SSH:
 ```bash
 ssh -p 2222 localhost
 ```
 
-4. Fill out the form and submit!
+## 🌐 Railway Deployment
 
-## 🌐 Production Deployment
+This repository is configured for Railway deployment:
 
-### Option 1: Railway.app (Recommended)
-
-1. Install Railway CLI:
-```bash
-npm install -g railway
-```
-
-2. Login and initialize:
-```bash
-railway login
-railway init
-```
-
-3. Add environment variables:
-```bash
-railway variables set API_URL=https://pcstyle.dev/api/contact
-railway variables set SSH_PORT=22
-```
-
-4. Deploy:
-```bash
-railway up
-```
-
-5. Expose SSH port (port 22):
+1. **Connect Railway to this GitHub repo:**
    - Go to Railway dashboard
-   - Settings > Networking > Public Networking
-   - Enable TCP proxy for port 22
+   - New Project → Deploy from GitHub repo
+   - Select this repository
 
-### Option 2: Fly.io
+2. **Environment variables are already configured** in `.env` file
 
-1. Install Fly CLI:
-```bash
-curl -L https://fly.io/install.sh | sh
-```
+3. **Configure TCP proxy:**
+   - Railway dashboard → Service → Settings → Networking
+   - Enable Public Networking
+   - Add TCP proxy for port 22
 
-2. Create `fly.toml`:
-```toml
-app = "pcstyle-ssh-contact"
+4. **Set up DNS:**
+   - Add A record: `ssh.pcstyle.dev` → Railway IP
+   - Or use Railway domain: `ssh.pcstyle.up.railway.app`
 
-[build]
-  builder = "heroku/buildpacks:20"
+## 🔒 Security
 
-[[services]]
-  internal_port = 22
-  protocol = "tcp"
+- Generate SSH host key: `ssh-keygen -t rsa -b 4096 -f host.key -N ""`
+- Host key is auto-generated if missing (development only)
+- Rate limiting: 5 requests per minute per IP
+- Optional password authentication via `SSH_PASSWORD` env var
 
-  [[services.ports]]
-    port = 22
-```
+## 📝 Environment Variables
 
-3. Deploy:
-```bash
-fly launch
-fly secrets set API_URL=https://pcstyle.dev/api/contact
-fly deploy
-```
-
-### Option 3: DigitalOcean Droplet / VPS
-
-1. Create a small droplet ($6/month)
-2. SSH into the server
-3. Install Node.js:
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
-4. Clone and setup:
-```bash
-git clone <your-repo>
-cd ssh-server
-npm install
-```
-
-5. Create systemd service (`/etc/systemd/system/ssh-contact.service`):
-```ini
-[Unit]
-Description=pcstyle.dev SSH Contact Form
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/root/ssh-server
-ExecStart=/usr/bin/node server.js
-Restart=always
-Environment=NODE_ENV=production
-Environment=SSH_PORT=22
-
-[Install]
-WantedBy=multi-user.target
-```
-
-6. Enable and start:
-```bash
-sudo systemctl enable ssh-contact
-sudo systemctl start ssh-contact
-```
-
-## 🔒 Security Considerations
-
-### Production Checklist:
-
-- [ ] Generate proper RSA host key (4096-bit)
-- [ ] Set `SSH_PORT=22` (requires root privileges)
-- [ ] Consider enabling password authentication via `SSH_PASSWORD`
-- [ ] Set up firewall rules (allow port 22)
-- [ ] Configure Discord webhook URL as environment variable
-- [ ] Enable HTTPS for API endpoint
-- [ ] Monitor logs for suspicious activity
-- [ ] Set up log rotation
-- [ ] Consider adding DDoS protection
-
-### Rate Limiting
-
-The API includes built-in rate limiting:
-- **5 requests per minute** per IP address
-- Returns 429 status code when exceeded
-- Rate limit window: 60 seconds
-
-## 📝 DNS Configuration
-
-### Point pcstyle.dev to SSH server:
-
-**Option A: Direct A record (single server)**
-```
-Type: A
-Name: @
-Value: <your-server-ip>
-TTL: 3600
-```
-
-**Option B: Subdomain (recommended)**
-```
-Type: A
-Name: ssh
-Value: <your-server-ip>
-TTL: 3600
-```
-
-Users would connect: `ssh ssh.pcstyle.dev`
-
-**Option C: SRV record (advanced)**
-```
-Type: SRV
-Name: _ssh._tcp
-Priority: 0
-Weight: 5
-Port: 22
-Target: ssh.pcstyle.dev
-```
-
-**Note:** Your web server (Vercel) and SSH server can coexist:
-- Web traffic (HTTP/HTTPS) → Vercel (ports 80/443)
-- SSH traffic → Your SSH server (port 22)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `API_URL` | Vercel API endpoint | `http://localhost:3000/api/contact` |
+| `SSH_PORT` | SSH server port | `2222` |
+| `SSH_HOST` | Host binding | `0.0.0.0` |
+| `SSH_PASSWORD` | Optional password auth | `null` (open access) |
+| `NODE_ENV` | Environment | `production` |
 
 ## 🐛 Troubleshooting
 
 ### "Connection refused"
-- Check if server is running: `sudo netstat -tulpn | grep 2222`
-- Verify firewall allows the port: `sudo ufw status`
-- Check if port is already in use
-
-### "Permission denied"
-- For port 22, you need root: `sudo node server.js`
-- Or use `setcap`: `sudo setcap 'cap_net_bind_service=+ep' $(which node)`
+- Check if server is running
+- Verify firewall allows the port
+- Check Railway logs: `railway logs`
 
 ### "Host key verification failed"
-- Remove old key: `ssh-keygen -R [localhost]:2222`
-- Or use: `ssh -o StrictHostKeyChecking=no -p 2222 localhost`
+- Remove old key: `ssh-keygen -R ssh.pcstyle.dev`
+- Or use: `ssh -o StrictHostKeyChecking=no ssh.pcstyle.dev`
 
 ### "API submission failed"
-- Check API_URL is correct
-- Verify Discord webhook URL is set in Vercel environment variables
-- Check API logs in Vercel dashboard
-- Test API endpoint: `curl -X POST https://pcstyle.dev/api/contact -H "Content-Type: application/json" -d '{"message":"test","source":"ssh"}'`
-
-## 📊 Monitoring
-
-View server logs:
-```bash
-# If running with systemd
-sudo journalctl -u ssh-contact -f
-
-# If running directly
-# Output is already in the terminal
-```
-
-## 🔄 Updating
-
-```bash
-cd ssh-server
-git pull
-npm install
-# Restart the service
-sudo systemctl restart ssh-contact
-```
+- Verify `API_URL` is correct
+- Check Discord webhook URL in Vercel environment variables
+- Test API: `curl -X POST https://pcstyle.dev/api/contact -H "Content-Type: application/json" -d '{"message":"test","source":"ssh"}'`
 
 ## 📄 License
 
-MIT
-
-## 🤝 Contributing
-
-This is a personal project, but feel free to fork and adapt for your own use!
+MIT © 2025 Adam Krupa
 
 ---
 
-Made with ❤️ by Adam Krupa
+Made with ❤️ by pcstyle  
 https://pcstyle.dev

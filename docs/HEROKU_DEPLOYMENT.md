@@ -32,24 +32,45 @@ cd ssh-server
 railway init
 ```
 
-4. **Ustaw zmienne środowiskowe:**
+4. **Utwórz serwis:**
 ```bash
-railway variables set API_URL=https://pcstyle.dev/api/contact
-railway variables set SSH_PORT=22
-railway variables set SSH_HOST=0.0.0.0
+# Opcja A: Utwórz serwis bezpośrednio (najprostsze)
+railway add --service ssh-contact
+
+# Opcja B: Utwórz serwis z linkiem do GitHub (wymaga połączenia Railway z GitHub)
+railway add --service ssh-contact --repo pc-style/pcstyledev
+
+# Opcja C: Interaktywny wizard (naciśnij Enter dla pustych wartości jeśli nie chcesz linkować repo)
+railway add
 ```
 
-5. **Deploy:**
+**Uwaga:** Jeśli Railway nie może znaleźć repozytorium:
+- Upewnij się że Railway jest połączone z GitHub (dashboard → Settings → Connections)
+- Albo pomiń `--repo` i deployuj bezpośrednio z lokalnego katalogu używając `railway up`
+
+5. **Ustaw zmienne środowiskowe:**
+```bash
+railway variables --set API_URL=https://pcstyle.dev/api/contact
+railway variables --set SSH_PORT=22
+railway variables --set SSH_HOST=0.0.0.0
+```
+
+Albo wszystkie naraz:
+```bash
+railway variables --set API_URL=https://pcstyle.dev/api/contact --set SSH_PORT=22 --set SSH_HOST=0.0.0.0
+```
+
+6. **Deploy:**
 ```bash
 railway up
 ```
 
-6. **Skonfiguruj publiczne TCP proxy:**
+7. **Skonfiguruj publiczne TCP proxy:**
    - Idź do Railway dashboard
    - Settings > Networking > Public Networking
    - Włącz TCP proxy na porcie 22
 
-7. **Ustaw DNS:**
+8. **Ustaw DNS:**
    - Dodaj A record dla `ssh.pcstyle.dev` → IP z Railway
    - Albo użyj Railway domain (np. `ssh.pcstyle.up.railway.app`)
 

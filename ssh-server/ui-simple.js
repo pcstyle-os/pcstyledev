@@ -1,19 +1,17 @@
 // Simple ANSI-based UI without blessed (more reliable for SSH)
 
 const ASCII_ART = `
-\x1b[36m╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   ██████╗  ██████╗███████╗████████╗██╗   ██╗██╗     ███████╗ ║
-║   ██╔══██╗██╔════╝██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝ ║
-║   ██████╔╝██║     ███████╗   ██║    ╚████╔╝ ██║     █████╗   ║
-║   ██╔═══╝ ██║     ╚════██║   ██║     ╚██╔╝  ██║     ██╔══╝   ║
-║   ██║     ╚██████╗███████║   ██║      ██║   ███████╗███████╗ ║
-║   ╚═╝      ╚═════╝╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝ ║
-║                                                               ║
-║                  Terminal Contact Form v1.0                  ║
-║                     https://pcstyle.dev                      ║
-╚═══════════════════════════════════════════════════════════════╝\x1b[0m
-
+\x1b[36m+=========================================================+
+|                                                             |
+|   ######   ###### ######## ######## ##   ## ##     ######## |
+|   ##   ## ##   ## ##    ## ##       ### ### ##     ##       |
+|   ######  ##   ## ##    ## ##       ####### ##     ######   |
+|   ##   ## ##   ## ##    ## ##       ## # ## ##     ##       |
+|   ######   ###### ######## ######## ##   ## ######## ########|
+|                                                             |
+|               Terminal Contact Form v1.0                   |
+|                  https://pcstyle.dev                        |
++=========================================================+\x1b[0m
 `;
 
 const INSTRUCTIONS = `
@@ -36,7 +34,16 @@ export async function createContactForm(stream, onSubmit) {
 
   // Clear screen and show header
   stream.write('\x1b[2J\x1b[H'); // Clear screen
-  stream.write(ASCII_ART);
+  
+  // Display ASCII art - simple left-aligned for all terminals
+  const asciiLines = ASCII_ART.trim().split('\n');
+  
+  // Just write lines directly without padding (prevents stretching on wide terminals)
+  asciiLines.forEach(line => {
+    stream.write(line + '\r\n');
+  });
+  
+  stream.write('\r\n');
   stream.write(INSTRUCTIONS);
 
   const fields = [
@@ -113,40 +120,55 @@ export async function createContactForm(stream, onSubmit) {
   // Show first prompt
   showPrompt();
 
-  // Handle input
+  // Handle input - process byte by byte for proper handling
   stream.on('data', async (data) => {
-    const char = data.toString();
+    const str = data.toString();
+    
+    // Process each character
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const charCode = str.charCodeAt(i);
 
-    // Handle Ctrl+C
-    if (char === '\x03') {
-      stream.write('\r\n\x1b[33mGoodbye!\x1b[0m\r\n');
-      stream.end();
-      return;
-    }
-
-    // Handle Enter
-    if (char === '\r' || char === '\n') {
-      const line = buffer;
-      buffer = '';
-      stream.write('\r\n');
-      await processInput(line);
-      return;
-    }
-
-    // Handle Backspace
-    if (char === '\x7f' || char === '\x08') {
-      if (buffer.length > 0) {
-        buffer = buffer.slice(0, -1);
-        stream.write('\b \b'); // Erase character
+      // Handle Ctrl+C
+      if (charCode === 3) {
+        stream.write('\r\n\x1b[33mGoodbye!\x1b[0m\r\n');
+        stream.end();
+        return;
       }
-      return;
-    }
 
-    // Regular character
-    if (char >= ' ' && char <= '~') {
-      buffer += char;
-      stream.write(char); // Echo character
+      // Handle Enter (CR or LF)
+      if (charCode === 13 || charCode === 10) {
+        // Skip duplicate LF after CR
+        if (charCode === 10 && i > 0 && str.charCodeAt(i - 1) === 13) {
+          continue;
+        }
+        const line = buffer;
+        buffer = '';
+        stream.write('\r\n');
+        await processInput(line);
+        return;
+      }
+
+      // Handle Backspace/Del
+      if (charCode === 127 || charCode === 8) {
+        if (buffer.length > 0) {
+          buffer = buffer.slice(0, -1);
+          stream.write('\b \b'); // Erase character
+        }
+        continue;
+      }
+
+      // Regular printable character (including unicode)
+      if (charCode >= 32 && charCode !== 127) {
+        buffer += char;
+        stream.write(char); // Echo character
+      }
     }
+  });
+
+  // Handle errors
+  stream.on('error', (err) => {
+    console.error('Stream error:', err);
   });
 
   return { stream };

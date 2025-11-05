@@ -16,14 +16,39 @@ const ASCII_ART = `
 `;
 
 export function createContactForm(stream, onSubmit) {
-  const screen = blessed.screen({
-    smartCSR: true,
-    input: stream,
-    output: stream,
-    autoPadding: true,
-    warnings: false,
-    fullUnicode: true,
-  });
+  try {
+    // Ensure stream has proper dimensions
+    if (!stream.columns) stream.columns = 80;
+    if (!stream.rows) stream.rows = 24;
+
+    // Ensure stream is writable
+    if (!stream.writable) {
+      console.error('Stream is not writable');
+      stream.write('\r\nError: Stream not ready\r\n');
+      return;
+    }
+
+    const screen = blessed.screen({
+      smartCSR: true,
+      input: stream,
+      output: stream,
+      autoPadding: false,
+      warnings: false,
+      fullUnicode: false, // Disable fullUnicode to avoid encoding issues
+      terminal: process.env.TERM || 'xterm-256color',
+      width: stream.columns,
+      height: stream.rows,
+    });
+
+    // Handle screen errors
+    screen.on('error', (err) => {
+      console.error('Screen error:', err);
+      try {
+        stream.write('\r\nError initializing terminal UI\r\n');
+      } catch (e) {
+        // Ignore write errors
+      }
+    });
 
   // Header
   const header = blessed.box({
@@ -243,10 +268,25 @@ export function createContactForm(stream, onSubmit) {
     form.focusPrevious();
   });
 
-  // Initial render
-  screen.render();
+    // Initial render
+    try {
+      screen.render();
+    } catch (err) {
+      console.error('Render error:', err);
+      stream.write('\r\nTerminal initialized. Please resize your terminal if needed.\r\n');
+    }
 
-  return screen;
+    return screen;
+  } catch (err) {
+    console.error('Error creating contact form:', err);
+    try {
+      stream.write('\r\nError: Failed to initialize contact form\r\n');
+      stream.write(`Error: ${err.message}\r\n`);
+    } catch (e) {
+      // Ignore write errors
+    }
+    throw err;
+  }
 }
 
 function showMessage(screen, message, type) {

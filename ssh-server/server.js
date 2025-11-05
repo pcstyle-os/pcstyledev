@@ -133,19 +133,55 @@ const sshServer = new Server({
       });
 
       session.on('shell', (accept) => {
-        sessionStream = accept();
+        try {
+          sessionStream = accept();
+          if (!sessionStream) {
+            console.error('❌ Failed to accept shell session');
+            return;
+          }
 
-        if (ptyInfo) {
-          sessionStream.columns = ptyInfo.cols;
-          sessionStream.rows = ptyInfo.rows;
-          sessionStream.isTTY = true;
-          sessionStream.isRaw = false;
+          // Set up terminal properties BEFORE creating UI
+          if (ptyInfo) {
+            sessionStream.columns = ptyInfo.cols || 80;
+            sessionStream.rows = ptyInfo.rows || 24;
+            sessionStream.isTTY = true;
+            sessionStream.isRaw = true; // Enable raw mode for proper input handling
+          } else {
+            // Default terminal size if PTY not set
+            sessionStream.columns = 80;
+            sessionStream.rows = 24;
+            sessionStream.isTTY = true;
+            sessionStream.isRaw = true; // Enable raw mode for proper input handling
+          }
+
+          // Set terminal type for proper rendering
+          process.env.TERM = ptyInfo?.term || 'xterm-256color';
+          process.env.COLUMNS = String(sessionStream.columns);
+          process.env.LINES = String(sessionStream.rows);
+
+          // Handle stream errors
+          sessionStream.on('error', (err) => {
+            console.error('❌ Stream error:', err.message);
+          });
+
+          // Use blessed UI (main UI)
+          setTimeout(() => {
+            try {
+              console.log('Creating contact form with blessed UI');
+              createContactForm(sessionStream, async (formData) => {
+                return await submitToAPI(formData);
+              });
+            } catch (err) {
+              console.error('❌ Error creating contact form:', err);
+              sessionStream.write('\r\nError initializing form. Please try again.\r\n');
+              sessionStream.write(`Error: ${err.message}\r\n`);
+              // Don't end stream immediately, let user see the error
+              setTimeout(() => sessionStream.end(), 5000);
+            }
+          }, 100);
+        } catch (err) {
+          console.error('❌ Error in shell handler:', err);
         }
-
-        // Create the contact form UI
-        createContactForm(sessionStream, async (formData) => {
-          return await submitToAPI(formData);
-        });
       });
 
       session.on('exec', (accept, reject, info) => {
