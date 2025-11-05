@@ -96,7 +96,7 @@ export function Hero() {
         >
           <p className="font-medium uppercase tracking-wide text-[color:var(--color-ink)]">Adam Krupa // pcstyle</p>
           <p className="text-pretty text-[color:var(--color-ink)]/80">
-            18 y/o pierwszoroczny student Sztucznej Inteligencji na Politechnice
+            18 y/o developer z Polski, pierwszoroczny student Sztucznej Inteligencji na Politechnice
             Częstochowskiej. Łączenie AI, kreatywnego kodu i brutalnej estetyki to
             mój ulubiony chaos.
           </p>

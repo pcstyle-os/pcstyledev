@@ -39,7 +39,7 @@ export default function OgImage() {
             neo brutal playground
           </div>
           <div style={{ fontSize: 32, maxWidth: 640, lineHeight: 1.3 }}>
-            Adam Krupa // pcstyle — 18yo AI student @ Politechnika Częstochowska.
+            Adam Krupa // pcstyle — Developer z Polski. 18yo AI student @ Politechnika Częstochowska.
             Zegary, aim drift, kalkulatory, pixelowe AI hacki.
           </div>
         </div>
