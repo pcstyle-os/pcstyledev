@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type MagneticButtonProps = {
   children: React.ReactNode;
@@ -18,6 +19,9 @@ export function MagneticButton({
   onClick,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const disableMagnet = shouldReduceMotion || isMobile;
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -27,7 +31,7 @@ export function MagneticButton({
   const springY = useSpring(y, springConfig);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!ref.current) return;
+    if (!ref.current || disableMagnet) return;
 
     const rect = ref.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -49,16 +53,16 @@ export function MagneticButton({
   return (
     <motion.button
       ref={ref}
-      className={className}
-      style={{ x: springX, y: springY }}
+      type="button"
+      className={`focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-magenta)] ${className}`.trim()}
+      style={{ x: disableMagnet ? 0 : springX, y: disableMagnet ? 0 : springY }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={disableMagnet ? undefined : { scale: 1.05 }}
+      whileTap={disableMagnet ? undefined : { scale: 0.95 }}
     >
       {children}
     </motion.button>
   );
 }
-

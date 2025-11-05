@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // lightweight shapes dla dekoracji
 const shapes = [
@@ -165,17 +166,19 @@ function CursorGlow() {
 // main component — super lightweight
 export function SmoothBackground() {
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const reduceMotion = prefersReducedMotion || isMobile;
 
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {/* cursor glow — smooth as butter */}
-      {!prefersReducedMotion && <CursorGlow />}
+      {!reduceMotion && <CursorGlow />}
 
       {/* CSS-only particles — zero performance hit */}
       <CSSParticleGrid />
 
       {/* floating orbs z parallax */}
-      {!prefersReducedMotion && [0, 1, 2].map((i) => <FloatingOrb key={i} index={i} />)}
+      {!reduceMotion && [0, 1, 2].map((i) => <FloatingOrb key={i} index={i} />)}
 
       {/* animated shapes */}
       {shapes.map((shape) => (
@@ -183,7 +186,7 @@ export function SmoothBackground() {
           key={shape.id}
           aria-hidden
           className={shape.className}
-          animate={prefersReducedMotion ? undefined : shape.animate}
+          animate={reduceMotion ? undefined : shape.animate}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
@@ -192,7 +195,7 @@ export function SmoothBackground() {
       <motion.div
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(230,0,126,0.08),_transparent_60%)]"
-        animate={prefersReducedMotion ? undefined : { opacity: [0.5, 0.7, 0.4, 0.5] }}
+        animate={reduceMotion ? undefined : { opacity: [0.5, 0.7, 0.4, 0.5] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
 
@@ -216,4 +219,3 @@ export function SmoothBackground() {
     </div>
   );
 }
-

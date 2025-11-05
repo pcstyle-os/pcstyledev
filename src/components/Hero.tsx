@@ -1,10 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { useEffect, useState, type MouseEvent } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
 import { MagneticButton } from "@/components/MagneticButton";
 import { SSHContactModal } from "@/components/SSHContactModal";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import {
   Github,
   Mail,
@@ -15,6 +21,7 @@ import {
   Palette,
   MessageCircle,
   Facebook,
+  CalendarClock,
 } from "lucide-react";
 
 type HeroFact = {
@@ -44,11 +51,14 @@ export function Hero() {
 
   const pulse = useMotionValue(0);
   const shadow = useTransform(pulse, (val) => `drop-shadow(10px 10px 0 rgba(0,0,0,${val}))`);
+  const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const minimizeMotion = prefersReducedMotion || isMobile;
   const [showNotification, setShowNotification] = useState(false);
   const [showSSHModal, setShowSSHModal] = useState(false);
 
   // copy discord username
-  const handleDiscordClick = (e: React.MouseEvent) => {
+  const handleDiscordClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     navigator.clipboard.writeText("Add me on Discord: @pcstyle");
     setShowNotification(true);
@@ -63,16 +73,18 @@ export function Hero() {
   return (
     <motion.section
       id="intro"
-      initial={{ opacity: 0, y: 120, rotateX: -12 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ type: "spring", stiffness: 120, damping: 16 }}
+      initial={minimizeMotion ? false : { opacity: 0, y: 120, rotateX: -12 }}
+      animate={minimizeMotion ? { opacity: 1 } : { opacity: 1, y: 0, rotateX: 0 }}
+      transition={minimizeMotion ? { duration: 0.2 } : { type: "spring", stiffness: 120, damping: 16 }}
       className="relative flex w-full flex-col gap-12 overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-paper)] p-12 brutal-border brutal-shadow noisy-paper text-[color:var(--color-ink)]"
     >
       <motion.span
         className="inline-block text-xs uppercase tracking-[0.4em] text-[color:var(--color-magenta)]"
-        initial={{ y: -20, opacity: 0 }}
+        initial={minimizeMotion ? false : { y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, type: "spring", stiffness: 220, damping: 18 }}
+        transition={
+          minimizeMotion ? { duration: 0.2 } : { delay: 0.2, type: "spring", stiffness: 220, damping: 18 }
+        }
       >
         {drawBanner("pcstyle.dev")}
       </motion.span>
@@ -80,21 +92,25 @@ export function Hero() {
       <div className="flex flex-wrap items-end gap-6">
         <motion.h1
           className="neo-pulse text-balance text-[clamp(3.8rem,9vw,8.5rem)] font-black uppercase leading-[0.85]"
-          whileHover={{ rotate: -1.5, scale: 1.02 }}
+          whileHover={minimizeMotion ? undefined : { rotate: -1.5, scale: 1.02 }}
         >
           <motion.span
             className="block text-[color:var(--color-ink)]"
-            whileHover={{ color: "var(--color-magenta)", textShadow: "6px 6px 0 var(--color-magenta)" }}
-            transition={{ type: "spring", stiffness: 180, damping: 20 }}
+            whileHover={
+              minimizeMotion
+                ? undefined
+                : { color: "var(--color-magenta)", textShadow: "6px 6px 0 var(--color-magenta)" }
+            }
+            transition={minimizeMotion ? { duration: 0.2 } : { type: "spring", stiffness: 180, damping: 20 }}
           >
             pcstyle
           </motion.span>
         </motion.h1>
         <motion.div
           className="flex max-w-sm flex-col gap-3 text-sm sm:text-base"
-          initial={{ opacity: 0, y: 40 }}
+          initial={minimizeMotion ? false : { opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
+          transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.25, duration: 0.5 }}
         >
           <p className="font-medium uppercase tracking-wide text-[color:var(--color-ink)]">Adam Krupa // pcstyle</p>
           <p className="text-pretty text-[color:var(--color-ink)]/80">
@@ -125,7 +141,7 @@ export function Hero() {
               key={fact.label}
               className="relative z-10 flex items-start gap-3 brutal-border brutal-shadow bg-[var(--color-paper)] px-4 py-3 font-semibold uppercase tracking-[0.2em] text-[color:var(--color-ink)]"
               variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-              whileHover={{ rotate: 2.5, scale: 1.05 }}
+              whileHover={minimizeMotion ? undefined : { rotate: 2.5, scale: 1.05 }}
             >
               <Icon className="h-5 w-5 text-[var(--color-magenta)]" />
               <div>
@@ -140,99 +156,108 @@ export function Hero() {
       <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-center">
         <motion.button
           onClick={() => setShowSSHModal(true)}
-          className="relative flex w-fit items-center gap-3 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-magenta)] px-6 py-3 text-sm font-semibold uppercase text-white shadow-[6px_6px_0_var(--color-ink)] cursor-pointer transition-all hover:bg-[var(--color-cyan)]"
-          whileHover={{ scale: 1.06, rotate: -2 }}
-          transition={{ type: "spring", stiffness: 200 }}
+          className="relative flex w-fit items-center gap-3 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-magenta)] px-6 py-3 text-sm font-semibold uppercase text-white shadow-[6px_6px_0_var(--color-ink)] cursor-pointer transition-all hover:bg-[var(--color-cyan)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
+          whileHover={minimizeMotion ? undefined : { scale: 1.06, rotate: -2 }}
+          transition={minimizeMotion ? { duration: 0.1 } : { type: "spring", stiffness: 200 }}
         >
           {/* vibey fake indicator */}
           <span className="flex size-3 animate-pulse rounded-full bg-white/90 shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
           contact me on ssh
         </motion.button>
 
-        <motion.div
-          className="flex flex-wrap gap-4 text-sm"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-        >
-          <MagneticButton
-            className="brutal-border brutal-shadow bg-[var(--color-paper)] px-6 py-3 font-semibold uppercase tracking-[0.2em] hover:text-[color:var(--color-magenta)] flex items-center gap-2"
-            strength={0.2}
-          >
-            <Code2 className="h-4 w-4" />
-            <Link href="#projects">zobacz projekty</Link>
-          </MagneticButton>
-        </motion.div>
-
-        {/* social links z ikonami — actual working links */}
-        <motion.div
-          className="flex flex-wrap gap-3"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-        >
-          <Link
-            href="https://github.com/pc-style"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
+        <div className="flex flex-col gap-4 text-sm sm:flex-row sm:flex-wrap sm:items-center">
+          <motion.div
+            className="flex flex-wrap gap-4 text-sm"
+            initial={minimizeMotion ? false : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.35, duration: 0.5 }}
           >
             <MagneticButton
-              className="brutal-border brutal-shadow bg-[var(--color-paper)] p-3 hover:bg-[var(--color-ink)] hover:text-white transition-colors"
-              strength={0.3}
+              className="brutal-border brutal-shadow bg-[var(--color-paper)] px-6 py-3 font-semibold uppercase tracking-[0.2em] hover:text-[color:var(--color-magenta)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-magenta)] flex items-center gap-2"
+              strength={0.2}
+              onClick={() => {
+                const section = document.getElementById("projects");
+                section?.scrollIntoView({ behavior: minimizeMotion ? "auto" : "smooth" });
+              }}
+            >
+              <Code2 className="h-4 w-4" />
+              zobacz projekty
+            </MagneticButton>
+            <motion.a
+              href="mailto:adamkrupa@tuta.io?subject=Hello%20from%20pcstyle.dev"
+              className="flex items-center gap-2 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-paper)] px-6 py-3 font-semibold uppercase tracking-[0.2em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)] transition-colors hover:bg-[var(--color-magenta)] hover:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-magenta)]"
+              target="_blank"
+              rel="noreferrer noopener"
+              whileHover={minimizeMotion ? undefined : { rotate: -2, scale: 1.04 }}
+            >
+              <Mail className="h-4 w-4" />
+              wyślij maila
+            </motion.a>
+            <motion.a
+              href="https://cal.com/pcstyle"
+              className="flex items-center gap-2 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-paper)] px-6 py-3 font-semibold uppercase tracking-[0.2em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)] transition-colors hover:bg-[var(--color-cyan)] hover:text-[color:var(--color-ink)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-cyan)]"
+              target="_blank"
+              rel="noreferrer noopener"
+              whileHover={minimizeMotion ? undefined : { rotate: 1.5, scale: 1.04 }}
+            >
+              <CalendarClock className="h-4 w-4" />
+              book a call
+            </motion.a>
+          </motion.div>
+
+          {/* social links z ikonami — actual working links */}
+          <motion.div
+            className="flex flex-wrap gap-3"
+            initial={minimizeMotion ? false : { opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.5, duration: 0.4 }}
+          >
+            <motion.a
+              href="https://github.com/pcstyle"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="brutal-border brutal-shadow grid size-12 place-items-center rounded-full bg-[var(--color-paper)] transition-colors hover:bg-[var(--color-ink)] hover:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"
+              whileHover={minimizeMotion ? undefined : { scale: 1.05, rotate: -1.5 }}
             >
               <Github className="h-5 w-5" />
-            </MagneticButton>
-          </Link>
-          <Link
-            href="https://www.facebook.com/adam.krupa.771/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Facebook"
-          >
-            <MagneticButton
-              className="brutal-border brutal-shadow bg-[var(--color-paper)] p-3 hover:bg-[#1877F2] hover:text-white transition-colors"
-              strength={0.3}
+            </motion.a>
+            <motion.a
+              href="https://www.facebook.com/adam.krupa.771/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="brutal-border brutal-shadow grid size-12 place-items-center rounded-full bg-[var(--color-paper)] transition-colors hover:bg-[#1877F2] hover:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#1877F2]"
+              whileHover={minimizeMotion ? undefined : { scale: 1.05, rotate: 1.5 }}
             >
               <Facebook className="h-5 w-5" />
-            </MagneticButton>
-          </Link>
-          <div onClick={handleDiscordClick} className="cursor-pointer">
-            <MagneticButton
-              className="brutal-border brutal-shadow bg-[var(--color-paper)] p-3 hover:bg-[#5865F2] hover:text-white transition-colors"
-              strength={0.3}
+            </motion.a>
+            <motion.button
+              onClick={handleDiscordClick}
+              aria-label="Copy Discord handle"
+              className="brutal-border brutal-shadow grid size-12 place-items-center rounded-full bg-[var(--color-paper)] transition-colors hover:bg-[#5865F2] hover:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#5865F2]"
+              whileHover={minimizeMotion ? undefined : { scale: 1.05, rotate: -1 }}
             >
               <MessageCircle className="h-5 w-5" />
-            </MagneticButton>
-          </div>
-          <Link
-            href="mailto:adamkrupa@tuta.io"
-            aria-label="Email"
-          >
-            <MagneticButton
-              className="brutal-border brutal-shadow bg-[var(--color-paper)] p-3 hover:bg-[var(--color-magenta)] hover:text-white transition-colors"
-              strength={0.3}
-            >
-              <Mail className="h-5 w-5" />
-            </MagneticButton>
-          </Link>
-        </motion.div>
+            </motion.button>
+          </motion.div>
+        </div>
       </div>
 
       <motion.div
         className="pointer-events-none absolute -right-16 -top-20 hidden aspect-square w-48 rotate-6 border-4 border-[var(--color-ink)] bg-[var(--color-cyan)] brutal-shadow md:block grid place-items-center"
-        initial={{ scale: 0, rotate: -40 }}
-        animate={{ scale: 1, rotate: 6 }}
-        transition={{ delay: 0.4, type: "spring", stiffness: 160 }}
+        initial={minimizeMotion ? false : { scale: 0, rotate: -40 }}
+        animate={minimizeMotion ? { opacity: 0.8 } : { scale: 1, rotate: 6 }}
+        transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.4, type: "spring", stiffness: 160 }}
       >
         <Sparkles className="h-20 w-20 text-[var(--color-ink)] opacity-30" />
       </motion.div>
 
       <motion.div
         className="pointer-events-none absolute -bottom-16 left-8 hidden h-32 w-32 -rotate-3 border-4 border-[var(--color-ink)] bg-[var(--color-yellow)] brutal-shadow sm:block grid place-items-center"
-        initial={{ y: 120, opacity: 0 }}
+        initial={minimizeMotion ? false : { y: 120, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.55, type: "spring", stiffness: 140 }}
+        transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.55, type: "spring", stiffness: 140 }}
         style={{ filter: shadow }}
         onMouseEnter={() => pulse.set(0.4)}
         onMouseLeave={() => pulse.set(0)}
@@ -269,4 +294,3 @@ export function Hero() {
     </motion.section>
   );
 }
-

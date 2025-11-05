@@ -1,10 +1,66 @@
+import Link from "next/link";
 import { SmoothBackground } from "@/components/SmoothBackground";
 import { Hero } from "@/components/Hero";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
+import { loadProjects } from "@/lib/projects";
 
-// lepsze SEO przez semantic HTML i dodatkowy content
+const explorations = [
+  {
+    title: "Realtime AI workflows",
+    description:
+      "Buduję lekkie agenty, które w locie zamieniają prompty na gotowe animacje i shaderowe wariacje.",
+    status: "W prototypie",
+  },
+  {
+    title: "Neo-brutalist design system",
+    description:
+      "Porządkuję kontrasty, spacingi i brutal shadows w tokenach, żeby każda subdomena miała tę samą energię.",
+    status: "Tokeny siedzą już w Tailwind v4",
+  },
+  {
+    title: "Interactive SSH contact UX",
+    description:
+      "Dopinam spokojniejszy onboarding i live logi, żeby zostawianie wiadomości z terminala było bezstresowe.",
+    status: "Testuję WebRTC fallback",
+  },
+];
+
+const faqEntries = [
+  {
+    question: "Kim jestem?",
+    answer:
+      "Adam Krupa (pcstyle) — developer z Polski. Łączę AI, design i kreatywny kod. Studiuję Sztuczną Inteligencję na Politechnice Częstochowskiej.",
+  },
+  {
+    question: "Jakie projekty prowadzę?",
+    answer:
+      "Clock Gallery, AimDrift, PoliCalc i PixelForge pokazują zakres: interaktywne doświadczenia, narzędzia AI oraz produkty dla studentów.",
+  },
+  {
+    question: "Jakiego stacku używam?",
+    answer:
+      "Next.js 16, React 19, TypeScript, Tailwind v4, Framer Motion, WebGL shadery. Po stronie AI — Python i autorskie pipeline'y generatywne.",
+  },
+  {
+    question: "Jak się skontaktować?",
+    answer:
+      "Mailuj na adamkrupa@tuta.io, złap mnie na Discordzie (@pcstyle), albo wypróbuj SSH modal. Na rozmowy mam kalendarz pod cal.com/pcstyle.",
+  },
+];
+
 export default function Home() {
+  const projects = loadProjects();
+  const [latestProject] = projects;
+  const spotlightProject =
+    latestProject ??
+    ({
+      id: "portfolio",
+      title: "Najnowszy eksperyment",
+      description: "Nowy projekt jest w drodze — zaglądaj częściej po świeże rzeczy.",
+      url: "https://pcstyle.dev",
+    } as (typeof projects)[number]);
+
   return (
     <>
       <h1 className="sr-only">
@@ -12,116 +68,141 @@ export default function Home() {
       </h1>
       <main className="relative isolate mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-24 px-6 pb-40 pt-16 sm:px-10 lg:px-16">
         <SmoothBackground />
+        <nav className="sticky top-6 z-20 mb-4 flex w-full justify-end">
+          <ul className="flex flex-wrap gap-3 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-paper)] px-5 py-3 text-xs font-semibold uppercase tracking-[0.35em] shadow-[6px_6px_0_var(--color-ink)] sm:text-sm">
+            <li>
+              <a className="transition-colors hover:text-[var(--color-magenta)]" href="#intro">
+                intro
+              </a>
+            </li>
+            <li>
+              <a className="transition-colors hover:text-[var(--color-magenta)]" href="#latest">
+                latest drop
+              </a>
+            </li>
+            <li>
+              <a className="transition-colors hover:text-[var(--color-magenta)]" href="#projects">
+                projects
+              </a>
+            </li>
+            <li>
+              <a className="transition-colors hover:text-[var(--color-magenta)]" href="#lab">
+                lab notes
+              </a>
+            </li>
+            <li>
+              <a className="transition-colors hover:text-[var(--color-magenta)]" href="#faq">
+                faq
+              </a>
+            </li>
+          </ul>
+        </nav>
         <ScrollIndicator />
-        {/* intro ma robić pop i robi pop */}
         <Hero />
+
+        <section
+          id="latest"
+          className="relative flex flex-col gap-8 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-10 brutal-shadow"
+        >
+          <header className="flex flex-col gap-3">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-yellow)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)]">
+              latest drop
+            </span>
+            <h2 className="text-[clamp(2.4rem,5vw,3.4rem)] font-black uppercase leading-tight text-[color:var(--color-ink)]">
+              {spotlightProject.title}
+            </h2>
+          </header>
+          <div className="grid gap-8 md:grid-cols-[1.3fr,1fr]">
+            <p className="text-pretty text-base leading-relaxed text-[color:var(--color-ink)]/80 sm:text-lg">
+              {spotlightProject.description} Ostatnia iteracja dopieszcza fizykę ruchu, manualne shadery i tryb
+              dostępności (wysoki kontrast + redukcja animacji). Chcesz zajrzeć w proces szkiców i prototypów?
+              Odezwij się, podeślę surowe nagrania i repo eksperymentów.
+            </p>
+            <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border-4 border-dashed border-[var(--color-ink)] bg-[var(--color-muted)]/60 p-6 text-sm uppercase tracking-[0.25em] text-[color:var(--color-ink)]">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs opacity-60">role</span>
+                <span className="font-semibold">Creative coding • Motion systems • UX glow-up</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-xs opacity-60">stack</span>
+                <span className="font-semibold">Next.js · Framer Motion · WebGL shader toys · Tailwind v4</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-xs opacity-60">link</span>
+                <Link
+                  href={spotlightProject.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-2 text-[color:var(--color-magenta)] underline-offset-4 hover:underline"
+                >
+                  {spotlightProject.url.replace(/^https:\/\//, "")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <ProjectsSection />
-        
-        {/* dodatkowy content dla SEO — niewidoczny ale indeksowany */}
-        <section className="sr-only" aria-hidden="true">
-          <h2>Adam Krupa — Developer z Polski | pcstyle.dev</h2>
-          <p>
-            Adam Krupa, znany jako pcstyle, to 18-letni developer z Polski, student Sztucznej Inteligencji 
-            na Politechnice Częstochowskiej w Częstochowie. Adam Krupa developer specjalizuje się w web development, 
-            AI development i creative coding. Tworzy neo-brutalistyczne projekty 
-            łączące technologię, design i sztukę. Adam Krupa Poland — portfolio programisty i kreatywnego kodera.
-          </p>
-          
-          <h3>Kim jest Adam Krupa?</h3>
-          <p>
-            Adam Krupa to młody developer z Częstochowy, student pierwszego roku Sztucznej Inteligencji 
-            na Politechnice Częstochowskiej. Jako pcstyle tworzy innowacyjne projekty webowe i aplikacje AI.
-            Adam Krupa developer Poland łączy technologię z kreatywnością, specjalizując się w React, Next.js, 
-            TypeScript i Framer Motion. Portfolio Adam Krupa zawiera projekty takie jak Clock Gallery, AimDrift, 
-            PoliCalc i PixelForge.
-          </p>
-          
-          <h3>Projekty Adam Krupa (pcstyle)</h3>
-          <ul>
-            <li>
-              <strong>Clock Gallery</strong> - Kreatywna galeria animowanych zegarów z efektami doodle, mycelium, 
-              particle clouds i neon. Projekt Adam Krupa demonstrujący creative coding i interactive design.
-            </li>
-            <li>
-              <strong>AimDrift</strong> - Interaktywny trener precyzji i celowania z multiple modes i evolving visual styles. 
-              Game development project Adam Krupa Poland.
-            </li>
-            <li>
-              <strong>PoliCalc</strong> - Kalkulator ocen dla Politechniki Częstochowskiej (open source). 
-              Narzędzie dla studentów PCz stworzone przez Adam Krupa developer.
-            </li>
-            <li>
-              <strong>PixelForge</strong> - AI-powered image studio z point-and-edit i style transfer. 
-              AI project Adam Krupa wykorzystujący machine learning.
-            </li>
+
+        <section
+          id="lab"
+          className="relative grid gap-10 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-10 brutal-shadow md:grid-cols-2"
+        >
+          <header className="flex flex-col gap-4">
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black uppercase text-[color:var(--color-ink)]">
+              What I&apos;m exploring now
+            </h2>
+            <p className="text-pretty text-sm uppercase tracking-[0.3em] text-[color:var(--color-ink)]/60 sm:text-base">
+              {"// szybkie lab notes — eksperymenty, które kleję po nocach"}
+            </p>
+          </header>
+          <ul className="flex flex-col gap-6">
+            {explorations.map((item) => (
+              <li
+                key={item.title}
+                className="group flex flex-col gap-3 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-muted)]/70 p-6 transition-colors hover:bg-[var(--color-magenta)]/20"
+              >
+                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--color-ink)]/60 group-hover:text-[color:var(--color-ink)]">
+                  {item.status}
+                </span>
+                <h3 className="text-lg font-black uppercase text-[color:var(--color-ink)]">{item.title}</h3>
+                <p className="text-pretty text-sm leading-relaxed text-[color:var(--color-ink)]/80">
+                  {item.description}
+                </p>
+              </li>
+            ))}
           </ul>
-          
-          <h3>Adam Krupa Developer — Technologie i Umiejętności</h3>
-          <p>
-            Adam Krupa developer z Polski specjalizuje się w nowoczesnych technologiach webowych i AI:
-          </p>
-          <ul>
-            <li><strong>Frontend Development:</strong> React, Next.js, TypeScript, Framer Motion, Tailwind CSS</li>
-            <li><strong>AI & Machine Learning:</strong> Artificial Intelligence, Machine Learning, Python</li>
-            <li><strong>Design:</strong> Neo Brutalism, Interactive Design, Generative Art, Creative Coding</li>
-            <li><strong>Tools:</strong> Git, Cursor IDE, Vercel, Modern Web Technologies</li>
-          </ul>
-          <p>
-            Adam Krupa Poland portfolio pokazuje szeroki zakres umiejętności od web development przez AI 
-            po creative coding. Portfolio Adam Krupa developer prezentuje projekty łączące estetykę 
-            neo-brutalistyczną z zaawansowanymi funkcjonalnościami.
-          </p>
-          
-          <h3>Lokalizacja - Developer Częstochowa</h3>
-          <p>
-            Adam Krupa developer znajduje się w Częstochowie, Polska (województwo śląskie). 
-            Web developer Częstochowa, AI developer Częstochowa, programista Częstochowa.
-            Student Politechniki Częstochowskiej kierunek Sztuczna Inteligencja.
-          </p>
-          
-          <h3>O Adam Krupa (FAQ)</h3>
-          <dl>
-            <dt>Szukasz "Adam Krupa developer"?</dt>
-            <dd>
-              Adam Krupa (pcstyle) to młody programista z Polski, specjalizujący się w 
-              web development i AI. Portfolio dostępne na pcstyle.dev.
-            </dd>
-            
-            <dt>Gdzie studiuje Adam Krupa?</dt>
-            <dd>
-              Adam Krupa studiuje Sztuczną Inteligencję na Politechnice Częstochowskiej (PCz) w Częstochowie, Polska.
-            </dd>
-            
-            <dt>Jakie projekty stworzył Adam Krupa developer?</dt>
-            <dd>
-              Adam Krupa stworzył projekty takie jak Clock Gallery (galeria zegarów), AimDrift (aim trainer), 
-              PoliCalc (kalkulator dla PCz) i PixelForge (AI image studio).
-            </dd>
-            
-            <dt>W jakich technologiach specjalizuje się Adam Krupa?</dt>
-            <dd>
-              Adam Krupa Poland specjalizuje się w React, Next.js, TypeScript, Framer Motion, AI/ML, 
-              oraz creative coding i neo-brutalistycznym designie.
-            </dd>
-            
-            <dt>Adam Krupa developer Poland - kontakt?</dt>
-            <dd>
-              Adam Krupa kontakt: email adamkrupa@tuta.io, GitHub @pcstyle, portfolio pcstyle.dev
-            </dd>
+        </section>
+
+        <section
+          id="faq"
+          className="relative flex flex-col gap-8 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-10 brutal-shadow"
+        >
+          <header className="flex flex-col gap-3">
+            <h2 className="text-[clamp(2.2rem,4.5vw,3.4rem)] font-black uppercase text-[color:var(--color-ink)]">
+              Quick answers
+            </h2>
+            <p className="max-w-[60ch] text-sm text-[color:var(--color-ink)]/70 sm:text-base">
+              Najczęstsze pytania klientów i współpracowników. Potrzebujesz więcej szczegółów? Odezwij się na
+              maila albo umów call.
+            </p>
+          </header>
+          <dl className="grid gap-6 md:grid-cols-2">
+            {faqEntries.map(({ question, answer }) => (
+              <div
+                key={question}
+                className="flex flex-col gap-2 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-muted)]/60 p-6"
+              >
+                <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--color-ink)]/60">
+                  {question}
+                </dt>
+                <dd className="text-sm leading-relaxed text-[color:var(--color-ink)]/85">{answer}</dd>
+              </div>
+            ))}
           </dl>
-          
-          <h3>Keywords: Adam Krupa</h3>
-          <p>
-            Adam Krupa, Adam Krupa developer, Adam Krupa Poland, Adam Krupa developer Poland, 
-            Adam Krupa portfolio, Adam Krupa Częstochowa, Adam Krupa Politechnika Częstochowska,
-            Adam Krupa web developer, Adam Krupa AI developer, Adam Krupa pcstyle, pcstyle Adam Krupa,
-            developer Częstochowa, programista Częstochowa, web developer Polska, AI developer Polska,
-            student AI Polska, portfolio developer Poland, młody developer Polska, React developer Poland,
-            Next.js developer Poland, TypeScript developer Poland, creative coder Poland
-          </p>
         </section>
       </main>
-      
+
       {/* structured data - FAQPage schema */}
       <script
         type="application/ld+json"
@@ -129,52 +210,18 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: "Kim jest Adam Krupa developer?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Adam Krupa (pcstyle) to 18-letni developer z Polski, student Sztucznej Inteligencji na Politechnice Częstochowskiej. Specjalizuje się w web development, AI development i creative coding, tworząc neo-brutalistyczne projekty."
-                }
+            mainEntity: faqEntries.map(({ question, answer }) => ({
+              "@type": "Question",
+              name: question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: answer,
               },
-              {
-                "@type": "Question",
-                name: "Gdzie studiuje Adam Krupa?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Adam Krupa studiuje na kierunku Sztuczna Inteligencja na Politechnice Częstochowskiej (PCz) w Częstochowie, Polska."
-                }
-              },
-              {
-                "@type": "Question",
-                name: "Jakie projekty stworzył Adam Krupa?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Adam Krupa stworzył projekty: Clock Gallery (galeria animowanych zegarów), AimDrift (interaktywny aim trainer), PoliCalc (kalkulator ocen dla PCz), PixelForge (AI-powered image studio)."
-                }
-              },
-              {
-                "@type": "Question",
-                name: "W jakich technologiach specjalizuje się Adam Krupa developer?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Adam Krupa specjalizuje się w React, Next.js, TypeScript, Framer Motion, Tailwind CSS, Artificial Intelligence, Machine Learning, oraz creative coding i neo-brutalistycznym designie."
-                }
-              },
-              {
-                "@type": "Question",
-                name: "Jak skontaktować się z Adam Krupa developer Poland?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Kontakt z Adam Krupa: email adamkrupa@tuta.io, GitHub github.com/pcstyle, portfolio pcstyle.dev, Facebook, Discord @pcstyle"
-                }
-              }
-            ]
+            })),
           }),
         }}
       />
-      
+
       {/* structured data dla projektów */}
       <script
         type="application/ld+json"
@@ -183,62 +230,19 @@ export default function Home() {
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: "pcstyle Projects by Adam Krupa — Developer z Polski",
-            itemListElement: [
-              {
-                "@type": "CreativeWork",
-                position: 1,
-                name: "Clock Gallery",
-                url: "https://clock.pcstyle.dev",
-                description: "Creative gallery of animated clocks by Adam Krupa (pcstyle) — Developer z Polski",
-                author: { 
-                  "@type": "Person", 
-                  name: "Adam Krupa",
-                  alternateName: "pcstyle",
-                  nationality: { "@type": "Country", name: "Poland" }
-                },
+            itemListElement: projects.map((project, index) => ({
+              "@type": "CreativeWork",
+              position: index + 1,
+              name: project.title,
+              url: project.url,
+              description: project.description,
+              author: {
+                "@type": "Person",
+                name: "Adam Krupa",
+                alternateName: "pcstyle",
+                nationality: { "@type": "Country", name: "Poland" },
               },
-              {
-                "@type": "CreativeWork",
-                position: 2,
-                name: "AimDrift",
-                url: "https://driftfield.pcstyle.dev",
-                description: "Interactive aim trainer by Adam Krupa (pcstyle) — Developer z Polski",
-                author: { 
-                  "@type": "Person", 
-                  name: "Adam Krupa",
-                  alternateName: "pcstyle",
-                  nationality: { "@type": "Country", name: "Poland" }
-                },
-              },
-              {
-                "@type": "SoftwareApplication",
-                position: 3,
-                name: "PoliCalc",
-                url: "https://kalkulator.pcstyle.dev",
-                description: "Grade calculator for Politechnika Częstochowska by Adam Krupa (pcstyle) — Developer z Polski",
-                author: { 
-                  "@type": "Person", 
-                  name: "Adam Krupa",
-                  alternateName: "pcstyle",
-                  nationality: { "@type": "Country", name: "Poland" }
-                },
-                applicationCategory: "UtilityApplication",
-              },
-              {
-                "@type": "SoftwareApplication",
-                position: 4,
-                name: "PixelForge",
-                url: "https://pixlab.pcstyle.dev",
-                description: "AI-powered image studio by Adam Krupa (pcstyle) — Developer z Polski",
-                author: { 
-                  "@type": "Person", 
-                  name: "Adam Krupa",
-                  alternateName: "pcstyle",
-                  nationality: { "@type": "Country", name: "Poland" }
-                },
-                applicationCategory: "MultimediaApplication",
-              },
-            ],
+            })),
           }),
         }}
       />

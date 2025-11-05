@@ -3,10 +3,12 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // scroll indicator that disappears po scrollu
 export function ScrollIndicator() {
   const [isVisible, setIsVisible] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +24,7 @@ export function ScrollIndicator() {
   }, []);
 
   if (!isVisible) return null;
+  if (isMobile) return null;
 
   return (
     <motion.div
@@ -43,4 +46,3 @@ export function ScrollIndicator() {
     </motion.div>
   );
 }
-

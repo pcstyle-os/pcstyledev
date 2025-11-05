@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import type { ProjectInfo } from "@/types/project";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const hoverTransition = { type: "spring" as const, stiffness: 220, damping: 14 };
 
@@ -42,6 +43,9 @@ export function ProjectCard({
 }) {
   const accent = accentColor(project);
   const cardRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const disableFancyMotion = prefersReducedMotion || isMobile;
 
   // 3D tilt effect based on mouse position
   const mouseX = useMotionValue(0);
@@ -55,7 +59,7 @@ export function ProjectCard({
   const spotlightY = useTransform(mouseY, [-0.5, 0.5], ["0%", "100%"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || disableFancyMotion) return;
 
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -66,6 +70,7 @@ export function ProjectCard({
   };
 
   const handleMouseLeave = () => {
+    if (disableFancyMotion) return;
     mouseX.set(0);
     mouseY.set(0);
   };
@@ -76,39 +81,49 @@ export function ProjectCard({
       className={`group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-8 brutal-shadow ${className ?? ""}`.trim()}
       style={{
         color: "var(--color-ink)",
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
+        ...(disableFancyMotion ? {} : { rotateX, rotateY, transformStyle: "preserve-3d" as const }),
       }}
-      initial={{ opacity: 0, y: 60, rotate: index % 2 ? -3 : 3 }}
-      whileInView={{ opacity: 1, y: 0, rotate: index % 2 ? -1.5 : 1.5 }}
+      initial={disableFancyMotion ? false : { opacity: 0, y: 60, rotate: index % 2 ? -3 : 3 }}
+      whileInView={disableFancyMotion ? undefined : { opacity: 1, y: 0, rotate: index % 2 ? -1.5 : 1.5 }}
       viewport={{ once: true, amount: 0.4 }}
-      transition={{ delay: 0.08 * index, type: "spring", stiffness: 160, damping: 18 }}
-      whileHover={{
-        scale: 1.04,
-        translateY: -6,
-        boxShadow: `16px 16px 0 ${accent}`,
-      }}
+      transition={
+        disableFancyMotion
+          ? undefined
+          : { delay: 0.08 * index, type: "spring", stiffness: 160, damping: 18 }
+      }
+      whileHover={
+        disableFancyMotion
+          ? undefined
+          : {
+              scale: 1.04,
+              translateY: -6,
+              boxShadow: `16px 16px 0 ${accent}`,
+            }
+      }
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       {/* spotlight effect that follows mouse */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(circle 300px at ${spotlightX.get()} ${spotlightY.get()}, ${accent}22, transparent)`,
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-        <div
-          className="absolute inset-x-0 top-0 h-2"
-          style={{ background: accent }}
-        />
-        <div
-          className="absolute inset-y-0 left-0 w-2"
-          style={{ background: accent }}
-        />
-      </div>
+      {!disableFancyMotion && (
+        <>
+          <motion.div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: `radial-gradient(circle 300px at ${spotlightX.get()} ${spotlightY.get()}, ${accent}22, transparent)`,
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <div
+              className="absolute inset-x-0 top-0 h-2"
+              style={{ background: accent }}
+            />
+            <div
+              className="absolute inset-y-0 left-0 w-2"
+              style={{ background: accent }}
+            />
+          </div>
+        </>
+      )}
 
       <div className="relative flex flex-col gap-4">
         <span
@@ -138,8 +153,8 @@ export function ProjectCard({
         </div>
         <motion.div
           className="relative flex items-center gap-2"
-          whileHover={{ x: 6 }}
-          transition={hoverTransition}
+          whileHover={disableFancyMotion ? undefined : { x: 6 }}
+          transition={disableFancyMotion ? undefined : hoverTransition}
         >
           <span className="hidden text-xs uppercase tracking-[0.3em] sm:inline">wejdź</span>
           <div
@@ -169,20 +184,23 @@ export function ProjectCard({
         aria-label={`Open ${project.title}`}
       />
 
-      <div
-        className="pointer-events-none absolute -right-6 bottom-6 -z-10 h-16 w-16 rotate-3 border-4 border-[var(--color-ink)] opacity-40"
-        style={{ background: accent }}
-      />
+      {!disableFancyMotion && (
+        <>
+          <div
+            className="pointer-events-none absolute -right-6 bottom-6 -z-10 h-16 w-16 rotate-3 border-4 border-[var(--color-ink)] opacity-40"
+            style={{ background: accent }}
+          />
 
-      <div
-        className="pointer-events-none absolute -left-5 top-10 -z-10 h-20 w-2 opacity-50 flux-line"
-        style={{
-          backgroundImage: `linear-gradient(90deg, ${accent}, #000, ${accent})`,
-        }}
-      />
+          <div
+            className="pointer-events-none absolute -left-5 top-10 -z-10 h-20 w-2 opacity-50 flux-line"
+            style={{
+              backgroundImage: `linear-gradient(90deg, ${accent}, #000, ${accent})`,
+            }}
+          />
+        </>
+      )}
 
       {drawCorner()}
     </motion.article>
   );
 }
-
