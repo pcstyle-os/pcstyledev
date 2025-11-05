@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/MagneticButton";
+import { SSHContactModal } from "@/components/SSHContactModal";
 import {
   Github,
   Mail,
@@ -44,6 +45,7 @@ export function Hero() {
   const pulse = useMotionValue(0);
   const shadow = useTransform(pulse, (val) => `drop-shadow(10px 10px 0 rgba(0,0,0,${val}))`);
   const [showNotification, setShowNotification] = useState(false);
+  const [showSSHModal, setShowSSHModal] = useState(false);
 
   // copy discord username
   const handleDiscordClick = (e: React.MouseEvent) => {
@@ -136,15 +138,16 @@ export function Hero() {
       </motion.ul>
 
       <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-center">
-        <motion.span
-          className="relative flex w-fit items-center gap-3 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-magenta)] px-6 py-3 text-sm font-semibold uppercase text-white shadow-[6px_6px_0_var(--color-ink)]"
+        <motion.button
+          onClick={() => setShowSSHModal(true)}
+          className="relative flex w-fit items-center gap-3 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-magenta)] px-6 py-3 text-sm font-semibold uppercase text-white shadow-[6px_6px_0_var(--color-ink)] cursor-pointer transition-all hover:bg-[var(--color-cyan)]"
           whileHover={{ scale: 1.06, rotate: -2 }}
           transition={{ type: "spring", stiffness: 200 }}
         >
           {/* vibey fake indicator */}
           <span className="flex size-3 animate-pulse rounded-full bg-white/90 shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
-          gotowy na glitch?
-        </motion.span>
+          contact me on ssh
+        </motion.button>
 
         <motion.div
           className="flex flex-wrap gap-4 text-sm"
@@ -260,6 +263,9 @@ export function Hero() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* SSH Contact Modal */}
+      <SSHContactModal isOpen={showSSHModal} onClose={() => setShowSSHModal(false)} />
     </motion.section>
   );
 }

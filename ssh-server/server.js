@@ -11,7 +11,15 @@ const { Server } = ssh2;
 dotenv.config();
 
 const API_URL = process.env.API_URL || 'http://localhost:3000/api/contact';
-const SSH_PORT = parseInt(process.env.SSH_PORT || '2222', 10);
+// Heroku assigns PORT, but SSH needs a custom port
+// For Heroku, you'll need to use a tunnel service or Railway/Fly.io
+// This will use SSH_PORT if set, otherwise PORT, otherwise default to 2222
+const SSH_PORT = parseInt(
+  process.env.SSH_PORT || 
+  process.env.PORT || 
+  '2222', 
+  10
+);
 const SSH_HOST = process.env.SSH_HOST || '0.0.0.0';
 const SSH_PASSWORD = process.env.SSH_PASSWORD || null;
 
