@@ -9,7 +9,7 @@ type SSHContactModalProps = {
   onClose: () => void;
 };
 
-const SSH_COMMAND = "ssh ssh.pcstyle.dev"; // to będzie po deploy na Heroku
+const SSH_COMMAND = "ssh -p 49358 ssh.pcstyle.dev"; // Railway TCP proxy port
 
 export function SSHContactModal({ isOpen, onClose }: SSHContactModalProps) {
   const [copied, setCopied] = useState(false);
