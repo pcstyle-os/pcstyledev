@@ -9,7 +9,7 @@ type SSHContactModalProps = {
   onClose: () => void;
 };
 
-const SSH_COMMAND = "ssh -p 49358 ssh.pcstyle.dev"; // Railway TCP proxy port
+const SSH_COMMAND = "ssh yamanote.proxy.rlwy.net -p 49358"; // Railway TCP proxy
 
 export function SSHContactModal({ isOpen, onClose }: SSHContactModalProps) {
   const [copied, setCopied] = useState(false);
