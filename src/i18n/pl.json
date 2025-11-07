@@ -33,10 +33,11 @@
   },
   "latestDrop": {
     "label": "najnowszy projekt",
-    "descriptionSuffix": "Ostatnia iteracja dopieszcza fizykę ruchu, manualne shadery i tryb dostępności (wysoki kontrast + redukcja animacji). Chcesz zajrzeć w proces szkiców i prototypów? Odezwij się, podeślę surowe nagrania i repo eksperymentów.",
+    "descriptionSuffix": "Najnowsza wersja dorzuca sprytniejsze heurystyki literówek, profile pauz, skrót awaryjny i odtwarzanie seansów przez CLI. Chcesz benchmarki z GPTZero albo notatki z obchodzenia detektorów? Odezwij się, podeślę surowe notebooki.",
     "role": "rola",
     "stack": "technologie",
-    "link": "link"
+    "link": "link",
+    "repo": "github"
   },
   "projects": {
     "title": "plac zabaw subdomen",
@@ -75,7 +76,7 @@
       },
       "projects": {
         "question": "Jakie projekty prowadzę?",
-        "answer": "Clock Gallery, AimDrift, PoliCalc i PixelForge pokazują mój zakres: interaktywne doświadczenia, narzędzia AI oraz produkty dla studentów."
+        "answer": "TypeSim, Clock Gallery, AimDrift, PoliCalc i PixelForge pokazują mój zakres: AI-owe pipeline’y pisania, interaktywne doświadczenia i narzędzia dla studentów."
       },
       "stack": {
         "question": "Jakiego stacku używam?",
@@ -88,6 +89,10 @@
     }
   },
   "projectsData": {
+    "typesim": {
+      "description": "Pythonowy symulator ludzkiego pisania — literówki, poprawki, pauzy na myślenie i edycje w środku zdania, żeby prześlizgnąć się pod radarem GPTZero.",
+      "tagline": "Symulator pisania jak człowiek — literówki i pauzy na zawołanie"
+    },
     "clock": {
       "description": "Kreatywna galeria animowanych zegarów — doodle, mycelium, chmury cząsteczek, efekty neonowe — interaktywne dzieła sztuki w czasie rzeczywistym.",
       "tagline": "Interaktywna galeria animowanych zegarów — sztuka w czasie rzeczywistym"
