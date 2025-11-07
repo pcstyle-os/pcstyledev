@@ -33,10 +33,11 @@
   },
   "latestDrop": {
     "label": "latest drop",
-    "descriptionSuffix": "Latest iteration fine-tunes motion physics, manual shaders, and accessibility mode (high contrast + reduced animations). Want to peek into the sketch and prototype process? Reach out, I'll share raw recordings and experiment repos.",
+    "descriptionSuffix": "Newest build adds smarter typo heuristics, adjustable pause profiles, panic-stop shortcuts, and a CLI replay mode. Curious about red-team benchmarks or detector bypass notes? Ping me and I'll drop the raw notebooks.",
     "role": "role",
     "stack": "stack",
-    "link": "link"
+    "link": "link",
+    "repo": "github"
   },
   "projects": {
     "title": "playground of subdomains",
@@ -75,7 +76,7 @@
       },
       "projects": {
         "question": "What projects do I run?",
-        "answer": "Clock Gallery, AimDrift, PoliCalc, and PixelForge showcase the range: interactive experiences, AI tools, and products for students."
+        "answer": "TypeSim, Clock Gallery, AimDrift, PoliCalc, and PixelForge showcase the range: AI typing pipelines, interactive experiences, and tools for students."
       },
       "stack": {
         "question": "What stack do I use?",
@@ -88,6 +89,10 @@
     }
   },
   "projectsData": {
+    "typesim": {
+      "description": "AI-powered Python tool that simulates authentic human typing behaviour with typos, corrections, thinking pauses, and mid-sentence edits to slip past GPTZero-style detectors.",
+      "tagline": "Human typing simulator — typos, pauses, and edits on command"
+    },
     "clock": {
       "description": "Creative gallery of animated clocks — doodle, mycelium, particle clouds, neon effects — interactive art timepieces.",
       "tagline": "Interactive gallery of animated clocks — art in real time"
@@ -156,4 +161,3 @@
     "success": "Message sent successfully!"
   }
 }
-

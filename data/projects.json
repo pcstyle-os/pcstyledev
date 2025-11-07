@@ -1,5 +1,12 @@
 [
   {
+    "id": "typesim",
+    "title": "TypeSim",
+    "url": "https://typesim.pcstyle.dev",
+    "description": "AI-powered Python tool that simulates authentic human typing patterns — typos, corrections, thinking pauses, mid-sentence edits — built to dodge GPTZero-style detectors.",
+    "accent": "#C026D3"
+  },
+  {
     "id": "clock",
     "title": "Clock Gallery",
     "url": "https://clock.pcstyle.dev",

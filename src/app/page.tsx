@@ -9,6 +9,41 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { loadProjects } from "@/lib/projects";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const repoDirectory = {
+  typesim: "https://github.com/pc-style/typesim",
+} as const;
+
+type LatestMetaItem = {
+  label: string;
+  value: string;
+  href?: string;
+};
+
+function stripProtocol(url: string) {
+  // szybkie sprzątanie — bez https:// wygląda schludniej
+  return url.replace(/^https?:\/\//, "");
+}
+
+function pickLatestRole(projectId: string) {
+  // zero rocket science, po prostu teksty dopasowane do projektu
+  if (projectId === "typesim") return "AI automation • Python CLI • detection bypass research";
+  return "Creative coding • Motion systems • UX glow-up";
+}
+
+function pickLatestStack(projectId: string) {
+  // tak wiem, if else — późna noc, mózg mówi po polsku i english naraz
+  if (projectId === "typesim") return "Python · Typer · Rich TUI · asyncio pipelines · Next.js docs";
+  return "Next.js · Framer Motion · WebGL shader toys · Tailwind v4";
+}
+
+function findRepo(projectId: string) {
+  // guard + mapa bo nie każda zabawka ma repo publicznie
+  if (projectId in repoDirectory) {
+    return repoDirectory[projectId as keyof typeof repoDirectory];
+  }
+  return null;
+}
+
 export default function Home() {
   const { translations } = useLanguage();
   const projects = loadProjects();
@@ -21,6 +56,32 @@ export default function Home() {
       description: "Nowy projekt jest w drodze — zaglądaj częściej po świeże rzeczy.",
       url: "https://pcstyle.dev",
     } as (typeof projects)[number]);
+
+  const repoUrl = findRepo(spotlightProject.id);
+
+  const latestMeta: LatestMetaItem[] = [
+    {
+      label: translations.latestDrop.role,
+      value: pickLatestRole(spotlightProject.id),
+    },
+    {
+      label: translations.latestDrop.stack,
+      value: pickLatestStack(spotlightProject.id),
+    },
+    {
+      label: translations.latestDrop.link,
+      value: stripProtocol(spotlightProject.url),
+      href: spotlightProject.url,
+    },
+  ];
+
+  if (repoUrl) {
+    latestMeta.push({
+      label: translations.latestDrop.repo,
+      value: stripProtocol(repoUrl),
+      href: repoUrl,
+    });
+  }
 
   const explorations = [
     {
@@ -98,49 +159,46 @@ export default function Home() {
             </li>
           </ul>
         </nav>
-        <ScrollIndicator />
-        <Hero />
-
-        <section
-          id="latest"
-          aria-labelledby="latest-heading"
-          className="relative flex flex-col gap-8 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-10 brutal-shadow"
-        >
-          <header className="flex flex-col gap-3">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-yellow)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)]">
-              {translations.latestDrop.label}
-            </span>
-            <h2 id="latest-heading" className="text-[clamp(2.4rem,5vw,3.4rem)] font-black uppercase leading-tight text-[color:var(--color-ink)]">
-              {spotlightProject.title}
-            </h2>
-          </header>
-          <div className="grid gap-8 md:grid-cols-[1.3fr,1fr]">
-            <p className="text-pretty text-base leading-relaxed text-[color:var(--color-ink)]/90 sm:text-lg">
-              {spotlightProject.description} {translations.latestDrop.descriptionSuffix}
-            </p>
-            <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-6 text-sm uppercase tracking-[0.25em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)]">
-              <div className="flex flex-col gap-2">
-                <span className="text-xs opacity-60">{translations.latestDrop.role}</span>
-                <span className="font-semibold">Creative coding • Motion systems • UX glow-up</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-xs opacity-60">{translations.latestDrop.stack}</span>
-                <span className="font-semibold">Next.js · Framer Motion · WebGL shader toys · Tailwind v4</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-xs opacity-60">{translations.latestDrop.link}</span>
-                <Link
-                  href={spotlightProject.url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex items-center gap-2 text-[color:var(--color-magenta)] underline-offset-4 hover:underline"
-                >
-                  {spotlightProject.url.replace(/^https:\/\//, "")}
-                </Link>
+          <ScrollIndicator />
+          <Hero />
+          <section
+            id="latest"
+            aria-labelledby="latest-heading"
+            className="relative flex flex-col gap-8 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-10 brutal-shadow"
+          >
+            <header className="flex flex-col gap-3">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border-4 border-[var(--color-ink)] bg-[var(--color-yellow)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)]">
+                {translations.latestDrop.label}
+              </span>
+              <h2 id="latest-heading" className="text-[clamp(2.4rem,5vw,3.4rem)] font-black uppercase leading-tight text-[color:var(--color-ink)]">
+                {spotlightProject.title}
+              </h2>
+            </header>
+            <div className="grid gap-8 md:grid-cols-[1.3fr,1fr]">
+              <p className="text-pretty text-base leading-relaxed text-[color:var(--color-ink)]/90 sm:text-lg">
+                {spotlightProject.description} {translations.latestDrop.descriptionSuffix}
+              </p>
+              <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border-4 border-[var(--color-ink)] bg-[var(--color-paper)] p-6 text-sm uppercase tracking-[0.25em] text-[color:var(--color-ink)] shadow-[6px_6px_0_var(--color-ink)]">
+                {latestMeta.map((item) => (
+                  <div className="flex flex-col gap-2" key={`${spotlightProject.id}-${item.label}`}>
+                    <span className="text-xs opacity-60">{item.label}</span>
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="flex items-center gap-2 text-[color:var(--color-magenta)] underline-offset-4 hover:underline"
+                      >
+                        {item.value}
+                      </Link>
+                    ) : (
+                      <span className="font-semibold">{item.value}</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         <ProjectsSection />
 
