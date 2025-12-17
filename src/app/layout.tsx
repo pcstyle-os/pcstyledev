@@ -234,7 +234,7 @@ export default function RootLayout({
               ],
               knowsLanguage: ["pl", "en"],
               sameAs: [
-                "https://github.com/pcstyle",
+                "https://github.com/pc-style",
                 "https://twitter.com/pcstyle",
                 "https://www.facebook.com/adam.krupa.771/",
               ],

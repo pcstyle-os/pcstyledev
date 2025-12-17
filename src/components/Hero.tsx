@@ -225,7 +225,7 @@ export function Hero() {
             transition={minimizeMotion ? { duration: 0.2 } : { delay: 0.5, duration: 0.4 }}
           >
             <motion.a
-              href="https://github.com/pcstyle"
+              href="https://github.com/pc-style"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
