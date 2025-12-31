@@ -104,7 +104,7 @@ export async function analyzeWithGemini(apiKey: string, context: string): Promis
     contents: ANALYSIS_PROMPT + context,
     config: {
       temperature: 0.3,
-      maxOutputTokens: 500,
+      maxOutputTokens: 2000,
       responseMimeType: 'application/json',
       responseSchema: PROJECT_SCHEMA
     }
