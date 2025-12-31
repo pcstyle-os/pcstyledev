@@ -1,13 +1,16 @@
 import React from 'react';
 import { ProjectCard } from '../components/ui/ProjectCard';
-import { PROJECTS } from '../data/constants';
+import projectsData from '../data/projects/projects.json';
 import { useOutletContext } from 'react-router-dom';
 import { Synth } from '../utils/audio';
+import type { Project } from '../lib/types';
 
 interface ContextType {
   soundEnabled: boolean;
   synth: Synth | null;
 }
+
+const PROJECTS: Project[] = projectsData.projects as Project[];
 
 export const Projects = () => {
   const { soundEnabled, synth } = useOutletContext<ContextType>();

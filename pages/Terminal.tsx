@@ -2,8 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Terminal as TerminalIcon, ShieldAlert } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
-import { PROJECTS } from '../data/constants';
+import projectsData from '../data/projects/projects.json';
 import { Synth } from '../utils/audio';
+import type { Project } from '../lib/types';
+
+const PROJECTS: Project[] = projectsData.projects as Project[];
 
 interface ContextType {
   soundEnabled: boolean;

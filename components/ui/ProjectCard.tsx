@@ -1,10 +1,18 @@
 import React, { useState, useRef, useCallback, memo } from 'react';
+import * as LucideIcons from 'lucide-react';
 import { ExternalLink, Github, Lock } from 'lucide-react';
 import { GlitchText } from './GlitchText';
 import { Synth } from '../../utils/audio';
+import type { Project } from '../../lib/types';
+
+// get icon component from string name
+function getIcon(name: string): React.ElementType {
+  const icons = LucideIcons as Record<string, React.ElementType>;
+  return icons[name] || icons['Box'];
+}
 
 interface Props {
-  project: any;
+  project: Project;
   soundEnabled: boolean;
   synth: Synth | null;
   delay: number;
@@ -53,7 +61,7 @@ export const ProjectCard = memo(({ project, soundEnabled, synth, delay }: Props)
 
       <div className="flex justify-between items-start mb-12">
         <div className={`p-4 shadow-[0_0_20px_rgba(255,0,255,0.2)] ${isDisabled ? 'bg-red-900/20 text-red-500' : 'bg-[#ff00ff] text-black'}`}>
-          {isDisabled ? <Lock className="w-5 h-5" /> : project.icon}
+          {isDisabled ? <Lock className="w-5 h-5" /> : React.createElement(getIcon(project.icon), { className: "w-5 h-5" })}
         </div>
         <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 border ${
           isDisabled ? 'border-red-500/20 text-red-500 bg-red-500/5' :

@@ -1,0 +1,22 @@
+{
+  "name": "projects-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "projects": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@inquirer/prompts": "^7.0.0",
+    "commander": "^13.0.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  }
+}
