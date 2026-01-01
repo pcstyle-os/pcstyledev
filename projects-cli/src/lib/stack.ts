@@ -25,8 +25,24 @@ const normalizeKey = (value: string) =>
     .toLowerCase()
 
 export async function loadStackConfig(): Promise<StackConfig> {
-  const content = await readFile(STACK_CANONICAL_PATH, 'utf-8')
-  return JSON.parse(content) as StackConfig
+  try {
+    const content = await readFile(STACK_CANONICAL_PATH, 'utf-8')
+    const data = JSON.parse(content)
+
+    if (
+      !Array.isArray(data.canonical) ||
+      typeof data.aliases !== 'object' ||
+      data.aliases === null ||
+      !Array.isArray(data.glossary)
+    ) {
+      throw new Error('invalid stack config schema: missing or malformed fields')
+    }
+
+    return data as StackConfig
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`failed to load stack config: ${message}`)
+  }
 }
 
 export async function saveStackConfig(config: StackConfig): Promise<void> {
@@ -41,6 +57,10 @@ export function normalizeStackList(stack: string[], config: StackConfig): Normal
   })
 
   Object.entries(config.aliases).forEach(([alias, canonical]) => {
+    if (!config.canonical.includes(canonical)) {
+      console.warn(`alias "${alias}" points to unknown canonical label "${canonical}", skipping`)
+      return
+    }
     lookup.set(normalizeKey(alias), canonical)
   })
 
@@ -69,7 +89,10 @@ export function normalizeStackList(stack: string[], config: StackConfig): Normal
     }
   })
 
-  const changed = normalized.join('|') !== stack.map((label) => label.trim()).filter(Boolean).join('|')
+  const original = stack.map((label) => label.trim()).filter(Boolean)
+  const changed =
+    normalized.length !== original.length ||
+    normalized.some((val, idx) => val !== original[idx])
 
   return {
     normalized,

@@ -24,18 +24,13 @@ const SORT_OPTIONS = [
 ] as const;
 type SortOption = typeof SORT_OPTIONS[number]['value'];
 const STATUS_SET = new Set<ProjectStatus>(STATUS_ORDER);
-type StackGlossaryEntry = {
-  label: string;
-  desc: string;
-};
 type StackConfig = {
   canonical: string[];
   aliases: Record<string, string>;
-  glossary: StackGlossaryEntry[];
+  glossary: { label: string; desc: string }[];
 };
 const STACK_CONFIG = stackConfig as StackConfig;
 const STACKS = STACK_CONFIG.canonical;
-const STACK_GLOSSARY = STACK_CONFIG.glossary;
 
 const parseList = (value: string | null) =>
   value?.split(',').map((item) => item.trim()).filter(Boolean) ?? [];
@@ -50,9 +45,6 @@ export const Projects = () => {
   const { soundEnabled, synth } = useOutletContext<ContextType>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [glossaryOpen, setGlossaryOpen] = useState(false);
-  const [glossarySearch, setGlossarySearch] = useState('');
-  const [showAllGlossary, setShowAllGlossary] = useState(false);
   const [searchInput, setSearchInput] = useState(() => searchParams.get('q')?.trim() ?? '');
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q')?.trim() ?? '');
   const [selectedStacks, setSelectedStacks] = useState<string[]>(() => parseList(searchParams.get('stack')));
@@ -63,13 +55,14 @@ export const Projects = () => {
   const totalNodes = PROJECTS.length;
   const activeNodes = PROJECTS.filter((project) => project.status === 'active').length;
   const experimentalNodes = PROJECTS.filter((project) => project.status === 'experimental').length;
+
   useEffect(() => {
     const handle = setTimeout(() => {
       setSearchQuery(searchInput.trim());
     }, 250);
-
     return () => clearTimeout(handle);
   }, [searchInput]);
+
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const matchesQuery = (project: Project) => {
     if (!normalizedQuery) return true;
@@ -108,6 +101,7 @@ export const Projects = () => {
     });
     return counts;
   }, [normalizedQuery, selectedStacks]);
+
   const totalStackCounts = useMemo(() => {
     const counts = new Map<string, number>();
     PROJECTS.forEach((project) => {
@@ -117,6 +111,7 @@ export const Projects = () => {
     });
     return counts;
   }, []);
+
   const topStackSet = useMemo(() => {
     const top = [...totalStackCounts.entries()]
       .sort((a, b) => b[1] - a[1])
@@ -124,30 +119,12 @@ export const Projects = () => {
       .map(([label]) => label);
     return new Set(top);
   }, [totalStackCounts]);
-  const usedGlossaryEntries = useMemo(() => {
-    const entries = STACK_GLOSSARY.filter((entry) => totalStackCounts.has(entry.label));
-    const query = glossarySearch.trim().toLowerCase();
-    const filtered = query
-      ? entries.filter((entry) => `${entry.label} ${entry.desc}`.toLowerCase().includes(query))
-      : entries;
-    return filtered.sort((a, b) => {
-      const countA = totalStackCounts.get(a.label) ?? 0;
-      const countB = totalStackCounts.get(b.label) ?? 0;
-      if (countA !== countB) return countB - countA;
-      return a.label.localeCompare(b.label);
-    });
-  }, [glossarySearch, totalStackCounts]);
-  const glossaryLimit = 12;
-  const glossaryHasSearch = glossarySearch.trim().length > 0;
-  const glossaryHasOverflow = usedGlossaryEntries.length > glossaryLimit;
-  const visibleGlossaryEntries =
-    !glossaryHasSearch && !showAllGlossary && glossaryHasOverflow
-      ? usedGlossaryEntries.slice(0, glossaryLimit)
-      : usedGlossaryEntries;
+
   const availableStacks = useMemo(
     () => STACKS.filter((stack) => (stackCounts.get(stack) ?? 0) > 0 || selectedStacks.includes(stack)),
     [selectedStacks, stackCounts]
   );
+
   const availableStatuses = useMemo(
     () =>
       STATUS_ORDER.filter(
@@ -155,6 +132,7 @@ export const Projects = () => {
       ),
     [selectedStatuses, statusCounts]
   );
+
   const showStackFilter = availableStacks.length >= 2;
   const showStatusFilter = availableStatuses.length >= 2;
 
@@ -195,6 +173,7 @@ export const Projects = () => {
 
     return projects;
   }, [filteredProjects, sortBy]);
+
   const lastUpdatedDate = new Date(projectsData.lastUpdated);
   const lastUpdated = Number.isNaN(lastUpdatedDate.getTime())
     ? 'unknown'
@@ -216,28 +195,8 @@ export const Projects = () => {
   };
 
   const handleFiltersToggle = () => {
-    setFiltersOpen((prev) => {
-      const next = !prev;
-      return next;
-    });
+    setFiltersOpen((prev) => !prev);
   };
-
-  const handleGlossaryToggle = () => {
-    setGlossarySearch('');
-    setShowAllGlossary(false);
-    setGlossaryOpen((prev) => !prev);
-  };
-
-  useEffect(() => {
-    if (!glossaryOpen) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setGlossaryOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [glossaryOpen]);
 
   useEffect(() => {
     const nextParams = new URLSearchParams();
@@ -279,14 +238,14 @@ export const Projects = () => {
   const hasActiveFilters = activeFilters.length > 0;
 
   return (
-    <div className="space-y-20 animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10 border-l-[6px] border-[#ff00ff] pl-10 py-4">
+    <div className="space-y-10 sm:space-y-14 md:space-y-20 animate-fadeIn">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 sm:gap-8 md:gap-10 border-l-[6px] border-[#ff00ff] pl-4 sm:pl-6 md:pl-10 py-4">
         <div>
-          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4 italic leading-none">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter mb-4 italic leading-none">
             artifact_nodes
           </h2>
           <p className="text-gray-500 max-w-xl text-xs lowercase font-mono opacity-80 leading-relaxed">
-            exploring the junction of human interaction and autonomous code. 
+            exploring the junction of human interaction and autonomous code.
             decrypted from public repository archives.
           </p>
           <div className="pt-6">
@@ -300,7 +259,7 @@ export const Projects = () => {
             </a>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <div className="p-4 bg-white/5 border border-white/10">
             <span className="text-[9px] text-[#ff00ff] block uppercase font-black tracking-widest mb-1">total_nodes</span>
             <span className="text-3xl font-mono text-white tracking-tighter">{totalNodes}</span>
@@ -320,7 +279,7 @@ export const Projects = () => {
         </div>
       </div>
 
-      <div className="space-y-6 border border-white/10 bg-black/40 p-6 md:p-8">
+      <div className="space-y-4 sm:space-y-6 border border-white/10 bg-black/40 p-4 sm:p-6 md:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <span className="text-[10px] text-[#ff00ff] block uppercase font-black tracking-[0.4em]">filter_matrix</span>
@@ -337,13 +296,6 @@ export const Projects = () => {
               className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-3 border border-white/10 text-gray-400 hover:text-white hover:border-white transition-all"
             >
               {filtersOpen ? 'hide_filters' : 'show_filters'}
-            </button>
-            <button
-              type="button"
-              onClick={handleGlossaryToggle}
-              className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-3 border border-white/10 text-gray-500 hover:text-white hover:border-white transition-all"
-            >
-              stack_glossary
             </button>
             {hasActiveFilters && (
               <button
@@ -475,99 +427,11 @@ export const Projects = () => {
                 </div>
               </div>
             )}
-
           </div>
         )}
       </div>
 
-      {glossaryOpen && (
-        <div className="fixed inset-0 z-50 flex items-stretch justify-center">
-          <button
-            type="button"
-            aria-label="close glossary"
-            onClick={() => setGlossaryOpen(false)}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="relative z-10 w-full h-full border border-white/10 bg-black/90 p-6 md:p-10 shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-y-auto"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block">
-                  stack_glossary
-                </span>
-                <p className="text-xs text-gray-600 font-mono lowercase">stack definitions in current portfolio.</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {glossaryHasOverflow && !glossaryHasSearch && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllGlossary((prev) => !prev)}
-                    className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-2 border border-white/10 text-gray-500 hover:text-white hover:border-white transition-all"
-                  >
-                    {showAllGlossary ? 'show_top' : 'show_all'}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setGlossaryOpen(false)}
-                  className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-2 border border-white/10 text-gray-500 hover:text-white hover:border-white transition-all"
-                >
-                  close
-                </button>
-              </div>
-            </div>
-            <div className="mt-6">
-              <label
-                htmlFor="stack-glossary-search"
-                className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block mb-3"
-              >
-                filter_glossary
-              </label>
-              <input
-                id="stack-glossary-search"
-                type="search"
-                value={glossarySearch}
-                onChange={(e) => {
-                  setGlossarySearch(e.target.value);
-                  setShowAllGlossary(false);
-                }}
-                placeholder="type to filter"
-                className="w-full bg-black/60 border border-white/10 text-[11px] uppercase tracking-[0.25em] px-4 py-3 text-gray-300 font-black focus:outline-none focus-visible:border-white/40"
-              />
-            </div>
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              {visibleGlossaryEntries.length === 0 ? (
-                <div className="col-span-full border border-white/10 px-4 py-6 text-center text-[10px] uppercase tracking-[0.4em] text-gray-600">
-                  no_entries
-                </div>
-              ) : (
-                visibleGlossaryEntries.map((entry) => (
-                  <div
-                    key={entry.label}
-                    className={`flex items-center justify-between border px-3 py-2 ${
-                      topStackSet.has(entry.label)
-                        ? 'border-[#ff00ff]/40 bg-[#ff00ff]/10 shadow-[0_0_24px_rgba(255,0,255,0.35)]'
-                        : 'border-white/10'
-                    }`}
-                  >
-                    <span className="text-[10px] uppercase font-black tracking-[0.25em] text-gray-300">
-                      {entry.label}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-gray-600">
-                      {entry.desc}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {displayProjects.length === 0 ? (
           <div className="col-span-full border border-white/10 bg-black/40 p-10 text-center">
             <p className="text-[11px] uppercase tracking-[0.4em] text-gray-600 font-black">no_nodes_match_filters</p>
