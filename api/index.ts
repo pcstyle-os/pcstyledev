@@ -69,8 +69,7 @@ async function fetchWithRetry(url: string, options: RequestInit = {}): Promise<R
   const cacheKey = `${options.method || 'GET'}:${url}`
 
   if (inflight.has(cacheKey)) {
-    const res = await inflight.get(cacheKey)
-    return res.clone()
+    return await inflight.get(cacheKey)!
   }
 
   const controller = new AbortController()
