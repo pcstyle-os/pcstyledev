@@ -75,7 +75,7 @@ export function VisualContributionHeatmap() {
                 <motion.div
                     className="fixed z-[100] pointer-events-none px-2 py-1 bg-black/90 border border-[#ff00ff] shadow-[0_0_15px_#ff00ff66] backdrop-blur-sm"
                     style={{
-                        left: mouseX,
+            left: mouseX.get(),
                         top: mouseY,
                         x: '-50%',
                         y: '-120%',
