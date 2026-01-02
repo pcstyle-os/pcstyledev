@@ -15,7 +15,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 export function ContributionHeatmap() {
   const { contributions, loading, error } = useGitHubContributions()
-  const [hoveredDay, setHoveredDay] = useState<{ date: string; count: number } | null>(null)
+  const [hoveredDay, setHoveredDay] = useState<{ date: string; count: number; x?: number; y?: number; isKeyboard?: boolean } | null>(null)
 
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
@@ -89,15 +89,15 @@ export function ContributionHeatmap() {
         <motion.div
           className="fixed z-[100] pointer-events-none px-2 py-1 bg-black/95 border border-[#ff00ff] shadow-[0_0_15px_#ff00ff44] backdrop-blur-sm"
           style={{
-            left: mouseX,
-            top: mouseY,
+            left: hoveredDay.isKeyboard ? hoveredDay.x : mouseX,
+            top: hoveredDay.isKeyboard ? hoveredDay.y : mouseY,
             x: '-50%',
             y: '-120%',
           }}
         >
           <div className="text-[10px] font-mono whitespace-nowrap leading-tight">
             <div className="text-white mb-0.5">{hoveredDay.date}:</div>
-            <div className="text-[#ff00ff] font-bold text-xs">{hoveredDay.count} CONTRIBUTS</div>
+            <div className="text-[#ff00ff] font-bold text-xs">{hoveredDay.count} CONTRIBUTIONS</div>
           </div>
         </motion.div>
       )}
@@ -157,9 +157,18 @@ export function ContributionHeatmap() {
                           tabIndex={0}
                           aria-label={`${day.date}: ${day.count} contributions`}
                           className={`w-[10px] h-[10px] ${LEVEL_COLORS[day.level] || LEVEL_COLORS[0]} transition-all hover:scale-150 focus:scale-150 focus:outline-none hover:z-20 focus:z-20 hover:ring-1 focus:ring-1 hover:ring-white/50 focus:ring-[#ff00ff] relative outline-none`}
-                          onMouseEnter={() => setHoveredDay({ date: day.date, count: day.count })}
+                          onMouseEnter={() => setHoveredDay({ date: day.date, count: day.count, isKeyboard: false })}
                           onMouseLeave={() => setHoveredDay(null)}
-                          onFocus={() => setHoveredDay({ date: day.date, count: day.count })}
+                          onFocus={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            setHoveredDay({
+                              date: day.date,
+                              count: day.count,
+                              x: rect.left + rect.width / 2,
+                              y: rect.top,
+                              isKeyboard: true
+                            })
+                          }}
                           onBlur={() => setHoveredDay(null)}
                         />
                       ))}

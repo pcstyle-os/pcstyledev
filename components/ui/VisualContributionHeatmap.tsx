@@ -47,11 +47,21 @@ export function VisualContributionHeatmap() {
         return contributions.weeks.slice(-14)
     }, [contributions])
 
-    if (loading || error || !contributions) {
+    if (loading || !contributions) {
         return (
             <div className="p-4 bg-white/5 border border-white/10 h-full min-h-[220px] flex items-center justify-center">
                 <div className="text-[9px] text-[#ff00ff] uppercase font-black tracking-widest animate-pulse flex items-center gap-2">
                     <Zap size={10} className="animate-bounce" /> INITIALIZING_NEURAL_MAP...
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="p-4 bg-white/5 border border-white/10 h-full min-h-[220px] flex items-center justify-center">
+                <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">
+                    NEURAL_MAP_UNAVAILABLE
                 </div>
             </div>
         )

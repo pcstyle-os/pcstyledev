@@ -8,10 +8,14 @@ export function NeuralLanguageMap() {
 
     const languages = useMemo(() => {
         if (!summary?.languages) return []
-        return summary.languages.slice(0, 10)
+        return summary.languages.slice(0, 10).map(lang => ({
+            ...lang,
+            fragmentDelay: Math.random(),
+            fragmentPosition: Math.random() * lang.percent
+        }))
     }, [summary])
 
-    if (loading || error || !summary) {
+    if (loading || !summary) {
         return (
             <div className="p-4 bg-white/5 border border-white/10 h-[250px] flex items-center justify-center">
                 <div className="text-[9px] text-[#ff00ff] uppercase font-black tracking-widest animate-pulse flex items-center gap-2">
@@ -21,8 +25,32 @@ export function NeuralLanguageMap() {
         )
     }
 
+    if (error) {
+        return (
+            <div className="p-4 bg-white/5 border border-white/10 h-[250px] flex items-center justify-center">
+                <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">
+                    ERROR_LOADING_DATA
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="p-6 bg-white/5 border border-white/10 h-full relative overflow-hidden flex flex-col group min-h-[300px]">
+        <div
+            className="p-6 bg-white/5 border border-white/10 h-full relative overflow-hidden flex flex-col group min-h-[300px]"
+            role="region"
+            aria-label="Programming language usage statistics"
+        >
+            {/* Screen reader accessible data */}
+            <div className="sr-only">
+                <h3>Programming Languages</h3>
+                <ul>
+                    {languages.map(lang => (
+                        <li key={lang.name}>{lang.name}: {lang.percent}%</li>
+                    ))}
+                </ul>
+            </div>
+
             <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div className="absolute inset-0 bg-[radial-gradient(#ff00ff22_1px,transparent_1px)] bg-[size:16px_16px]"></div>
             </div>
@@ -73,9 +101,9 @@ export function NeuralLanguageMap() {
                             {lang.percent > 20 && (
                                 <motion.div
                                     animate={{ opacity: [0, 1, 0] }}
-                                    transition={{ duration: 0.5, repeat: Infinity, delay: Math.random() }}
+                                    transition={{ duration: 0.5, repeat: Infinity, delay: lang.fragmentDelay }}
                                     className="absolute top-0 h-full w-[1px] bg-[#ff00ff]"
-                                    style={{ left: `${Math.random() * lang.percent}%` }}
+                                    style={{ left: `${lang.fragmentPosition}%` }}
                                 />
                             )}
                         </div>

@@ -25,7 +25,6 @@ function ProgressBar({ percent, label, value }: { percent: number; label: string
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(percent, 100)}%` }}
           className="h-full bg-[#ff00ff] shadow-[0_0_10px_#ff00ff]"
-          className="h-full bg-[#ff00ff] shadow-[0_0:10px_#ff00ff]"
         />
       </div>
     </div>
