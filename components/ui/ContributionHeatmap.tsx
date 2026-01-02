@@ -159,6 +159,8 @@ export function ContributionHeatmap() {
                           className={`w-[10px] h-[10px] ${LEVEL_COLORS[day.level] || LEVEL_COLORS[0]} transition-all hover:scale-150 focus:scale-150 focus:outline-none hover:z-20 focus:z-20 hover:ring-1 focus:ring-1 hover:ring-white/50 focus:ring-[#ff00ff] relative outline-none`}
                           onMouseEnter={() => setHoveredDay({ date: day.date, count: day.count })}
                           onMouseLeave={() => setHoveredDay(null)}
+                          onFocus={() => setHoveredDay({ date: day.date, count: day.count })}
+                          onBlur={() => setHoveredDay(null)}
                         />
                       ))}
                       {/* Fill in missing days if week is short */}
