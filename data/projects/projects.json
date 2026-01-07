@@ -293,7 +293,25 @@
       "link": "https://og.pcstyle.dev",
       "createdAt": "2026-01-07T16:48:37.383Z",
       "updatedAt": "2026-01-07T16:48:37.383Z"
+    },
+    {
+      "id": "qr",
+      "name": "QR Code Generator",
+      "desc": "cyberpunk qr code generator with neon, matrix, glitch, and minimal style presets",
+      "stack": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "Framer Motion"
+      ],
+      "status": "active",
+      "icon": "QrCode",
+      "github": "https://github.com/pc-style/qr.git",
+      "link": "https://qr.pcstyle.dev",
+      "createdAt": "2026-01-07T17:41:58.000Z",
+      "updatedAt": "2026-01-07T17:41:58.000Z"
     }
   ],
-  "lastUpdated": "2026-01-07T16:48:37.385Z"
+  "lastUpdated": "2026-01-07T18:02:02.000Z"
 }
