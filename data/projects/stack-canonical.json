@@ -31,7 +31,8 @@
     "UI Kit",
     "Vite",
     "WebGL",
-    "UploadThing"
+    "UploadThing",
+    "@vercel/og"
   ],
   "aliases": {
     "AI": "AI/ML",
@@ -176,6 +177,10 @@
     {
       "label": "UploadThing",
       "desc": "custom stack"
+    },
+    {
+      "label": "@vercel/og",
+      "desc": "Edge-powered OG image generation"
     }
   ]
 }

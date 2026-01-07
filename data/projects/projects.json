@@ -275,7 +275,25 @@
       "link": "https://s.pcstyle.dev",
       "createdAt": "2026-01-07T16:27:16.451Z",
       "updatedAt": "2026-01-07T16:27:16.451Z"
+    },
+    {
+      "id": "og",
+      "name": "OG Image Generator",
+      "desc": "dynamic open graph image generator with cyberpunk aesthetics",
+      "stack": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "@vercel/og"
+      ],
+      "status": "active",
+      "icon": "Image",
+      "github": "https://github.com/pc-style/og.git",
+      "link": "https://og.pcstyle.dev",
+      "createdAt": "2026-01-07T16:48:37.383Z",
+      "updatedAt": "2026-01-07T16:48:37.383Z"
     }
   ],
-  "lastUpdated": "2026-01-07T16:27:16.452Z"
+  "lastUpdated": "2026-01-07T16:48:37.385Z"
 }
