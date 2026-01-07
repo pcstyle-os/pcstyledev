@@ -239,7 +239,25 @@
       "link": "https://friends-tierlist.vercel.app/",
       "createdAt": "2026-01-02T03:55:09.246Z",
       "updatedAt": "2026-01-02T03:55:09.246Z"
+    },
+    {
+      "id": "short",
+      "name": "S.PCSTYLE Link Shortener",
+      "desc": "cybernetic url compression protocol",
+      "stack": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "Convex"
+      ],
+      "status": "active",
+      "icon": "Link",
+      "github": "https://github.com/pc-style/short.git",
+      "link": "https://s.pcstyle.dev",
+      "createdAt": "2026-01-07T16:24:40.678Z",
+      "updatedAt": "2026-01-07T16:24:40.678Z"
     }
   ],
-  "lastUpdated": "2026-01-02T03:55:09.248Z"
+  "lastUpdated": "2026-01-07T16:24:40.681Z"
 }
