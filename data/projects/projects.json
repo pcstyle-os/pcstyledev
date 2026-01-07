@@ -239,7 +239,25 @@
       "link": "https://friends-tierlist.vercel.app/",
       "createdAt": "2026-01-02T03:55:09.246Z",
       "updatedAt": "2026-01-02T03:55:09.246Z"
+    },
+    {
+      "id": "uploader",
+      "name": "Uploader",
+      "desc": "a high-performance file transfer protocol powered by uploadthing for secure and fast file delivery",
+      "stack": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "UploadThing"
+      ],
+      "status": "active",
+      "icon": "Upload",
+      "github": "https://github.com/pc-style/upload",
+      "link": "https://upload.pcstyle.dev",
+      "createdAt": "2026-01-07T16:26:50.770Z",
+      "updatedAt": "2026-01-07T16:26:50.770Z"
     }
   ],
-  "lastUpdated": "2026-01-07T16:26:07.278Z"
+  "lastUpdated": "2026-01-07T16:26:50.771Z"
 }
