@@ -32,7 +32,8 @@
     "Vite",
     "WebGL",
     "UploadThing",
-    "@vercel/og"
+    "@vercel/og",
+    "Framer Motion"
   ],
   "aliases": {
     "AI": "AI/ML",
@@ -181,6 +182,10 @@
     {
       "label": "@vercel/og",
       "desc": "Edge-powered OG image generation"
+    },
+    {
+      "label": "Framer Motion",
+      "desc": "Motion library for React"
     }
   ]
 }
