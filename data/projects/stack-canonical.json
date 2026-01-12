@@ -33,7 +33,11 @@
     "WebGL",
     "UploadThing",
     "@vercel/og",
-    "Framer Motion"
+    "Framer Motion",
+    "Expo",
+    "React Native",
+    "React Navigation",
+    "React Native Reanimated"
   ],
   "aliases": {
     "AI": "AI/ML",
@@ -186,6 +190,22 @@
     {
       "label": "Framer Motion",
       "desc": "Motion library for React"
+    },
+    {
+      "label": "Expo",
+      "desc": "custom stack"
+    },
+    {
+      "label": "React Native",
+      "desc": "custom stack"
+    },
+    {
+      "label": "React Navigation",
+      "desc": "custom stack"
+    },
+    {
+      "label": "React Native Reanimated",
+      "desc": "custom stack"
     }
   ]
 }

@@ -313,7 +313,25 @@
       "link": "https://qr.pcstyle.dev",
       "createdAt": "2026-01-07T17:41:58.000Z",
       "updatedAt": "2026-01-07T17:41:58.000Z"
+    },
+    {
+      "id": "478",
+      "name": "478 Breathing App",
+      "desc": "a mobile app for practicing the 4-7-8 breathing technique to promote relaxation and improve sleep",
+      "stack": [
+        "Expo",
+        "React Native",
+        "TypeScript",
+        "React Navigation",
+        "React Native Reanimated"
+      ],
+      "status": "active",
+      "icon": "Wind",
+      "github": "https://github.com/pc-style/478.git",
+      "link": null,
+      "createdAt": "2026-01-12T10:09:40.766Z",
+      "updatedAt": "2026-01-12T10:09:40.766Z"
     }
   ],
-  "lastUpdated": "2026-01-07T18:02:02.000Z"
+  "lastUpdated": "2026-01-12T10:09:40.769Z"
 }
