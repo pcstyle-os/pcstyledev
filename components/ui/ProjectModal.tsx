@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Terminal } from 'lucide-react';
 import type { Project } from '../../lib/types';
@@ -21,10 +22,10 @@ const modalVariants = {
 export const ProjectModal = ({ project, onClose }: Props) => {
     if (!project || !project.modal) return null;
 
-    return (
+    return createPortal(
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
@@ -80,6 +81,7 @@ export const ProjectModal = ({ project, onClose }: Props) => {
                     <div className="absolute inset-0 pointer-events-none bg-[url('/scanlines.png')] opacity-10" />
                 </motion.div>
             </motion.div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
