@@ -384,7 +384,7 @@
       "updatedAt": "2026-01-14T19:50:00.000Z",
       "modal": {
         "title": "zielarz_inventory_core",
-        "content": "custom-built inventory management for zielarz, a local vape shop in częstochowa. designed to handle specific domain requirements like liquid strengths (6/12/18mg), longfills, and salts that generic pos systems couldn't support.\n\npowered by convex for real-time updates across multiple screens. features a drag-and-drop admin interface for organizing brands, qr code generation for shelf labels, and a complete audit log for tracking stock changes. it's not just a database; it's the nervous system of the shop."
+        "content": "custom-built inventory management for zielarz, a local vape shop in częstochowa. designed to handle specific domain requirements like liquid strengths (6/12/18mg), longfills, and salts that generic pos systems couldn't support.\n\npowered by convex for real-time updates across multiple screens. includes a customer-facing TV display for live menu availability, a drag-and-drop admin interface, qr code generation, and a complete audit log. it's not just a database; it's the nervous system of the shop."
       }
     }
   ],
