@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ProjectCard } from '../components/ui/ProjectCard';
+import { ProjectModal } from '../components/ui/ProjectModal';
 import projectsData from '../data/projects/projects.json';
 import stackConfig from '../data/projects/stack-canonical.json';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
@@ -55,6 +56,7 @@ export const Projects = () => {
   const totalNodes = PROJECTS.length;
   const activeNodes = PROJECTS.filter((project) => project.status === 'active').length;
   const experimentalNodes = PROJECTS.filter((project) => project.status === 'experimental').length;
+  const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -84,7 +86,7 @@ export const Projects = () => {
       selectedStacks.length === 0 || project.stack.some((stack) => selectedStacks.includes(stack));
     const matchesStatusFilter = (project: Project) =>
       selectedStatuses.length === 0 || selectedStatuses.includes(project.status);
-    
+
     return PROJECTS.filter(
       (project) => matchesQuery(project) && matchesStackFilter(project) && matchesStatusFilter(project)
     );
@@ -224,15 +226,15 @@ export const Projects = () => {
   const activeFilters = [
     ...(searchQuery.trim()
       ? [
-          {
-            key: 'search',
-            label: `search:${searchQuery.trim()}`,
-            onRemove: () => {
-              setSearchInput('');
-              setSearchQuery('');
-            }
+        {
+          key: 'search',
+          label: `search:${searchQuery.trim()}`,
+          onRemove: () => {
+            setSearchInput('');
+            setSearchQuery('');
           }
-        ]
+        }
+      ]
       : []),
     ...selectedStacks.map((stack) => ({
       key: `stack-${stack}`,
@@ -386,13 +388,11 @@ export const Projects = () => {
                       <button
                         key={stack}
                         onClick={() => toggleSelection(stack, selectedStacks, setSelectedStacks)}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${
-                          active
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${active
                             ? 'border-[#ff00ff] text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_18px_rgba(255,0,255,0.2)]'
                             : 'border-white/10 text-gray-500 hover:text-white hover:border-white/40'
-                        } ${isTopStack ? 'shadow-[0_0_22px_rgba(255,0,255,0.35)]' : ''} ${
-                          disabled ? 'opacity-40 cursor-not-allowed' : ''
-                        }`}
+                          } ${isTopStack ? 'shadow-[0_0_22px_rgba(255,0,255,0.35)]' : ''} ${disabled ? 'opacity-40 cursor-not-allowed' : ''
+                          }`}
                         aria-pressed={active}
                         aria-disabled={disabled}
                         disabled={disabled}
@@ -420,11 +420,10 @@ export const Projects = () => {
                       <button
                         key={status}
                         onClick={() => toggleSelection(status, selectedStatuses, setSelectedStatuses)}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${
-                          active
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${active
                             ? 'border-[#ff00ff] text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_18px_rgba(255,0,255,0.2)]'
                             : 'border-white/10 text-gray-500 hover:text-white hover:border-white/40'
-                        } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                         aria-pressed={active}
                         aria-disabled={disabled}
                         disabled={disabled}
@@ -448,10 +447,22 @@ export const Projects = () => {
           </div>
         ) : (
           displayProjects.map((p, idx) => (
-            <ProjectCard key={p.id} project={p} soundEnabled={soundEnabled} synth={synth} delay={idx * 50} />
+            <ProjectCard
+              key={p.id}
+              project={p}
+              soundEnabled={soundEnabled}
+              synth={synth}
+              delay={idx * 50}
+              onOpenModal={setActiveModalProject}
+            />
           ))
         )}
       </div>
+
+      <ProjectModal
+        project={activeModalProject}
+        onClose={() => setActiveModalProject(null)}
+      />
     </div>
   );
 };

@@ -366,6 +366,26 @@
       "icon": "Calendar",
       "createdAt": "2026-01-14T19:25:00.000Z",
       "updatedAt": "2026-01-14T19:25:00.000Z"
+    },
+    {
+      "id": "stock-management",
+      "name": "Stock Management",
+      "desc": "custom stock management system for a local vape shop.",
+      "stack": [
+        "Electron",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "SQLite"
+      ],
+      "status": "active",
+      "icon": "Package",
+      "createdAt": "2026-01-14T19:50:00.000Z",
+      "updatedAt": "2026-01-14T19:50:00.000Z",
+      "modal": {
+        "title": "zielarz_stock_system",
+        "content": "built a custom stock management solution for zielarz, a local vape shop in częstochowa. they needed something fast and offline-first to handle inventory, sales tracking, and low-stock alerts without the bloat of generic pos systems.\n\nit's running on electron + sqlite for reliability. simple, dark-mode ui because staring at bright screens all day sucks. features barcode scanning hooks and auto-generated monthly reports. honestly just happy it's helping them stay organized."
+      }
     }
   ],
   "lastUpdated": "2026-01-14T19:25:00.000Z"

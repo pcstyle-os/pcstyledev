@@ -12,6 +12,10 @@ export interface Project {
   icon: string
   createdAt: string
   updatedAt: string
+  modal?: {
+    title: string
+    content: string
+  }
 }
 
 export interface ProjectsData {
