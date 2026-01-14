@@ -16,6 +16,7 @@ interface Props {
   soundEnabled: boolean;
   delay: number;
   onOpenModal?: (project: Project) => void;
+  synth?: Synth;
 }
 
 export const ProjectCard = memo(({ project, soundEnabled, synth, delay, onOpenModal }: Props) => {
