@@ -10,6 +10,12 @@
     "projects": "bun run projects-cli/src/index.ts"
   },
   "dependencies": {
+    "@pcstyle/analytics": "workspace:*",
+    "@pcstyle/hooks": "workspace:*",
+    "@pcstyle/logger": "workspace:*",
+    "@pcstyle/og": "workspace:*",
+    "@pcstyle/seo": "workspace:*",
+    "@pcstyle/toast": "workspace:*",
     "framer-motion": "^12.23.26",
     "hono": "^4.11.3",
     "lucide-react": "^0.561.0",
