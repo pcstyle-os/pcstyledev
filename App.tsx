@@ -18,6 +18,12 @@ import { Terminal } from './pages/Terminal';
 import { Identity } from './pages/Identity';
 import { Stats } from './pages/Stats';
 
+import { Beta1Blueprint } from './pages/beta/Beta1Blueprint';
+import { Beta2Editorial } from './pages/beta/Beta2Editorial';
+import { Beta3IDE } from './pages/beta/Beta3IDE';
+import { Beta4Brutalist } from './pages/beta/Beta4Brutalist';
+import { Beta5CeramicStudio } from './pages/beta/Beta5CeramicStudio';
+
 function Layout({
   soundEnabled,
   setSoundEnabled,
@@ -226,6 +232,13 @@ export default function App() {
               <Route path="stats" element={<Stats />} />
               <Route path="identity" element={<Identity />} />
             </Route>
+
+            {/* Beta design explorations */}
+            <Route path="/beta/1" element={<Beta1Blueprint />} />
+            <Route path="/beta/2" element={<Beta2Editorial />} />
+            <Route path="/beta/3" element={<Beta3IDE />} />
+            <Route path="/beta/4" element={<Beta4Brutalist />} />
+            <Route path="/beta/5" element={<Beta5CeramicStudio />} />
           </Routes>
         </HashRouter>
       )}
