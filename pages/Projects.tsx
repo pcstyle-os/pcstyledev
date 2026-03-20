@@ -125,8 +125,11 @@ export const Projects = () => {
   }, [audiencePath]);
 
   useEffect(() => {
-    if (!audiencePath) return;
     try {
+      if (!audiencePath) {
+        localStorage.removeItem(AUDIENCE_PATH_STORAGE_KEY);
+        return;
+      }
       localStorage.setItem(AUDIENCE_PATH_STORAGE_KEY, audiencePath);
     } catch {
       /* ignore */

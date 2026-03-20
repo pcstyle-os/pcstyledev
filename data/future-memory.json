@@ -1,0 +1,26 @@
+{
+  "intro": "A memory from the future, rewound: outcomes first, then the builds that earn them.",
+  "milestones": [
+    {
+      "year": 2030,
+      "headline": "Dual-brand education on one hardened spine",
+      "metric": "One deploy, two hosts — brand-scoped Convex, WorkOS, Stripe",
+      "body": "Oddech and Re4matik never fork auth or entitlements. Middleware keeps hosts honest; Playwright keeps checkout and lesson gates honest.",
+      "projectIds": ["oddech"]
+    },
+    {
+      "year": 2028,
+      "headline": "Retail floors run on variant-native inventory",
+      "metric": "TV, counter, and audits share one subscription graph",
+      "body": "Strengths and salts are modeled as data, not spreadsheet hacks. Stockouts vanish from public menus the moment counts hit zero.",
+      "projectIds": ["stock-management"]
+    },
+    {
+      "year": 2027,
+      "headline": "Messenger as a user-owned surface",
+      "metric": "17+ themes + receipt control without a fragile shell",
+      "body": "Electron + guarded IPC let the renderer experiment while auto-update and notifications stay boring — the way infrastructure should be.",
+      "projectIds": ["messenger"]
+    }
+  ]
+}
