@@ -64,12 +64,13 @@ function StatCard({
 
 export function WakaTimeDashboard() {
   const { summary, loading, error } = useWakaTimeSummary();
+  const isGitHubInferred = summary?.source === 'github-inferred';
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="text-xs text-primary font-body font-semibold uppercase tracking-widest flex items-center gap-2">
-          <Clock size={14} className="animate-pulse" /> Loading WakaTime…
+          <Clock size={14} className="animate-pulse" /> Loading activity estimate…
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -84,7 +85,7 @@ export function WakaTimeDashboard() {
     return (
       <div className="p-8 rounded-[2rem] glass-panel">
         <div className="text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
-          WakaTime unavailable
+          Activity stats unavailable
         </div>
         <p className="text-on-surface-variant text-sm mt-2 font-body">{error || 'Could not load coding statistics.'}</p>
       </div>
@@ -94,8 +95,16 @@ export function WakaTimeDashboard() {
   return (
     <div className="space-y-10 pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div className="flex items-center gap-2 text-xs md:text-sm text-primary font-body font-semibold uppercase tracking-widest">
-          <Clock size={16} /> WakaTime (7 days)
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-xs md:text-sm text-primary font-body font-semibold uppercase tracking-widest">
+            <Clock size={16} />{' '}
+            {isGitHubInferred ? 'Coding estimate (7d · GitHub)' : 'WakaTime (7 days)'}
+          </div>
+          {isGitHubInferred && (
+            <p className="text-[11px] text-on-surface-variant/90 font-body max-w-xl leading-relaxed">
+              Heuristic from your contribution graph and recent pushes — not exact IDE time.
+            </p>
+          )}
         </div>
         <span className="text-xs text-on-surface-variant font-body">
           {summary.range.start} — {summary.range.end}
@@ -123,14 +132,18 @@ export function WakaTimeDashboard() {
         <div className="space-y-6 xl:col-span-1">
           <div className="p-6 rounded-[1.5rem] glass-panel space-y-5 h-full">
             <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
-              <Monitor size={14} className="text-primary" /> Editors
+              <Monitor size={14} className="text-primary" /> {isGitHubInferred ? 'Data source' : 'Editors'}
             </div>
             <div className="space-y-4">
-              {summary.editors.slice(0, 3).map((editor) => (
-                <div key={editor.name}>
-                  <ProgressBar label={editor.name} value={`${editor.percent}%`} percent={editor.percent} />
-                </div>
-              ))}
+              {summary.editors.length === 0 ? (
+                <p className="text-xs text-on-surface-variant font-body">No activity in this window.</p>
+              ) : (
+                summary.editors.slice(0, 3).map((editor) => (
+                  <div key={editor.name}>
+                    <ProgressBar label={editor.name} value={`${editor.percent}%`} percent={editor.percent} />
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="pt-6">

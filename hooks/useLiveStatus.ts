@@ -17,7 +17,7 @@ export function useLiveStatus(pollInterval = 30000): UseLiveStatusResult {
 
     const fetchStatus = async () => {
       try {
-        const res = await fetch('/api/wakatime/status')
+        const res = await fetch('/api/github/activity-status')
         if (!res.ok) throw new Error('failed to fetch status')
         const data = await res.json()
 

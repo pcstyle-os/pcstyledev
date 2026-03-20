@@ -27,8 +27,8 @@ export function useWakaTimeSummary(): UseWakaTimeSummaryResult {
         setLoading(true)
         setError(null)
       }
-      const res = await fetch('/api/wakatime/summary')
-      if (!res.ok) throw new Error('failed to fetch wakatime summary')
+      const res = await fetch('/api/github/coding-estimate')
+      if (!res.ok) throw new Error('failed to fetch coding estimate')
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       if (mountedRef.current) {
@@ -68,8 +68,8 @@ export function useWakaTimeStatus(pollInterval = 30000): UseWakaTimeStatusResult
 
     const fetchStatus = async () => {
       try {
-        const res = await fetch('/api/wakatime/status')
-        if (!res.ok) throw new Error('failed to fetch status')
+        const res = await fetch('/api/github/activity-status')
+        if (!res.ok) throw new Error('failed to fetch activity status')
         const data = await res.json()
         if (mounted) {
           if (data.error) {

@@ -36,8 +36,15 @@ export function ProjectMatrix() {
       />
 
       <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest group-hover:text-primary transition-colors">
-          <FolderGit2 size={14} className="text-primary" /> By project
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest group-hover:text-primary transition-colors">
+            <FolderGit2 size={14} className="text-primary" /> By project
+          </div>
+          {summary.source === 'github-inferred' && (
+            <span className="text-[10px] text-on-surface-variant/70 font-body normal-case tracking-normal">
+              From public push events (last 7d)
+            </span>
+          )}
         </div>
       </div>
 

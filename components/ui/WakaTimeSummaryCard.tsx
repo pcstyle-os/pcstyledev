@@ -44,7 +44,9 @@ export function WakaTimeSummaryCard() {
   return (
     <div className="p-8 rounded-[2rem] glass-panel space-y-8 shadow-ambient">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <span className="text-xs text-primary font-body font-semibold uppercase tracking-widest">Coding (7d)</span>
+        <span className="text-xs text-primary font-body font-semibold uppercase tracking-widest">
+          {summary.source === 'github-inferred' ? 'Coding estimate (7d)' : 'Coding (7d)'}
+        </span>
         <Link
           to="/stats"
           className="text-xs text-on-surface-variant hover:text-primary font-body font-semibold uppercase tracking-widest inline-flex items-center gap-1 transition-colors"
@@ -100,6 +102,12 @@ export function WakaTimeSummaryCard() {
             <span className="text-on-surface-variant ml-2">({formatTime(summary.bestDay.seconds)})</span>
           </p>
         </div>
+      )}
+
+      {summary.source === 'github-inferred' && (
+        <p className="text-[11px] text-on-surface-variant/80 font-body leading-relaxed border-t border-outline-variant/30 pt-4">
+          Derived from public GitHub activity (contributions + repo languages), not WakaTime.
+        </p>
       )}
     </div>
   );

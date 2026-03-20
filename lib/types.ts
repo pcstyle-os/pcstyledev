@@ -51,6 +51,8 @@ export interface WakaTimeSummary {
   projects: WakaTimeProject[]
   bestDay: { date: string; seconds: number } | null
   range: { start: string; end: string }
+  /** Present when stats are modeled from GitHub (commits, repos) instead of WakaTime */
+  source?: 'github-inferred' | 'wakatime'
 }
 
 export interface WakaTimeStatus {

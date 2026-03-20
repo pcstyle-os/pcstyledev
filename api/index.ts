@@ -22,7 +22,7 @@ const projects: Project[] = (projectsData as ProjectsData).projects
 const app = new Hono()
 
 // Validate environment variables
-const requiredEnvVars = ['WAKATIME_API_KEY', 'GITHUB_TOKEN', 'GITHUB_USERNAME'] as const
+const requiredEnvVars = ['GITHUB_TOKEN', 'GITHUB_USERNAME'] as const
 type RequiredEnvVar = typeof requiredEnvVars[number]
 
 function validateEnv(): { valid: boolean; missing: string[] } {
@@ -176,15 +176,6 @@ routes.get('/health', (c) => {
   }, envStatus.valid ? 200 : 503)
 })
 
-// Middleware to protect stats routes from missing credentials
-routes.use('/wakatime/*', async (c, next) => {
-  if (!process.env.WAKATIME_API_KEY) {
-    console.error('[API] Missing WAKATIME_API_KEY')
-    return c.json({ error: 'System misconfigured: WakaTime API key missing' }, 500)
-  }
-  await next()
-})
-
 routes.use('/github/*', async (c, next) => {
   if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_USERNAME) {
     console.error('[API] Missing GitHub credentials')
@@ -215,9 +206,12 @@ routes.get('/projects/meta', (c) => {
   })
 })
 
-// WakaTime
+// WakaTime (optional — dashboard uses GitHub-derived estimate by default)
 routes.get('/wakatime/summary', async (c) => {
-  const apiKey = process.env.WAKATIME_API_KEY!
+  const apiKey = process.env.WAKATIME_API_KEY
+  if (!apiKey) {
+    return c.json({ error: 'WakaTime API key not configured' }, 503)
+  }
 
   const cached = getCached<WakaTimeSummary>('wakatime:summary')
   if (cached) {
@@ -274,7 +268,8 @@ routes.get('/wakatime/summary', async (c) => {
       range: {
         start: summaries[0]?.range?.date || '',
         end: summaries[summaries.length - 1]?.range?.date || ''
-      }
+      },
+      source: 'wakatime'
     }
 
     setCache('wakatime:summary', summary)
@@ -286,7 +281,10 @@ routes.get('/wakatime/summary', async (c) => {
 })
 
 routes.get('/wakatime/status', async (c) => {
-  const apiKey = process.env.WAKATIME_API_KEY!
+  const apiKey = process.env.WAKATIME_API_KEY
+  if (!apiKey) {
+    return c.json({ error: 'WakaTime API key not configured' }, 503)
+  }
 
   const cached = getCached<WakaTimeStatus>('wakatime:status')
   if (cached) {
@@ -476,6 +474,232 @@ routes.get('/github/stats', async (c) => {
     setCache('github:stats', stats, GH_CACHE_TTL)
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(stats)
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
+})
+
+/** Model ~minutes of focus from contribution count (commits/issues/PRs); capped per day. Not wall-clock time. */
+const INFER_SEC_PER_CONTRIBUTION = 14 * 60
+const INFER_MAX_DAY_SECONDS = 5 * 3600
+
+function utcYmd(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+function last7UtcBounds() {
+  const now = new Date()
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999))
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0, 0))
+  return {
+    fromIso: start.toISOString(),
+    toIso: end.toISOString(),
+    startYmd: utcYmd(start),
+    endYmd: utcYmd(end)
+  }
+}
+
+routes.get('/github/coding-estimate', async (c) => {
+  const token = process.env.GITHUB_TOKEN!
+  const username = process.env.GITHUB_USERNAME!
+
+  const cached = getCached<WakaTimeSummary>('github:coding-estimate:v1')
+  if (cached) {
+    c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
+    return c.json(cached)
+  }
+
+  try {
+    const { fromIso, toIso, startYmd, endYmd } = last7UtcBounds()
+
+    const calQuery = `
+      query($username: String!, $from: DateTime!, $to: DateTime!) {
+        user(login: $username) {
+          contributionsCollection(from: $from, to: $to) {
+            contributionCalendar {
+              weeks {
+                contributionDays {
+                  date
+                  contributionCount
+                  contributionLevel
+                  weekday
+                  color
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+    const calRes = await fetchWithRetry('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: calQuery,
+        variables: { username, from: fromIso, to: toIso }
+      })
+    })
+
+    if (!calRes.ok) throw new Error(`GitHub GraphQL Error: ${calRes.status}`)
+    const calJson = await calRes.json()
+    const weeks = calJson.data?.user?.contributionsCollection?.contributionCalendar?.weeks ?? []
+
+    const dayRows: { date: string; count: number }[] = []
+    for (const week of weeks) {
+      const normalized = normalizeGitHubWeek(week)
+      for (const d of normalized) {
+        if (!d.date || d.date < startYmd || d.date > endYmd) continue
+        dayRows.push({ date: d.date, count: d.count })
+      }
+    }
+
+    let totalSeconds = 0
+    let bestDay: { date: string; seconds: number } | null = null
+    for (const { date, count } of dayRows) {
+      const sec = Math.min(Math.max(0, count) * INFER_SEC_PER_CONTRIBUTION, INFER_MAX_DAY_SECONDS)
+      totalSeconds += sec
+      if (sec > 0 && (!bestDay || sec > bestDay.seconds)) {
+        bestDay = { date, seconds: sec }
+      }
+    }
+
+    const dailyAverage = Math.round(totalSeconds / 7)
+
+    const eventsRes = await fetchWithRetry(
+      `https://api.github.com/users/${username}/events/public?per_page=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      }
+    )
+    const events = eventsRes.ok ? await eventsRes.json() : []
+    const startMs = new Date(`${startYmd}T00:00:00.000Z`).getTime()
+    const endMs = new Date(`${endYmd}T23:59:59.999Z`).getTime()
+    const repoCommits = new Map<string, number>()
+    for (const e of events as any[]) {
+      if (e.type !== 'PushEvent') continue
+      const t = new Date(e.created_at).getTime()
+      if (t < startMs || t > endMs) continue
+      const name = e.repo?.name as string | undefined
+      if (!name) continue
+      const n = Array.isArray(e.payload?.commits) ? e.payload.commits.length : (e.payload?.size ?? 1)
+      repoCommits.set(name, (repoCommits.get(name) || 0) + n)
+    }
+
+    const projectEntries = [...repoCommits.entries()].sort((a, b) => b[1] - a[1])
+    const projCommitSum = projectEntries.reduce((s, [, c]) => s + c, 0) || 1
+
+    let projects: WakaTimeSummary['projects'] = projectEntries.slice(0, 12).map(([name, commits]) => ({
+      name,
+      totalSeconds: Math.round((commits / projCommitSum) * totalSeconds),
+      percent: Math.round((commits / projCommitSum) * 100)
+    }))
+    if (projects.length === 0 && totalSeconds > 0) {
+      projects = [{ name: 'Activity (no recent pushes in feed)', totalSeconds, percent: 100 }]
+    }
+
+    const langWeighted = new Map<string, number>()
+    const topRepos = projectEntries.slice(0, 10)
+    await Promise.all(
+      topRepos.map(async ([repoName, commits]) => {
+        const langRes = await fetchWithRetry(`https://api.github.com/repos/${repoName}/languages`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+          }
+        })
+        if (!langRes.ok) return
+        const langs = (await langRes.json()) as Record<string, number>
+        const weight = Math.sqrt(commits + 1)
+        for (const [lang, bytes] of Object.entries(langs)) {
+          langWeighted.set(lang, (langWeighted.get(lang) || 0) + bytes * weight)
+        }
+      })
+    )
+
+    const langSum = [...langWeighted.values()].reduce((a, b) => a + b, 0)
+    let languages: WakaTimeSummary['languages'] = []
+    if (langSum > 0 && totalSeconds > 0) {
+      languages = [...langWeighted.entries()]
+        .map(([name, w]) => ({
+          name,
+          totalSeconds: Math.round((w / langSum) * totalSeconds),
+          percent: Math.round((w / langSum) * 100)
+        }))
+        .sort((a, b) => b.totalSeconds - a.totalSeconds)
+        .slice(0, 10)
+    } else if (totalSeconds > 0) {
+      languages = [{ name: 'Mixed (no repo breakdown)', totalSeconds, percent: 100 }]
+    }
+
+    const editors: WakaTimeSummary['editors'] =
+      totalSeconds > 0
+        ? [{ name: 'Inferred from Git (no editor telemetry)', totalSeconds, percent: 100 }]
+        : []
+
+    const summary: WakaTimeSummary = {
+      totalSeconds,
+      totalHours: Math.round((totalSeconds / 3600) * 10) / 10,
+      dailyAverage,
+      languages,
+      editors,
+      projects,
+      bestDay,
+      range: { start: startYmd, end: endYmd },
+      source: 'github-inferred'
+    }
+
+    setCache('github:coding-estimate:v1', summary, GH_CACHE_TTL)
+    c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
+    return c.json(summary)
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
+})
+
+routes.get('/github/activity-status', async (c) => {
+  const token = process.env.GITHUB_TOKEN!
+  const username = process.env.GITHUB_USERNAME!
+
+  const cached = getCached<WakaTimeStatus>('github:activity-status:v1')
+  if (cached) {
+    c.header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return c.json(cached)
+  }
+
+  try {
+    const res = await fetchWithRetry(
+      `https://api.github.com/users/${username}/events/public?per_page=25`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      }
+    )
+    const events = res.ok ? await res.json() : []
+    const cutoff = Date.now() - 6 * 3600 * 1000
+    const push = (events as any[]).find(
+      (e) => e.type === 'PushEvent' && new Date(e.created_at).getTime() >= cutoff
+    )
+    const payload: WakaTimeStatus = {
+      isActive: !!push,
+      project: push?.repo?.name ?? null,
+      language: null,
+      editor: null,
+      lastHeartbeat: (push?.created_at as string) ?? null
+    }
+    setCache('github:activity-status:v1', payload, 60 * 1000)
+    c.header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
+    return c.json(payload)
   } catch (err: any) {
     return c.json({ error: err.message }, 500)
   }

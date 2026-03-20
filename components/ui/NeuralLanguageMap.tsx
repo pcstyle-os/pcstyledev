@@ -57,8 +57,15 @@ export function NeuralLanguageMap() {
       </div>
 
       <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest group-hover:text-primary transition-colors">
-          <Code2 size={14} className="text-primary" /> Languages
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest group-hover:text-primary transition-colors">
+            <Code2 size={14} className="text-primary" /> Languages
+          </div>
+          {summary.source === 'github-inferred' && (
+            <span className="text-[10px] text-on-surface-variant/70 font-body normal-case tracking-normal">
+              Weighted by active repos (bytes × push activity)
+            </span>
+          )}
         </div>
       </div>
 

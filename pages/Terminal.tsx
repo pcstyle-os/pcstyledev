@@ -171,7 +171,7 @@ export const Terminal = () => {
 
     switch(cmd) {
       case 'help':
-        log({ type: 'sys', content: 'commands: ls, cd, cat, pwd, clear, whoami, date, projects, wakatime, hack, sudo, reboot, id_card' });
+        log({ type: 'sys', content: 'commands: ls, cd, cat, pwd, clear, whoami, date, projects, wakatime (GitHub estimate), hack, sudo, reboot, id_card' });
         break;
 
       case 'clear':
@@ -265,9 +265,15 @@ export const Terminal = () => {
 
       case 'wakatime':
       case 'waka':
-        log({ type: 'sys', content: 'Fetching WakaTime stats...' });
-        fetch('/api/wakatime/summary')
-          .then(res => res.json())
+        log({ type: 'sys', content: 'Fetching GitHub-derived coding estimate...' });
+        fetch('/api/github/coding-estimate')
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || res.statusText || 'request failed');
+            }
+            return data;
+          })
           .then(data => {
             if (data.error) {
               setHistory(h => [...h, { type: 'error', content: `wakatime: ${data.error}` }]);
@@ -290,8 +296,9 @@ export const Terminal = () => {
             ).join('\n');
 
             const output = `
-WAKATIME_STATS_v1.0
-===================
+CODING_STATS (GitHub-inferred)
+==============================
+SOURCE: contributions graph + public pushes (not IDE time)
 TOTAL_TIME: ${formatTime(data.totalSeconds)} (7d)
 DAILY_AVG:  ${formatTime(data.dailyAverage)}
 
@@ -304,8 +311,9 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
 
             setHistory(h => [...h, { type: 'success', content: output }]);
           })
-          .catch(() => {
-            setHistory(h => [...h, { type: 'error', content: 'wakatime: failed to fetch stats' }]);
+          .catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'failed to fetch stats';
+            setHistory(h => [...h, { type: 'error', content: `wakatime: ${msg}` }]);
           });
         break;
 
@@ -440,7 +448,7 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
       <p className="font-body text-on-surface-variant text-sm mb-4 max-w-xl">
         A small in-browser shell. Try <span className="text-primary font-medium">help</span>,{' '}
         <span className="text-primary font-medium">projects</span>, or{' '}
-        <span className="text-primary font-medium">wakatime</span>.
+        <span className="text-primary font-medium">wakatime</span> (GitHub activity estimate).
       </p>
       <div className="terminal-skin glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-surface-container-low/80 backdrop-blur-sm">
