@@ -139,7 +139,13 @@ export const Projects = () => {
       const stored = parseAudiencePathParam(localStorage.getItem(AUDIENCE_PATH_STORAGE_KEY));
       if (stored) {
         setAudiencePath(stored);
-        applyAudiencePathPresets(stored);
+        const hasCustomFilters =
+          Boolean(searchParams.get('stack')) ||
+          Boolean(searchParams.get('status')) ||
+          (Boolean(searchParams.get('sort')) && parseSort(searchParams.get('sort')) !== 'featured');
+        if (!hasCustomFilters) {
+          applyAudiencePathPresets(stored);
+        }
       }
     } catch {
       /* ignore */

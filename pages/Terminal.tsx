@@ -144,6 +144,19 @@ export const Terminal = () => {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (workspace === 'replays') {
+      document.getElementById('term-input')?.blur();
+      requestAnimationFrame(() => {
+        document.getElementById('replay-session')?.focus();
+      });
+    } else {
+      requestAnimationFrame(() => {
+        document.getElementById('term-input')?.focus();
+      });
+    }
+  }, [workspace]);
+
   // Auto-scroll logic: only scroll if the new history item makes the container overflow
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -454,11 +467,10 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
         <span className="text-primary font-medium">Build replays</span> for scripted build transcripts.
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Console workspace">
+      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Console workspace">
         <button
           type="button"
-          role="tab"
-          aria-selected={workspace === 'console'}
+          aria-pressed={workspace === 'console'}
           onClick={() => setWorkspace('console')}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-body font-semibold uppercase tracking-wider transition-colors ${
             workspace === 'console'
@@ -470,8 +482,7 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
         </button>
         <button
           type="button"
-          role="tab"
-          aria-selected={workspace === 'replays'}
+          aria-pressed={workspace === 'replays'}
           onClick={() => setWorkspace('replays')}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-body font-semibold uppercase tracking-wider transition-colors ${
             workspace === 'replays'

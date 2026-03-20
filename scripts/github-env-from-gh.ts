@@ -10,14 +10,22 @@
  */
 
 function runGh(args: string[]): { ok: true; out: string } | { ok: false; err: string } {
-  const proc = Bun.spawnSync(["gh", ...args], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  if (proc.exitCode !== 0) {
-    return { ok: false, err: proc.stderr.toString().trim() || proc.stdout.toString().trim() || `gh ${args.join(" ")} failed` };
+  try {
+    const proc = Bun.spawnSync(["gh", ...args], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    if (proc.exitCode !== 0) {
+      return {
+        ok: false,
+        err: proc.stderr.toString().trim() || proc.stdout.toString().trim() || `gh ${args.join(" ")} failed`,
+      };
+    }
+    return { ok: true, out: proc.stdout.toString().trim() };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, err: msg || "gh spawn failed (is gh installed and on PATH?)" };
   }
-  return { ok: true, out: proc.stdout.toString().trim() };
 }
 
 const wantExport = process.argv.includes("--export");

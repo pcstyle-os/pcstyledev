@@ -36,12 +36,20 @@ export function ReplayTimeline() {
     [sessions, sessionId],
   );
 
+  const sortedSteps = useMemo(
+    () => (session ? [...session.steps].sort((a, b) => a.t - b.t) : []),
+    [session],
+  );
+
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
   const [playing, setPlaying] = useState(false);
   const [visible, setVisible] = useState(0);
   const [narrationOn, setNarrationOn] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<number[]>([]);
+  const visibleRef = useRef(0);
+  const speedRef = useRef(speed);
+  speedRef.current = speed;
 
   const clearTimers = useCallback(() => {
     timeoutsRef.current.forEach((id) => clearTimeout(id));
@@ -52,6 +60,7 @@ export function ReplayTimeline() {
     clearTimers();
     setPlaying(false);
     setVisible(0);
+    visibleRef.current = 0;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -63,35 +72,64 @@ export function ReplayTimeline() {
   }, [sessionId, session, reset]);
 
   useEffect(() => {
-    if (!playing || !session) return;
+    visibleRef.current = visible;
+  }, [visible]);
 
-    clearTimers();
-    const steps = [...session.steps].sort((a, b) => a.t - b.t);
-    if (steps.length === 0) {
+  /** Always stop narration on unmount so audio cannot outlive the panel. */
+  useEffect(() => {
+    return () => {
+      const el = audioRef.current;
+      if (el) {
+        el.pause();
+        el.currentTime = 0;
+      }
+    };
+  }, []);
+
+  /** Drive playback; `speed` in deps re-schedules from current `visibleRef` without resetting position. */
+  useEffect(() => {
+    if (!playing || !session) {
+      clearTimers();
+      return;
+    }
+
+    if (sortedSteps.length === 0) {
       setPlaying(false);
       return;
     }
 
-    let i = 0;
-    setVisible(1);
+    clearTimers();
 
-    const scheduleNext = () => {
-      if (i >= steps.length - 1) {
+    const scheduleChain = (currentVisible: number) => {
+      if (currentVisible === 0) {
+        setVisible(1);
+        visibleRef.current = 1;
+        scheduleChain(1);
+        return;
+      }
+      if (currentVisible >= sortedSteps.length) {
         setPlaying(false);
         return;
       }
-      const delay = (steps[i + 1].t - steps[i].t) / speed;
+      const lastIdx = currentVisible - 1;
+      if (lastIdx >= sortedSteps.length - 1) {
+        setPlaying(false);
+        return;
+      }
+      const delay = (sortedSteps[lastIdx + 1].t - sortedSteps[lastIdx].t) / speedRef.current;
       const id = window.setTimeout(() => {
-        i += 1;
-        setVisible(i + 1);
-        scheduleNext();
+        const next = currentVisible + 1;
+        setVisible(next);
+        visibleRef.current = next;
+        scheduleChain(next);
       }, Math.max(40, delay));
       timeoutsRef.current.push(id);
     };
 
-    scheduleNext();
+    scheduleChain(visibleRef.current);
+
     return () => clearTimers();
-  }, [playing, session, speed, clearTimers]);
+  }, [playing, session, speed, clearTimers, sortedSteps]);
 
   useEffect(() => {
     if (!session?.narrationUrl) {
@@ -116,8 +154,6 @@ export function ReplayTimeline() {
   if (!session) {
     return <p className="text-on-surface-variant font-body text-sm">No replay sessions configured.</p>;
   }
-
-  const steps = [...session.steps].sort((a, b) => a.t - b.t);
 
   return (
     <div className="space-y-6">
@@ -149,7 +185,10 @@ export function ReplayTimeline() {
                 setPlaying(false);
                 return;
               }
-              if (visible >= steps.length) setVisible(0);
+              if (visible >= sortedSteps.length) {
+                setVisible(0);
+                visibleRef.current = 0;
+              }
               setPlaying(true);
             }}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary font-body text-xs font-semibold uppercase tracking-wider shadow-ambient hover:opacity-90"
@@ -204,7 +243,7 @@ export function ReplayTimeline() {
         role="log"
         aria-live="polite"
       >
-        {steps.slice(0, visible).map((step, idx) => (
+        {sortedSteps.slice(0, visible).map((step, idx) => (
           <div
             key={`${step.t}-${idx}`}
             className={`border-l-2 pl-3 py-1.5 ${KIND_CLASS[step.kind]}`}
