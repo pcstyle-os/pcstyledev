@@ -19,8 +19,8 @@ export function AudiencePathSelector({ activePath, onSelect }: AudiencePathSelec
           <span className="text-xs font-body font-semibold uppercase tracking-widest">Choose your path</span>
         </div>
         <p className="text-on-surface-variant font-body text-sm max-w-md leading-relaxed">
-          Same projects — different lens. Pick what you are optimizing for; we will persist it in the URL and on this
-          device.
+          Same projects — different lens. Pick what you are optimizing for; we persist it in the URL and on this device.
+          <span className="text-on-surface/80"> Click the active card again to clear the lens.</span>
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -31,6 +31,7 @@ export function AudiencePathSelector({ activePath, onSelect }: AudiencePathSelec
               key={path.id}
               type="button"
               onClick={() => onSelect(path.id)}
+              title={selected ? 'Clear lens' : undefined}
               className={`text-left rounded-2xl px-5 py-4 transition-all border font-body ${
                 selected
                   ? 'bg-primary/15 border-primary/50 text-on-surface shadow-ambient'

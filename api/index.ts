@@ -382,7 +382,7 @@ routes.get('/github/stats', async (c) => {
   const token = process.env.GITHUB_TOKEN!
   const username = process.env.GITHUB_USERNAME!
 
-  const cached = getCached<GitHubStats>('github:stats')
+  const cached = getCached<GitHubStats>('github:stats:v2')
   if (cached) {
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(cached)
@@ -400,6 +400,25 @@ routes.get('/github/stats', async (c) => {
     })
     const repos = reposRes.ok ? await reposRes.json() : []
     const totalStars = repos.reduce((sum: number, repo: any) => sum + (repo.stargazers_count || 0), 0)
+
+    const recentRepos = (Array.isArray(repos) ? repos : [])
+      .filter((r: any) => !r.archived && !r.private)
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.pushed_at || 0).getTime() - new Date(a.pushed_at || 0).getTime(),
+      )
+      .slice(0, 12)
+      .map((r: any) => ({
+        name: r.name as string,
+        fullName: r.full_name as string,
+        description: (r.description as string | null) ?? null,
+        pushedAt: r.pushed_at as string,
+        createdAt: r.created_at as string,
+        stars: Number(r.stargazers_count) || 0,
+        language: (r.language as string | null) ?? null,
+        url: r.html_url as string,
+        fork: Boolean(r.fork),
+      }))
 
     const eventsRes = await fetchWithRetry(`https://api.github.com/users/${username}/events/public?per_page=100`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -468,10 +487,11 @@ routes.get('/github/stats', async (c) => {
       totalStars,
       totalCommits,
       lastCommit,
-      mostActiveRepo
+      mostActiveRepo,
+      recentRepos,
     }
 
-    setCache('github:stats', stats, GH_CACHE_TTL)
+    setCache('github:stats:v2', stats, GH_CACHE_TTL)
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(stats)
   } catch (err: any) {

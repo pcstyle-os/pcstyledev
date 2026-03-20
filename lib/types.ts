@@ -106,6 +106,19 @@ export interface GitHubContributions {
   weeks: GitHubContributionDay[][]
 }
 
+/** Snapshot for “recent repos” lists (from GitHub REST, sorted by last push). */
+export interface GitHubRecentRepo {
+  name: string
+  fullName: string
+  description: string | null
+  pushedAt: string
+  createdAt: string
+  stars: number
+  language: string | null
+  url: string
+  fork: boolean
+}
+
 export interface GitHubStats {
   publicRepos: number
   followers: number
@@ -123,6 +136,7 @@ export interface GitHubStats {
     url: string
     commits: number
   }
+  recentRepos?: GitHubRecentRepo[]
 }
 
 // combined live status for navbar
