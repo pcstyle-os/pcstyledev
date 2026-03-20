@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Terminal as TerminalIcon, ShieldAlert, Clapperboard } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { ReplayTimeline } from '../components/ui/ReplayTimeline';
+import { SeoSecondary } from '../components/Seo';
 import projectsData from '../data/projects/projects.json';
 import type { Project } from '../lib/types';
 
@@ -460,6 +461,11 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
 
   return (
     <div className="terminal-chassis max-w-4xl mx-auto animate-slideUp">
+      <SeoSecondary
+        title="Console"
+        description="In-browser terminal and build replays on Adam Krupa’s portfolio — pcstyle.dev."
+        path="/terminal"
+      />
       <p className="font-body text-on-surface-variant text-sm mb-4 max-w-xl">
         A small in-browser shell. Try <span className="text-primary font-medium">help</span>,{' '}
         <span className="text-primary font-medium">projects</span>, or{' '}

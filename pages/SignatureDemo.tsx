@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { PerformanceBadge } from '../components/ui/PerformanceBadge';
+import { SeoSecondary } from '../components/Seo';
 
 const PARTICLE_COUNT = 420;
 const REDUCED_PARTICLE_COUNT = 80;
@@ -214,6 +215,11 @@ export const SignatureDemo = () => {
 
   return (
     <div className="max-w-screen-2xl mx-auto animate-fadeIn space-y-10 sm:space-y-14 pb-24 md:pb-8">
+      <SeoSecondary
+        title="Signature lab"
+        description="Interactive particle field demo by Adam Krupa — motion, performance telemetry, and UI craft on pcstyle.dev."
+        path="/demo"
+      />
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
         <div>
           <Link

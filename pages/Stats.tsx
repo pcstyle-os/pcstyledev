@@ -5,6 +5,7 @@ import { VisualContributionHeatmap } from '../components/ui/VisualContributionHe
 import { useGitHubStats, type UseGitHubStatsResult } from '../hooks/useGitHub';
 
 import { motion } from 'framer-motion';
+import { SeoSecondary } from '../components/Seo';
 
 function GitHubMainStats({ github }: { github: UseGitHubStatsResult }) {
   const { stats, loading, error } = github;
@@ -120,6 +121,11 @@ export function Stats() {
 
   return (
     <div className="space-y-12 md:space-y-16 pb-12 animate-fadeIn">
+      <SeoSecondary
+        title="Metrics"
+        description="GitHub and coding activity metrics for Adam Krupa (pcstyle.dev)."
+        path="/stats"
+      />
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-primary-container/50 text-primary">

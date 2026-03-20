@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Github, Lock, Unlock } from 'lucide-react';
 import { WakaTimeSummaryCard } from '../components/ui/WakaTimeSummaryCard';
 import { GitHubRecentReposSection } from '../components/ui/GitHubRecentReposSection';
+import { SeoIdentity } from '../components/Seo';
 
 export const Identity = () => {
   const [decrypted, setDecrypted] = useState(false);
@@ -34,6 +36,8 @@ export const Identity = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-6 md:py-16 animate-fadeIn">
+      <SeoIdentity />
+
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center mb-20 lg:mb-28">
         <div className="relative order-2 lg:order-1">
           <div className="relative z-10 glass-panel p-1 rounded-[2.5rem] overflow-hidden">
@@ -51,9 +55,21 @@ export const Identity = () => {
           <span className="font-body text-primary font-semibold tracking-widest uppercase text-xs mb-6 block">
             Foundations
           </span>
-          <h1 className="font-headline text-5xl sm:text-6xl md:text-7xl text-on-surface mb-8 leading-tight tracking-tight">
-            Spaces for the <span className="italic text-primary font-light">immaterial</span>.
+          <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl text-on-surface mb-4 leading-tight tracking-tight">
+            Adam Krupa — <span className="text-primary">frontend designer</span> &amp; UI engineer
           </h1>
+          <p className="font-body text-on-surface-variant text-base sm:text-lg leading-relaxed mb-8 max-w-xl">
+            Adam Krupa builds interfaces and tools with an emphasis on clarity, performance, and privacy-first
+            engineering. This site is his portfolio and contact surface at{' '}
+            <span className="text-on-surface font-medium">pcstyle.dev</span>. For collaboration details, see{' '}
+            <Link to="/hire" className="text-primary font-medium hover:underline">
+              Hire
+            </Link>
+            .
+          </p>
+          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl text-on-surface mb-8 leading-tight tracking-tight">
+            Spaces for the <span className="italic text-primary font-light">immaterial</span>.
+          </h2>
           <div className="space-y-6 text-on-surface-variant font-body text-lg leading-relaxed font-light">
             <p>
               First-year AI student at{' '}
@@ -85,7 +101,7 @@ export const Identity = () => {
             <a
               href="https://github.com/pc-style"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-surface-container text-on-surface font-body text-sm font-semibold hover:bg-surface-variant transition-colors"
             >
               <Github size={18} /> GitHub
@@ -112,7 +128,7 @@ export const Identity = () => {
               <a
                 href="https://github.com/pc-style/pcstyledev"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex justify-center border border-on-primary/35 text-on-primary px-10 py-4 rounded-full font-body font-bold text-base hover:bg-on-primary/10 transition-colors backdrop-blur-sm"
               >
                 View archives

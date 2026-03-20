@@ -1,6 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutGrid, Terminal as TerminalIcon, BarChart3, User, Mail, Moon, Sun, Sparkles } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
+import {
+  LayoutGrid,
+  Terminal as TerminalIcon,
+  BarChart3,
+  User,
+  Mail,
+  Moon,
+  Sun,
+  Sparkles,
+  Briefcase,
+} from 'lucide-react';
 
 import { SystemNotification } from './components/ui/SystemNotification';
 import { PointerSpotlight } from './components/ui/PointerSpotlight';
@@ -12,6 +22,7 @@ import { Terminal } from './pages/Terminal';
 import { Identity } from './pages/Identity';
 import { Stats } from './pages/Stats';
 import { SignatureDemo } from './pages/SignatureDemo';
+import { Hire } from './pages/Hire';
 
 import type { Synth } from './utils/audio';
 
@@ -20,7 +31,14 @@ interface LayoutProps {
   addNotification: (msg: string) => void;
 }
 
-const NAV_STAGGER = ['nav-stagger-1', 'nav-stagger-2', 'nav-stagger-3', 'nav-stagger-4', 'nav-stagger-5'] as const;
+const NAV_STAGGER = [
+  'nav-stagger-1',
+  'nav-stagger-2',
+  'nav-stagger-3',
+  'nav-stagger-4',
+  'nav-stagger-5',
+  'nav-stagger-6',
+] as const;
 
 function Layout({ notifications, addNotification }: LayoutProps) {
   const location = useLocation();
@@ -30,6 +48,7 @@ function Layout({ notifications, addNotification }: LayoutProps) {
 
   const navItems = [
     { path: '/', key: 'projects', label: 'Projects' },
+    { path: '/hire', key: 'hire', label: 'Hire' },
     { path: '/demo', key: 'demo', label: 'Lab' },
     { path: '/stats', key: 'stats', label: 'Stats' },
     { path: '/identity', key: 'identity', label: 'About' },
@@ -39,7 +58,8 @@ function Layout({ notifications, addNotification }: LayoutProps) {
   const isActive = (key: string) =>
     (key === 'projects' && activeTab === 'projects') || activeTab === key;
 
-  const spotlightRoutes = activeTab === 'projects' || activeTab === 'stats' || activeTab === 'demo';
+  const spotlightRoutes =
+    activeTab === 'projects' || activeTab === 'stats' || activeTab === 'demo' || activeTab === 'hire';
 
   const handleThemeToggle = () => {
     playToggle();
@@ -141,6 +161,9 @@ function Layout({ notifications, addNotification }: LayoutProps) {
             <Link to="/stats" className="hover:text-primary transition-colors">
               Metrics
             </Link>
+            <Link to="/hire" className="hover:text-primary transition-colors">
+              Hire
+            </Link>
           </div>
           <p className="text-on-surface-variant font-body text-xs tracking-widest uppercase">
             © {new Date().getFullYear()} Adam Krupa
@@ -177,6 +200,14 @@ function Layout({ notifications, addNotification }: LayoutProps) {
           <BarChart3 size={22} strokeWidth={isActive('stats') ? 2.2 : 1.8} />
         </Link>
         <Link
+          to="/hire"
+          className={isActive('hire') ? 'text-primary' : 'text-on-surface-variant opacity-70'}
+          aria-current={isActive('hire') ? 'page' : undefined}
+          onClick={() => playNavClick()}
+        >
+          <Briefcase size={22} strokeWidth={isActive('hire') ? 2.2 : 1.8} />
+        </Link>
+        <Link
           to="/identity"
           className={isActive('identity') ? 'text-primary' : 'text-on-surface-variant opacity-70'}
           onClick={() => playNavClick()}
@@ -190,7 +221,7 @@ function Layout({ notifications, addNotification }: LayoutProps) {
         >
           <TerminalIcon size={22} strokeWidth={isActive('terminal') ? 2.2 : 1.8} />
         </Link>
-        <a href="mailto:AdamKrupa@Tuta.io" className="text-on-surface-variant opacity-70">
+        <a href="mailto:AdamKrupa@Tuta.io" className="text-on-surface-variant opacity-70" aria-label="Email">
           <Mail size={22} strokeWidth={1.8} />
         </a>
       </nav>
@@ -198,6 +229,27 @@ function Layout({ notifications, addNotification }: LayoutProps) {
       <SystemNotification notifications={notifications} />
       </div>
     </div>
+  );
+}
+
+interface AppTreeProps {
+  notifications: string[];
+  addNotification: (msg: string) => void;
+}
+
+/** Router-agnostic route tree (used with BrowserRouter or StaticRouter for prerender). */
+export function AppTree({ notifications, addNotification }: AppTreeProps) {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout notifications={notifications} addNotification={addNotification} />}>
+        <Route index element={<Projects />} />
+        <Route path="hire" element={<Hire />} />
+        <Route path="demo" element={<SignatureDemo />} />
+        <Route path="terminal" element={<Terminal />} />
+        <Route path="stats" element={<Stats />} />
+        <Route path="identity" element={<Identity />} />
+      </Route>
+    </Routes>
   );
 }
 
@@ -212,19 +264,8 @@ export default function App() {
   }, []);
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={<Layout notifications={notifications} addNotification={addNotification} />}
-        >
-          <Route index element={<Projects />} />
-          <Route path="demo" element={<SignatureDemo />} />
-          <Route path="terminal" element={<Terminal />} />
-          <Route path="stats" element={<Stats />} />
-          <Route path="identity" element={<Identity />} />
-        </Route>
-      </Routes>
+    <BrowserRouter>
+      <AppTree notifications={notifications} addNotification={addNotification} />
 
       <style>{`
         @keyframes fadeIn {
@@ -243,6 +284,6 @@ export default function App() {
         .animate-slideUp { animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slideIn { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}</style>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

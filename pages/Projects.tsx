@@ -16,6 +16,7 @@ import {
   parseAudiencePathParam,
   type AudiencePathId,
 } from '../lib/audiencePaths';
+import { SeoHome } from '../components/Seo';
 
 interface ContextType {
   soundEnabled: boolean;
@@ -377,6 +378,7 @@ export const Projects = () => {
 
   return (
     <div className="space-y-16 sm:space-y-24 md:space-y-32 animate-fadeIn">
+      <SeoHome />
       <section className="relative">
         <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl text-on-surface leading-[0.95] tracking-tight mb-12 md:mb-16 text-glow-soft">
           {pathLens.heroLead}{' '}
@@ -384,6 +386,20 @@ export const Projects = () => {
           <br />
           {pathLens.heroRest}
         </h1>
+
+        <p className="font-body text-on-surface-variant text-base sm:text-lg max-w-3xl leading-relaxed mb-10 md:mb-12">
+          <span className="text-on-surface font-medium">Adam Krupa</span> is a frontend designer and UI engineer
+          publishing selected work at pcstyle.dev — React and TypeScript interfaces, design systems, and
+          performance-minded UI. Hiring or collaboration: see the{' '}
+          <Link to="/hire" className="text-primary font-semibold hover:underline">
+            Hire
+          </Link>{' '}
+          page; background and contact on{' '}
+          <Link to="/identity" className="text-primary font-semibold hover:underline">
+            About
+          </Link>
+          .
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
           <div className="col-span-1 md:col-span-2 glass-panel p-8 sm:p-10 rounded-[2rem] flex flex-col justify-between min-h-[260px] relative overflow-hidden group">

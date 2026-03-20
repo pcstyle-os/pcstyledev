@@ -1,0 +1,5 @@
+# https://pcstyle.dev — allow major crawlers (adjust if you need to restrict AI training crawlers)
+User-agent: *
+Allow: /
+
+Sitemap: https://pcstyle.dev/sitemap.xml
