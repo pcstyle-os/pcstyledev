@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { FolderGit2, Cpu } from 'lucide-react';
 import { useWakaTimeSummary } from '../../hooks/useWakaTime';
 
-const FILLED = 'rgba(70, 101, 97, 0.85)';
-const EMPTY = 'rgba(234, 239, 238, 0.9)';
+const FILLED = 'var(--matrix-filled)';
+const EMPTY = 'var(--matrix-empty)';
 
 export function ProjectMatrix() {
   const { summary, loading, error } = useWakaTimeSummary();

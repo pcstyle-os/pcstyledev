@@ -1,20 +1,87 @@
-/* Ethereal Editorial — design tokens & utilities */
+/* Ethereal light + red-pink / black dark — CSS variables for Tailwind rgb(.../alpha) */
 
 :root {
+  color-scheme: light;
+
+  --tw-surface: 248 250 249;
+  --tw-on-surface: 45 52 51;
+  --tw-on-surface-variant: 89 96 96;
+  --tw-primary: 70 101 97;
+  --tw-primary-container: 200 233 229;
+  --tw-on-primary: 225 255 251;
+  --tw-surface-container-low: 240 244 243;
+  --tw-surface-container-lowest: 255 255 255;
+  --tw-surface-container: 234 239 238;
+  --tw-surface-variant: 221 228 227;
+  --tw-secondary-container: 199 234 225;
+  --tw-on-secondary-container: 56 88 81;
+  --tw-error: 168 56 54;
+  --tw-background: 248 250 249;
+  --tw-on-background: 45 52 51;
+
+  --shadow-ambient: 0 20px 40px rgba(45, 52, 51, 0.06);
+
+  /* Contribution voxel grid (3D heatmap) */
+  --heatmap-0: #dde4e3;
+  --heatmap-1: rgba(70, 101, 97, 0.22);
+  --heatmap-2: rgba(70, 101, 97, 0.42);
+  --heatmap-3: rgba(70, 101, 97, 0.65);
+  --heatmap-4: #466561;
+  --heatmap-shadow-1: 0 4px 12px rgba(70, 101, 97, 0.08);
+  --heatmap-shadow-2: 0 6px 16px rgba(70, 101, 97, 0.12);
+  --heatmap-shadow-3: 0 8px 20px rgba(70, 101, 97, 0.16);
+  --heatmap-shadow-4: 0 10px 24px rgba(70, 101, 97, 0.2);
+
+  --heatmap-grid-line: rgba(70, 101, 97, 0.12);
+
+  --matrix-filled: rgba(70, 101, 97, 0.85);
+  --matrix-empty: rgba(234, 239, 238, 0.9);
+
   --color-surface: #f8faf9;
   --color-on-surface: #2d3433;
-  --color-on-surface-variant: #596060;
-  --color-primary: #466561;
-  --color-primary-container: #c8e9e5;
-  --color-on-primary: #e1fffb;
-  --color-surface-container-low: #f0f4f3;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container: #eaefee;
-  --color-surface-variant: #dde4e3;
-  --color-secondary-container: #c7eae1;
   --color-error: #a83836;
-  --shadow-ambient: 0 20px 40px rgba(45, 52, 51, 0.06);
   --radius-glass: 1.5rem;
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --tw-surface: 8 8 10;
+  --tw-on-surface: 250 245 248;
+  --tw-on-surface-variant: 196 165 180;
+  --tw-primary: 199 0 92;
+  --tw-primary-container: 52 8 30;
+  --tw-on-primary: 255 255 255;
+  --tw-surface-container-low: 18 12 16;
+  --tw-surface-container-lowest: 26 20 24;
+  --tw-surface-container: 22 16 20;
+  --tw-surface-variant: 48 28 38;
+  --tw-secondary-container: 72 12 44;
+  --tw-on-secondary-container: 255 214 232;
+  --tw-error: 255 90 110;
+  --tw-background: 6 6 8;
+  --tw-on-background: 250 245 248;
+
+  --shadow-ambient: 0 20px 48px rgba(199, 0, 92, 0.22);
+
+  --heatmap-0: #2a2226;
+  --heatmap-1: rgba(199, 0, 92, 0.2);
+  --heatmap-2: rgba(199, 0, 92, 0.4);
+  --heatmap-3: rgba(199, 0, 92, 0.65);
+  --heatmap-4: #c7005c;
+  --heatmap-shadow-1: 0 4px 14px rgba(199, 0, 92, 0.16);
+  --heatmap-shadow-2: 0 6px 18px rgba(199, 0, 92, 0.24);
+  --heatmap-shadow-3: 0 8px 24px rgba(199, 0, 92, 0.3);
+  --heatmap-shadow-4: 0 12px 32px rgba(199, 0, 92, 0.38);
+
+  --heatmap-grid-line: rgba(199, 0, 92, 0.16);
+
+  --matrix-filled: rgba(199, 0, 92, 0.92);
+  --matrix-empty: rgba(40, 32, 36, 0.85);
+
+  --color-surface: #08080a;
+  --color-on-surface: #faf5f8;
+  --color-error: #ff5a6e;
 }
 
 html {
@@ -22,19 +89,42 @@ html {
 }
 
 body {
-  background-color: var(--color-surface);
-  color: var(--color-on-surface);
+  background-color: rgb(var(--tw-background));
+  color: rgb(var(--tw-on-surface));
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glass panel — ghost border + blur */
 .glass-panel {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: var(--shadow-ambient);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+html.dark .glass-panel {
+  background: rgba(18, 10, 14, 0.82);
+  border: 1px solid rgba(199, 0, 92, 0.24);
+  box-shadow: 0 0 0 1px rgba(199, 0, 92, 0.08);
 }
 
 .glass-panel-subtle {
@@ -42,30 +132,52 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+html.dark .glass-panel-subtle {
+  background: rgba(22, 14, 18, 0.75);
+  border: 1px solid rgba(199, 0, 92, 0.2);
 }
 
 .editorial-gradient {
   background: linear-gradient(135deg, #466561 0%, #c8e9e5 100%);
+  transition: background 0.35s ease;
+}
+
+html.dark .editorial-gradient {
+  background: linear-gradient(135deg, #c7005c 0%, #7a0038 45%, #14050c 100%);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(70, 101, 97, 0.1);
+}
+
+html.dark .text-glow {
+  text-shadow: 0 0 28px rgba(199, 0, 92, 0.38);
 }
 
 .text-glow-soft {
   text-shadow: 0 0 20px rgba(70, 101, 97, 0.12);
 }
 
-/* Scrollbar — tinted, not pure black */
+html.dark .text-glow-soft {
+  text-shadow: 0 0 32px rgba(199, 0, 92, 0.28);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-surface-container-low);
+  background: rgb(var(--tw-surface-container-low));
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(70, 101, 97, 0.25);
+  background: rgb(var(--tw-primary) / 0.28);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(70, 101, 97, 0.4);
+  background: rgb(var(--tw-primary) / 0.45);
 }
 
 .scrollbar-custom::-webkit-scrollbar {
@@ -73,7 +185,7 @@ body {
   height: 6px;
 }
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background: rgba(70, 101, 97, 0.3);
+  background: rgb(var(--tw-primary) / 0.32);
   border-radius: 3px;
 }
 

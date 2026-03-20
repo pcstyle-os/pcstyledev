@@ -10,6 +10,7 @@ import type {
   ProjectsData,
   WakaTimeSummary,
   WakaTimeStatus,
+  GitHubContributionDay,
   GitHubContributions,
   GitHubStats
 } from '../lib/types'
@@ -50,6 +51,60 @@ const inflight = new Map<string, Promise<any>>()
 const DEFAULT_CACHE_TTL = 60 * 1000
 const GH_CACHE_TTL = 5 * 60 * 1000
 const FETCH_TIMEOUT = 10000
+
+const GITHUB_CONTRIBUTION_LEVEL_MAP: Record<string, 0 | 1 | 2 | 3 | 4> = {
+  NONE: 0,
+  FIRST_QUARTILE: 1,
+  SECOND_QUARTILE: 2,
+  THIRD_QUARTILE: 3,
+  FOURTH_QUARTILE: 4
+}
+
+function mapGitHubContributionDay(day: {
+  date: string
+  contributionCount: number
+  contributionLevel: string
+  color?: string
+}): GitHubContributionDay {
+  const key = String(day.contributionLevel || 'NONE').toUpperCase()
+  let level = GITHUB_CONTRIBUTION_LEVEL_MAP[key] ?? 0
+  const count = Math.max(0, Number(day.contributionCount) || 0)
+  if (count > 0 && level === 0) level = 1
+  const out: GitHubContributionDay = { date: day.date, count, level }
+  if (day.color) out.color = day.color
+  return out
+}
+
+/** Place Sun(0)–Sat(6) in row order; avoids misaligned columns when days are unordered or partial. */
+function normalizeGitHubWeek(week: { contributionDays: any[] }): GitHubContributionDay[] {
+  const raw = week?.contributionDays ?? []
+  if (raw.length === 0) {
+    return Array.from({ length: 7 }, () => ({ date: '', count: 0, level: 0 }))
+  }
+
+  const allHaveWeekday = raw.every((d) => typeof d?.weekday === 'number')
+  if (allHaveWeekday) {
+    const byWeekday = new Map<number, any>()
+    for (const d of raw) {
+      byWeekday.set(d.weekday, d)
+    }
+    const out: GitHubContributionDay[] = []
+    for (let w = 0; w < 7; w++) {
+      out.push(
+        byWeekday.has(w)
+          ? mapGitHubContributionDay(byWeekday.get(w))
+          : { date: '', count: 0, level: 0 }
+      )
+    }
+    return out
+  }
+
+  const mapped = raw.map((d) => mapGitHubContributionDay(d))
+  while (mapped.length < 7) {
+    mapped.push({ date: '', count: 0, level: 0 })
+  }
+  return mapped.slice(0, 7)
+}
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key)
@@ -271,7 +326,7 @@ routes.get('/github/contributions', async (c) => {
   const token = process.env.GITHUB_TOKEN!
   const username = process.env.GITHUB_USERNAME!
 
-  const cached = getCached<GitHubContributions>('github:contributions')
+  const cached = getCached<GitHubContributions>('github:contributions:v2')
   if (cached) {
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(cached)
@@ -289,6 +344,8 @@ routes.get('/github/contributions', async (c) => {
                   date
                   contributionCount
                   contributionLevel
+                  weekday
+                  color
                 }
               }
             }
@@ -310,19 +367,12 @@ routes.get('/github/contributions', async (c) => {
     const calendar = data.data?.user?.contributionsCollection?.contributionCalendar
     if (!calendar) throw new Error('No calendar data')
 
-    const levelMap: any = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 }
     const contributions: GitHubContributions = {
       totalContributions: calendar.totalContributions,
-      weeks: calendar.weeks.map((week: any) =>
-        week.contributionDays.map((day: any) => ({
-          date: day.date,
-          count: day.contributionCount,
-          level: levelMap[day.contributionLevel] || 0
-        }))
-      )
+      weeks: calendar.weeks.map((week: any) => normalizeGitHubWeek(week))
     }
 
-    setCache('github:contributions', contributions, GH_CACHE_TTL)
+    setCache('github:contributions:v2', contributions, GH_CACHE_TTL)
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(contributions)
   } catch (err: any) {

@@ -3,15 +3,30 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Box, Zap } from 'lucide-react';
 import { useGitHubContributions } from '../../hooks/useGitHub';
 
-const LEVEL_COLORS = ['#dde4e3', 'rgba(70,101,97,0.22)', 'rgba(70,101,97,0.42)', 'rgba(70,101,97,0.65)', '#466561'];
+const LEVEL_COLORS = [
+  'var(--heatmap-0)',
+  'var(--heatmap-1)',
+  'var(--heatmap-2)',
+  'var(--heatmap-3)',
+  'var(--heatmap-4)',
+];
 
 const LEVEL_SHADOWS = [
   'none',
-  '0 4px 12px rgba(70,101,97,0.08)',
-  '0 6px 16px rgba(70,101,97,0.12)',
-  '0 8px 20px rgba(70,101,97,0.16)',
-  '0 10px 24px rgba(70,101,97,0.2)',
+  'var(--heatmap-shadow-1)',
+  'var(--heatmap-shadow-2)',
+  'var(--heatmap-shadow-3)',
+  'var(--heatmap-shadow-4)',
 ];
+
+function voxelDisplayLevel(day: { level: number; count: number }) {
+  if (day.count <= 0) return 0;
+  return Math.max(day.level, 1);
+}
+
+function voxelFill(day: { level: number; color?: string }) {
+  return day.color ?? LEVEL_COLORS[day.level] ?? LEVEL_COLORS[0];
+}
 
 export function VisualContributionHeatmap() {
   const { contributions, loading, error } = useGitHubContributions();
@@ -61,7 +76,13 @@ export function VisualContributionHeatmap() {
   return (
     <div className="p-5 rounded-2xl glass-panel h-full relative overflow-hidden flex flex-col group min-h-[220px]">
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(70,101,97,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(70,101,97,0.12)_1px,transparent_1px)] bg-[length:20px_20px]" />
+        <div
+          className="absolute inset-0 bg-[length:20px_20px]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, var(--heatmap-grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--heatmap-grid-line) 1px, transparent 1px)',
+          }}
+        />
       </div>
 
       <div className="flex items-center justify-between gap-4 mb-5 relative z-10">
@@ -101,15 +122,17 @@ export function VisualContributionHeatmap() {
             {displayWeeks.map((week, weekIndex) => (
               <div key={weekIndex} className="flex flex-col gap-1.5" style={{ transformStyle: 'preserve-3d' }}>
                 {week.map((day, dayIndex) => {
-                  const height = Math.max(4, day.level * 16);
+                  const L = voxelDisplayLevel(day);
+                  const height = Math.max(4, L * 16);
+                  const fill = voxelFill(day);
                   return (
                     <motion.div
                       key={`${weekIndex}-${dayIndex}`}
                       initial={{ height: 4 }}
                       animate={{
                         height,
-                        backgroundColor: LEVEL_COLORS[day.level],
-                        boxShadow: LEVEL_SHADOWS[day.level],
+                        backgroundColor: fill,
+                        boxShadow: LEVEL_SHADOWS[L],
                       }}
                       onMouseEnter={() => setHovered({ date: day.date, count: day.count })}
                       onMouseLeave={() => setHovered(null)}
@@ -129,9 +152,9 @@ export function VisualContributionHeatmap() {
                       <div
                         className="absolute top-0 left-0 w-full h-[10px] rounded-[2px]"
                         style={{
-                          backgroundColor: LEVEL_COLORS[day.level],
+                          backgroundColor: fill,
                           transform: 'translateY(-4px) rotateX(90deg)',
-                          boxShadow: LEVEL_SHADOWS[day.level],
+                          boxShadow: LEVEL_SHADOWS[L],
                           filter: 'brightness(1.15)',
                         }}
                       >
@@ -140,7 +163,7 @@ export function VisualContributionHeatmap() {
                       <div
                         className="absolute top-0 left-0 h-full w-[10px] rounded-[2px]"
                         style={{
-                          backgroundColor: LEVEL_COLORS[day.level],
+                          backgroundColor: fill,
                           transform: 'translateX(-4px) rotateY(90deg)',
                           filter: 'brightness(0.88)',
                         }}
@@ -148,7 +171,7 @@ export function VisualContributionHeatmap() {
                       <div
                         className="absolute top-0 right-0 h-full w-[10px] rounded-[2px]"
                         style={{
-                          backgroundColor: LEVEL_COLORS[day.level],
+                          backgroundColor: fill,
                           transform: 'translateX(4px) rotateY(90deg)',
                           filter: 'brightness(0.95)',
                         }}

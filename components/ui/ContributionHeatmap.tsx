@@ -107,9 +107,15 @@ export function ContributionHeatmap() {
         </motion.div>
       )}
 
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
-          <Calendar size={14} className="text-primary" /> Last ~120 days
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
+            <Calendar size={14} className="text-primary" /> Last ~120 days
+          </div>
+          <p className="text-[10px] text-on-surface-variant/70 font-body font-normal normal-case tracking-normal max-w-[min(100%,280px)]">
+            Squares use GitHub&rsquo;s own colors per day (same scale as your profile). Total is all contributions in this
+            calendar window.
+          </p>
         </div>
         <span className="text-xs text-on-surface-variant font-body">{contributions.totalContributions} total</span>
       </div>
@@ -157,7 +163,8 @@ export function ContributionHeatmap() {
                           role="img"
                           tabIndex={0}
                           aria-label={`${day.date}: ${day.count} contributions`}
-                          className={`w-[10px] h-[10px] rounded-[2px] ${LEVEL_CLASS[day.level] || LEVEL_CLASS[0]} transition-transform hover:scale-150 focus:scale-150 focus:outline-none focus:ring-2 focus:ring-primary/30 relative outline-none`}
+                          className={`w-[10px] h-[10px] rounded-[2px] ${day.color ? 'outline outline-1 outline-black/[0.06] dark:outline-white/10' : LEVEL_CLASS[day.level] || LEVEL_CLASS[0]} transition-transform hover:scale-150 focus:scale-150 focus:outline-none focus:ring-2 focus:ring-primary/30 relative outline-none`}
+                          style={day.color ? { backgroundColor: day.color } : undefined}
                           onMouseEnter={() => setHoveredDay({ date: day.date, count: day.count, isKeyboard: false })}
                           onMouseLeave={() => setHoveredDay(null)}
                           onFocus={(e) => {

@@ -66,6 +66,8 @@ export interface GitHubContributionDay {
   date: string
   count: number
   level: 0 | 1 | 2 | 3 | 4
+  /** Hex from GitHub API — use for fills so intensity matches your profile graph */
+  color?: string
 }
 
 export interface GitHubContributions {

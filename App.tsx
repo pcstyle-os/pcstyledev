@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutGrid, Terminal as TerminalIcon, BarChart3, User, Mail } from 'lucide-react';
+import { LayoutGrid, Terminal as TerminalIcon, BarChart3, User, Mail, Moon, Sun } from 'lucide-react';
 
 import { SystemNotification } from './components/ui/SystemNotification';
+import { useTheme } from './hooks/useTheme';
 
 import { Projects } from './pages/Projects';
 import { Terminal } from './pages/Terminal';
@@ -18,6 +19,7 @@ interface LayoutProps {
 
 function Layout({ notifications, addNotification }: LayoutProps) {
   const location = useLocation();
+  const { isDark, toggleTheme } = useTheme();
   const activeTab = location.pathname.substring(1) || 'projects';
 
   const navItems = [
@@ -54,12 +56,22 @@ function Layout({ notifications, addNotification }: LayoutProps) {
             ))}
           </div>
 
-          <a
-            href="mailto:AdamKrupa@Tuta.io"
-            className="hidden sm:inline-flex editorial-gradient text-on-primary px-6 lg:px-8 py-2.5 rounded-full font-body font-semibold text-sm tracking-wide shadow-ambient hover:opacity-90 active:scale-[0.99] transition-all shrink-0"
-          >
-            Connect
-          </a>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-surface-container-lowest/70 text-primary shadow-ambient backdrop-blur-sm transition hover:bg-primary-container/30 dark:border-primary/25 dark:bg-surface-container-lowest/50"
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+            </button>
+            <a
+              href="mailto:AdamKrupa@Tuta.io"
+              className="hidden sm:inline-flex editorial-gradient text-on-primary px-6 lg:px-8 py-2.5 rounded-full font-body font-semibold text-sm tracking-wide shadow-ambient hover:opacity-90 active:scale-[0.99] transition-all"
+            >
+              Connect
+            </a>
+          </div>
         </nav>
       </header>
 
