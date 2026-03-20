@@ -12,7 +12,8 @@ import type {
   WakaTimeStatus,
   GitHubContributionDay,
   GitHubContributions,
-  GitHubStats
+  GitHubStats,
+  GitHubSevenDayMetrics,
 } from '../lib/types'
 
 export const config = { runtime: 'edge' }
@@ -319,6 +320,73 @@ routes.get('/wakatime/status', async (c) => {
   }
 })
 
+function utcYmd(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+function last7UtcBounds() {
+  const now = new Date()
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999))
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0, 0))
+  return {
+    fromIso: start.toISOString(),
+    toIso: end.toISOString(),
+    startYmd: utcYmd(start),
+    endYmd: utcYmd(end),
+  }
+}
+
+async function fetchSevenDayMetrics(token: string, username: string): Promise<GitHubSevenDayMetrics> {
+  const { fromIso, toIso, startYmd, endYmd } = last7UtcBounds()
+  const searchQ = `is:pr is:merged author:${username} merged:>=${startYmd}`
+  const query = `
+    query($username: String!, $from: DateTime!, $to: DateTime!, $q: String!) {
+      user(login: $username) {
+        contributionsCollection(from: $from, to: $to) {
+          totalCommitContributions
+        }
+      }
+      search(query: $q, type: ISSUE, first: 100) {
+        issueCount
+        nodes {
+          ... on PullRequest {
+            additions
+          }
+        }
+      }
+    }
+  `
+  const res = await fetchWithRetry('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query,
+      variables: { username, from: fromIso, to: toIso, q: searchQ },
+    }),
+  })
+  if (!res.ok) throw new Error(`GitHub GraphQL Error: ${res.status}`)
+  const data = await res.json()
+  if (data.errors?.length) {
+    console.error('[API] fetchSevenDayMetrics:', JSON.stringify(data.errors))
+  }
+  const commitContributions =
+    Number(data.data?.user?.contributionsCollection?.totalCommitContributions) || 0
+  const search = data.data?.search
+  const mergedPrs = Number(search?.issueCount) || 0
+  let linesAddedMergedPrs = 0
+  for (const n of search?.nodes ?? []) {
+    if (typeof n?.additions === 'number') linesAddedMergedPrs += n.additions
+  }
+  return {
+    from: startYmd,
+    to: endYmd,
+    commitContributions,
+    mergedPrs,
+    linesAddedMergedPrs,
+    linesPartial: mergedPrs > 100,
+  }
+}
+
 // GitHub
 routes.get('/github/contributions', async (c) => {
   const token = process.env.GITHUB_TOKEN!
@@ -382,27 +450,58 @@ routes.get('/github/stats', async (c) => {
   const token = process.env.GITHUB_TOKEN!
   const username = process.env.GITHUB_USERNAME!
 
-  const cached = getCached<GitHubStats>('github:stats:v2')
+  const cached = getCached<GitHubStats>('github:stats:v3')
   if (cached) {
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(cached)
   }
 
   try {
-    const userRes = await fetchWithRetry(`https://api.github.com/users/${username}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    if (!userRes.ok) throw new Error(`GitHub User Error: ${userRes.status}`)
-    const user = await userRes.json()
+    let publicRepos = 0
+    let followers = 0
+    let following = 0
+    let totalPrivateRepos: number | undefined
+    let totalOwnedRepos: number | undefined
+    let authUserMatched = false
 
-    const reposRes = await fetchWithRetry(`https://api.github.com/users/${username}/repos?per_page=100`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const authUserRes = await fetchWithRetry('https://api.github.com/user', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (authUserRes.ok) {
+      const me = await authUserRes.json()
+      if (String(me.login || '').toLowerCase() === username.toLowerCase()) {
+        authUserMatched = true
+        publicRepos = me.public_repos || 0
+        followers = me.followers || 0
+        following = me.following || 0
+        totalPrivateRepos = me.total_private_repos ?? 0
+        totalOwnedRepos = publicRepos + (totalPrivateRepos ?? 0)
+      }
+    }
+
+    if (!authUserMatched) {
+      const userRes = await fetchWithRetry(`https://api.github.com/users/${username}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!userRes.ok) throw new Error(`GitHub User Error: ${userRes.status}`)
+      const user = await userRes.json()
+      publicRepos = user.public_repos || 0
+      followers = user.followers || 0
+      following = user.following || 0
+    }
+
+    const reposUrl = authUserMatched
+      ? 'https://api.github.com/user/repos?per_page=100&sort=pushed&affiliation=owner'
+      : `https://api.github.com/users/${username}/repos?per_page=100`
+
+    const reposRes = await fetchWithRetry(reposUrl, {
+      headers: { Authorization: `Bearer ${token}` },
     })
     const repos = reposRes.ok ? await reposRes.json() : []
     const totalStars = repos.reduce((sum: number, repo: any) => sum + (repo.stargazers_count || 0), 0)
 
     const recentRepos = (Array.isArray(repos) ? repos : [])
-      .filter((r: any) => !r.archived && !r.private)
+      .filter((r: any) => !r.archived)
       .sort(
         (a: any, b: any) =>
           new Date(b.pushed_at || 0).getTime() - new Date(a.pushed_at || 0).getTime(),
@@ -418,6 +517,7 @@ routes.get('/github/stats', async (c) => {
         language: (r.language as string | null) ?? null,
         url: r.html_url as string,
         fork: Boolean(r.fork),
+        private: Boolean(r.private),
       }))
 
     const eventsRes = await fetchWithRetry(`https://api.github.com/users/${username}/events/public?per_page=100`, {
@@ -480,18 +580,28 @@ routes.get('/github/stats', async (c) => {
     const contribData = contribRes.ok ? await contribRes.json() : {}
     const totalCommits = contribData.data?.user?.contributionsCollection?.contributionCalendar?.totalContributions || 0
 
+    let sevenDay: GitHubSevenDayMetrics | undefined
+    try {
+      sevenDay = await fetchSevenDayMetrics(token, username)
+    } catch (e) {
+      console.error('[API] fetchSevenDayMetrics failed', e)
+    }
+
     const stats: GitHubStats = {
-      publicRepos: user.public_repos || 0,
-      followers: user.followers || 0,
-      following: user.following || 0,
+      publicRepos,
+      followers,
+      following,
       totalStars,
       totalCommits,
       lastCommit,
       mostActiveRepo,
       recentRepos,
+      totalPrivateRepos,
+      totalOwnedRepos,
+      sevenDay,
     }
 
-    setCache('github:stats:v2', stats, GH_CACHE_TTL)
+    setCache('github:stats:v3', stats, GH_CACHE_TTL)
     c.header('Cache-Control', `public, s-maxage=${GH_CACHE_TTL / 1000}, stale-while-revalidate=${GH_CACHE_TTL / 2000}`)
     return c.json(stats)
   } catch (err: any) {
@@ -502,22 +612,6 @@ routes.get('/github/stats', async (c) => {
 /** Model ~minutes of focus from contribution count (commits/issues/PRs); capped per day. Not wall-clock time. */
 const INFER_SEC_PER_CONTRIBUTION = 14 * 60
 const INFER_MAX_DAY_SECONDS = 5 * 3600
-
-function utcYmd(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function last7UtcBounds() {
-  const now = new Date()
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999))
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 0, 0, 0, 0))
-  return {
-    fromIso: start.toISOString(),
-    toIso: end.toISOString(),
-    startYmd: utcYmd(start),
-    endYmd: utcYmd(end)
-  }
-}
 
 routes.get('/github/coding-estimate', async (c) => {
   const token = process.env.GITHUB_TOKEN!

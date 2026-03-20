@@ -1,4 +1,4 @@
-import { Github, Star } from 'lucide-react';
+import { Github, Star, Lock } from 'lucide-react';
 import { useGitHubStats } from '../../hooks/useGitHub';
 
 function formatGitDate(iso: string): string {
@@ -22,14 +22,15 @@ export function GitHubRecentReposSection() {
     <section className="relative mb-16 md:mb-24">
       <div className="flex items-center gap-3 text-primary mb-4">
         <Github size={22} strokeWidth={1.75} />
-        <span className="text-xs font-body font-semibold uppercase tracking-widest">Public repositories</span>
+        <span className="text-xs font-body font-semibold uppercase tracking-widest">Repositories</span>
       </div>
       <h2 className="font-headline text-4xl sm:text-5xl md:text-6xl text-on-surface tracking-tight mb-6">
         Recent <span className="italic text-primary font-light">pushes</span>
       </h2>
       <p className="text-on-surface-variant font-body text-base sm:text-lg max-w-2xl leading-relaxed mb-10 md:mb-12">
         Last activity on GitHub: sorted by <span className="text-on-surface font-medium">pushed_at</span> from the API
-        (public, non-archived repos). No roadmap copy — just names, dates, and metadata.
+        (your owned repos, including private when authenticated; non-archived). No roadmap copy — just names, dates, and
+        metadata.
       </p>
 
       {loading && (
@@ -60,7 +61,7 @@ export function GitHubRecentReposSection() {
 
       {!loading && !error && items.length === 0 && (
         <p className="text-on-surface-variant font-body text-sm">
-          No public repos returned for this view (or cache still warming). Check{' '}
+          No repos returned for this view (or cache still warming). Check{' '}
           <a href="https://github.com/pc-style" target="_blank" rel="noreferrer" className="text-primary font-semibold">
             github.com/pc-style
           </a>
@@ -87,6 +88,11 @@ export function GitHubRecentReposSection() {
                   >
                     {repo.name}
                   </a>
+                  {repo.private && (
+                    <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-body font-semibold uppercase tracking-wider text-primary normal-case">
+                      <Lock size={10} aria-hidden /> Private
+                    </span>
+                  )}
                   {repo.fork && (
                     <span className="ml-2 text-xs font-body font-normal text-on-surface-variant normal-case tracking-normal">
                       fork

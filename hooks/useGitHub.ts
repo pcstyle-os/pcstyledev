@@ -52,7 +52,7 @@ export function useGitHubContributions(): UseGitHubContributionsResult {
   return { contributions, loading, error, refetch: fetchContributions }
 }
 
-interface UseGitHubStatsResult {
+export interface UseGitHubStatsResult {
   stats: GitHubStats | null
   loading: boolean
   error: string | null
