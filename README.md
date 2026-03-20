@@ -17,7 +17,13 @@ Visit the live portfolio: [pcstyle.dev](https://pcstyle.dev)
 
 Stats, heatmaps, and the About page repo list call GitHub through the Hono API. **Production** needs `GITHUB_TOKEN` and `GITHUB_USERNAME` in the Vercel project settings (the Edge runtime cannot run shell tools).
 
-**Locally**, you can fill both from the [GitHub CLI](https://cli.github.com/) after `gh auth login`:
+### Why Stats show `Unexpected token '<' ... JSON` locally
+
+`bun dev` (Vite) does **not** run the Hono API — `/api/*` would return `index.html`. **Vite proxies `/api` to `https://pcstyle.dev` by default** so local dev hits your deployed API. Override with `VITE_API_PROXY_TARGET` in `.env.local`, or set it to `false` and run **`vercel dev`** from this directory instead.
+
+### GitHub CLI → env vars (optional)
+
+Useful when running **`vercel dev`** so the local API has credentials:
 
 ```bash
 # Append dotenv lines to .env.local (merge/edit if the file already exists)
