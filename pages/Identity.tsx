@@ -51,35 +51,47 @@ export const Identity = () => {
           <div className="absolute -bottom-10 -left-10 w-52 h-52 bg-secondary-container/30 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        <div className="order-1 lg:order-2">
-          <span className="font-body text-primary font-semibold tracking-widest uppercase text-xs mb-6 block">
-            Foundations
+        <div className="order-1 lg:order-2 lg:pl-2">
+          <span className="font-body text-on-surface-variant/80 font-medium tracking-[0.2em] uppercase text-[11px] mb-5 block">
+            About
           </span>
-          <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl text-on-surface mb-4 leading-tight tracking-tight">
-            Adam Krupa — <span className="text-primary">frontend designer</span> &amp; UI engineer
+          <h1 className="mb-6 max-w-lg">
+            <span className="block font-headline text-4xl sm:text-5xl md:text-[2.75rem] lg:text-6xl text-on-surface leading-[1.08] tracking-tight">
+              Adam Krupa
+            </span>
+            <span className="mt-3 block font-headline text-lg sm:text-xl text-on-surface-variant font-light italic leading-snug">
+              Frontend designer <span className="text-on-surface-variant/45 not-italic mx-1.5">·</span> UI engineer
+              <span className="text-on-surface-variant/45 not-italic mx-1.5">·</span>{' '}
+              <span className="text-on-surface/85 not-italic font-body text-[0.95em] font-normal tracking-normal">
+                pcstyle.dev
+              </span>
+            </span>
           </h1>
-          <p className="font-body text-on-surface-variant text-base sm:text-lg leading-relaxed mb-8 max-w-xl">
-            Adam Krupa builds interfaces and tools with an emphasis on clarity, performance, and privacy-first
-            engineering. This site is his portfolio and contact surface at{' '}
-            <span className="text-on-surface font-medium">pcstyle.dev</span>. For collaboration details, see{' '}
-            <Link to="/hire" className="text-primary font-medium hover:underline">
-              Hire
-            </Link>
-            .
+          <p className="font-body text-on-surface-variant text-[15px] sm:text-base leading-relaxed mb-8 max-w-lg">
+            I build interfaces and tools with an emphasis on clarity, performance, and privacy-first engineering.
+            Open to collaboration — see the{' '}
+            <Link to="/hire" className="text-on-surface underline decoration-primary/40 underline-offset-4 hover:decoration-primary transition-colors">
+              hire page
+            </Link>{' '}
+            for how I work.
           </p>
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl text-on-surface mb-8 leading-tight tracking-tight">
-            Spaces for the <span className="italic text-primary font-light">immaterial</span>.
-          </h2>
-          <div className="space-y-6 text-on-surface-variant font-body text-lg leading-relaxed font-light">
+          <figure className="mb-8 max-w-lg border-l-2 border-primary/35 pl-5 py-0.5">
+            <blockquote className="font-headline text-lg sm:text-xl text-on-surface-variant/90 font-light leading-relaxed italic">
+              Spaces for the <span className="text-primary/90 not-italic">immaterial</span>.
+            </blockquote>
+          </figure>
+          <div className="space-y-5 text-on-surface-variant font-body text-base sm:text-[17px] leading-relaxed">
             <p>
               First-year AI student at{' '}
               <span className="text-on-surface font-medium">Politechnika Częstochowska</span>. I build tools,
               interfaces, and systems with an eye for clarity and performance.
             </p>
-            <p>Privacy-first engineering and deliberate, breathable layouts — interfaces that stay out of the way.</p>
+            <p className="text-on-surface-variant/90">
+              Privacy-first engineering and deliberate, breathable layouts — interfaces that stay out of the way.
+            </p>
           </div>
 
-          <div className="flex flex-wrap gap-4 mt-10">
+          <div className="flex flex-wrap gap-4 mt-12">
             <button
               type="button"
               onClick={handleDecrypt}
