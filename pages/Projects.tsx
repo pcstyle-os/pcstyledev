@@ -68,6 +68,8 @@ export const Projects = () => {
   const { soundEnabled, synth } = useOutletContext<ContextType>();
   const [searchParams, setSearchParams] = useSearchParams();
   const pathPresetsAppliedRef = useRef(false);
+  /** Only hydrate lens from localStorage once; never re-apply when user clears the lens (that was breaking clear / unselect). */
+  const audienceStorageHydratedRef = useRef(false);
   const [audiencePath, setAudiencePath] = useState<AudiencePathId | null>(() =>
     parseAudiencePathParam(searchParams.get(AUDIENCE_PATH_QUERY_KEY)),
   );
@@ -114,19 +116,48 @@ export const Projects = () => {
     }
   }, []);
 
+  /** Reset stack/status/sort to a neutral baseline (no named lens). */
+  const resetLensDrivenFilters = useCallback(() => {
+    setSortBy('featured');
+    setSelectedStacks([]);
+    setSelectedStatuses([]);
+  }, []);
+
+  const clearAudienceLens = useCallback(() => {
+    setAudiencePath(null);
+    resetLensDrivenFilters();
+  }, [resetLensDrivenFilters]);
+
   useLayoutEffect(() => {
-    if (audiencePath) return;
+    if (audienceStorageHydratedRef.current) return;
+    audienceStorageHydratedRef.current = true;
+
+    const urlPath = parseAudiencePathParam(searchParams.get(AUDIENCE_PATH_QUERY_KEY));
+    if (urlPath) return;
+
     try {
       const stored = parseAudiencePathParam(localStorage.getItem(AUDIENCE_PATH_STORAGE_KEY));
-      if (stored) setAudiencePath(stored);
+      if (stored) {
+        setAudiencePath(stored);
+        const hasCustomFilters =
+          Boolean(searchParams.get('stack')) ||
+          Boolean(searchParams.get('status')) ||
+          (Boolean(searchParams.get('sort')) && parseSort(searchParams.get('sort')) !== 'featured');
+        if (!hasCustomFilters) {
+          applyAudiencePathPresets(stored);
+        }
+      }
     } catch {
       /* ignore */
     }
-  }, [audiencePath]);
+  }, [searchParams, applyAudiencePathPresets]);
 
   useEffect(() => {
-    if (!audiencePath) return;
     try {
+      if (!audiencePath) {
+        localStorage.removeItem(AUDIENCE_PATH_STORAGE_KEY);
+        return;
+      }
       localStorage.setItem(AUDIENCE_PATH_STORAGE_KEY, audiencePath);
     } catch {
       /* ignore */
@@ -149,10 +180,14 @@ export const Projects = () => {
 
   const handleAudiencePathSelect = useCallback(
     (id: AudiencePathId) => {
+      if (audiencePath === id) {
+        clearAudienceLens();
+        return;
+      }
       setAudiencePath(id);
       applyAudiencePathPresets(id);
     },
-    [applyAudiencePathPresets],
+    [audiencePath, applyAudiencePathPresets, clearAudienceLens],
   );
 
   useEffect(() => {
@@ -283,6 +318,7 @@ export const Projects = () => {
     setSelectedStatuses([]);
     setSearchInput('');
     setSearchQuery('');
+    setSortBy('featured');
     setAudiencePath(null);
   };
 
@@ -332,7 +368,7 @@ export const Projects = () => {
           {
             key: 'audience-path',
             label: `lens:${audiencePath.replace(/_/g, ' ')}`,
-            onRemove: () => setAudiencePath(null),
+            onRemove: clearAudienceLens,
           },
         ]
       : [])

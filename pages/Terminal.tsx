@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal as TerminalIcon, ShieldAlert } from 'lucide-react';
+import { Terminal as TerminalIcon, ShieldAlert, Clapperboard } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
+import { ReplayTimeline } from '../components/ui/ReplayTimeline';
 import projectsData from '../data/projects/projects.json';
 import type { Project } from '../lib/types';
 
@@ -125,6 +126,7 @@ const StudentIDCard = () => (
 
 export const Terminal = () => {
   const { addNotification } = useOutletContext<ContextType>();
+  const [workspace, setWorkspace] = useState<'console' | 'replays'>('console');
   const [input, setInput] = useState('');
   const [currentPath, setCurrentPath] = useState(['~']);
   const [history, setHistory] = useState<HistoryItem[]>([
@@ -141,6 +143,19 @@ export const Terminal = () => {
   const [tempInput, setTempInput] = useState('');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (workspace === 'replays') {
+      document.getElementById('term-input')?.blur();
+      requestAnimationFrame(() => {
+        document.getElementById('replay-session')?.focus();
+      });
+    } else {
+      requestAnimationFrame(() => {
+        document.getElementById('term-input')?.focus();
+      });
+    }
+  }, [workspace]);
 
   // Auto-scroll logic: only scroll if the new history item makes the container overflow
   useEffect(() => {
@@ -448,9 +463,48 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
       <p className="font-body text-on-surface-variant text-sm mb-4 max-w-xl">
         A small in-browser shell. Try <span className="text-primary font-medium">help</span>,{' '}
         <span className="text-primary font-medium">projects</span>, or{' '}
-        <span className="text-primary font-medium">wakatime</span> (GitHub activity estimate).
+        <span className="text-primary font-medium">wakatime</span> (GitHub activity estimate). Switch to{' '}
+        <span className="text-primary font-medium">Build replays</span> for scripted build transcripts.
       </p>
-      <div className="terminal-skin glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden">
+
+      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Console workspace">
+        <button
+          type="button"
+          aria-pressed={workspace === 'console'}
+          onClick={() => setWorkspace('console')}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-body font-semibold uppercase tracking-wider transition-colors ${
+            workspace === 'console'
+              ? 'bg-primary text-on-primary shadow-ambient'
+              : 'bg-surface-container-low text-on-surface-variant hover:text-primary'
+          }`}
+        >
+          <TerminalIcon size={16} /> Console
+        </button>
+        <button
+          type="button"
+          aria-pressed={workspace === 'replays'}
+          onClick={() => setWorkspace('replays')}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-body font-semibold uppercase tracking-wider transition-colors ${
+            workspace === 'replays'
+              ? 'bg-primary text-on-primary shadow-ambient'
+              : 'bg-surface-container-low text-on-surface-variant hover:text-primary'
+          }`}
+        >
+          <Clapperboard size={16} /> Build replays
+        </button>
+      </div>
+
+      {workspace === 'replays' ? (
+        <div className="glass-panel rounded-[1.75rem] shadow-ambient p-6 sm:p-8 mb-8">
+          <ReplayTimeline />
+        </div>
+      ) : null}
+
+      <div
+        className={`terminal-skin glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden ${
+          workspace === 'replays' ? 'hidden' : ''
+        }`}
+      >
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-surface-container-low/80 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             {isRoot ? (

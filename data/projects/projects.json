@@ -32,7 +32,42 @@
       "pinned": true,
       "icon": "Monitor",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "modal": {
+        "title": "messenger_desktop_case",
+        "content": "Electron shell wrapping a React renderer: theme packs, read-receipt suppression, and hotkeys for power users — shipping as a daily-driver client, not a toy UI mock.",
+        "casefile": {
+          "problem": "Official messengers optimize for engagement, not user agency. Read receipts, noisy chrome, and weak extensibility made daily use feel adversarial.",
+          "constraints": "Electron bundle size, OS notifications, and safe auto-update channels; must feel native on Windows with tolerable memory use.",
+          "failedAttempts": [
+            "CSS-only theme injection breaking on vendor DOM updates",
+            "Patching binaries instead of stable renderer-level hooks"
+          ],
+          "breakthrough": "Stabilized an extension surface in the renderer with versioned theme manifests and guarded IPC so UI experiments cannot brick the shell.",
+          "outcome": "A client people launch every day: 17+ curated themes, blocked receipts, and fast keyboard-first workflows.",
+          "timeline": [
+            {
+              "at": "Week 0",
+              "title": "Shell + preload contract",
+              "detail": "Locked IPC boundary before touching UI flourishes."
+            },
+            {
+              "at": "Week 3",
+              "title": "Theme compiler",
+              "detail": "Token map + contrast guards so community skins stay legible."
+            },
+            {
+              "at": "Ship",
+              "title": "Public beta",
+              "detail": "Installer + auto-update smoke tests on real hardware."
+            }
+          ],
+          "evidence": [
+            { "label": "Live build", "href": "https://unleashed.pcstyle.dev" },
+            { "label": "Source tree", "href": "https://github.com/pcstyleorg/messenger-desktop" }
+          ]
+        }
+      }
     },
     {
       "id": "pixelforge",
@@ -384,7 +419,26 @@
       "updatedAt": "2026-01-14T19:50:00.000Z",
       "modal": {
         "title": "zielarz_inventory_core",
-        "content": "custom-built inventory management for zielarz, a local vape shop in częstochowa. designed to handle specific domain requirements like liquid strengths (6/12/18mg), longfills, and salts that generic pos systems couldn't support.\n\npowered by convex for real-time updates across multiple screens. includes a customer-facing TV display for live menu availability, a drag-and-drop admin interface, qr code generation, and a complete audit log. it's not just a database; it's the nervous system of the shop."
+        "content": "custom-built inventory management for zielarz, a local vape shop in częstochowa. designed to handle specific domain requirements like liquid strengths (6/12/18mg), longfills, and salts that generic pos systems couldn't support.\n\npowered by convex for real-time updates across multiple screens. includes a customer-facing TV display for live menu availability, a drag-and-drop admin interface, qr code generation, and a complete audit log. it's not just a database; it's the nervous system of the shop.",
+        "casefile": {
+          "problem": "Retail POS templates could not express nicotine strengths, longfills vs shortfills, or salts without corrupting stock counts — staff were reconciling spreadsheets after close.",
+          "constraints": "Real-time floor + TV + back office; must work on uneven Wi‑Fi; audit trail for every price or quantity change; polish UI for non-technical operators.",
+          "failedAttempts": [
+            "Spreadsheet + barcode scanner (human error on variants)",
+            "Off-the-shelf inventory SaaS without variant algebra"
+          ],
+          "breakthrough": "Modeled inventory as variant SKUs with Convex subscriptions so TV, counter, and admin always share one optimistic-then-consistent truth.",
+          "outcome": "Same-day stock truth on the sales floor, fewer write-offs, and a TV menu that hides SKUs the moment counts hit zero.",
+          "timeline": [
+            { "at": "Discovery", "title": "Variant matrix interview", "detail": "Mapped how staff thinks in mg strengths, not generic product rows." },
+            { "at": "Build", "title": "TV + counter split", "detail": "Read-heavy public query vs authenticated mutations with role checks." },
+            { "at": "Hardening", "title": "Audit log + QR", "detail": "Every adjustment traceable; shelf labels generated from live data." }
+          ],
+          "evidence": [
+            { "label": "Convex-backed sync", "detail": "Multi-screen subscriptions, no manual refresh" },
+            { "label": "Domain: liquid strengths", "detail": "6 / 12 / 18 mg + salts encoded as first-class fields" }
+          ]
+        }
       }
     },
     {
@@ -410,7 +464,26 @@
       "updatedAt": "2026-03-20T00:00:00.000Z",
       "modal": {
         "title": "multi_brand_breathwork_platform",
-        "content": "one deployment for odrodzenie oddechowe and re4matik: middleware and proxy map hosts to brand-scoped routes; convex schema and queries filter by brand. public marketing, workshops, faq, contact with validation and bot protection; course purchase flow and authenticated learn area with lessons and media.\n\nadmin: refine for pages, services, workshops, testimonials, pricing, contacts, specialists, manual course access, seeds/migrations. integrations: stripe webhooks, workos authkit + membership sync into convex via signed api routes. quality: typescript strict, vitest, playwright (including csv-driven e2e), eslint with convex rules, csp and hardening (course visibility, webhooks, auth callback allowlist, lesson html sanitization).\n\nlive: odrodzenieoddechowe.pl; re4matik production is re4matik.pl with re4matik.pcstyle.dev used for preview/e2e per infra — repo pc-style/oddech (private)."
+        "content": "one deployment for odrodzenie oddechowe and re4matik: middleware and proxy map hosts to brand-scoped routes; convex schema and queries filter by brand. public marketing, workshops, faq, contact with validation and bot protection; course purchase flow and authenticated learn area with lessons and media.\n\nadmin: refine for pages, services, workshops, testimonials, pricing, contacts, specialists, manual course access, seeds/migrations. integrations: stripe webhooks, workos authkit + membership sync into convex via signed api routes. quality: typescript strict, vitest, playwright (including csv-driven e2e), eslint with convex rules, csp and hardening (course visibility, webhooks, auth callback allowlist, lesson html sanitization).\n\nlive: odrodzenieoddechowe.pl; re4matik production is re4matik.pl with re4matik.pcstyle.dev used for preview/e2e per infra — repo pc-style/oddech (private).",
+        "casefile": {
+          "problem": "Two brands needed separate marketing and course catalogs without duplicating deployments, auth, or Stripe logic — any drift between brands would double incident surface.",
+          "constraints": "Host-based routing, brand-scoped Convex data, WorkOS + Stripe correctness, CSP and webhook hardening, Polish-first content workflows for non-dev editors.",
+          "failedAttempts": [
+            "Separate Vercel projects per brand (auth + billing divergence)",
+            "Single UI theme with runtime toggles (SEO + routing leaks)"
+          ],
+          "breakthrough": "Middleware maps host → brand key; Convex functions always take brand scope; Refine admin shares one schema with row-level brand filters.",
+          "outcome": "One pipeline ships both brands: purchases unlock the right learn space, admins edit without touching code, and Playwright locks critical flows.",
+          "timeline": [
+            { "at": "Architecture", "title": "Host → brand map", "detail": "Middleware + typed brand enum end to end." },
+            { "at": "Commerce", "title": "Stripe + Convex entitlements", "detail": "Webhooks idempotent; course visibility derived from purchase state." },
+            { "at": "Quality", "title": "CSV-driven e2e", "detail": "Playwright scenarios cover contact, checkout, and lesson access." }
+          ],
+          "evidence": [
+            { "label": "Oddech live", "href": "https://odrodzenieoddechowe.pl" },
+            { "label": "GitHub (private)", "href": "https://github.com/pc-style/oddech" }
+          ]
+        }
       }
     }
   ],

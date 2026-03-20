@@ -20,6 +20,16 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
+/** Tailwind v4 exposes RGB triplets as "R G B" — canvas needs valid `rgba()` (not `rgb(r, g, b / a)`). */
+function parseTwRgbTriplet(value: string, fallback: string): [number, number, number] {
+  const raw = value.trim() || fallback;
+  const parts = raw.split(/\s+/).map((p) => Number.parseInt(p, 10));
+  const r = Number.isFinite(parts[0]) ? parts[0] : 128;
+  const g = Number.isFinite(parts[1]) ? parts[1] : 128;
+  const b = Number.isFinite(parts[2]) ? parts[2] : 128;
+  return [r, g, b];
+}
+
 function initParticles(w: number, h: number, count: number): Particle[] {
   const out: Particle[] = [];
   for (let i = 0; i < count; i++) {
@@ -139,9 +149,12 @@ export const SignatureDemo = () => {
       const mouse = mouseRef.current;
 
       const rootStyle = getComputedStyle(document.documentElement);
-      const lowest = rootStyle.getPropertyValue('--tw-surface-container-lowest').trim() || '255 255 255';
-      const primaryRgb = rootStyle.getPropertyValue('--tw-primary').trim() || '70 101 97';
-      ctx.fillStyle = `rgb(${lowest.replaceAll(' ', ',')} / 0.18)`;
+      const [lr, lg, lb] = parseTwRgbTriplet(
+        rootStyle.getPropertyValue('--tw-surface-container-lowest'),
+        '255 255 255',
+      );
+      const [pr, pg, pb] = parseTwRgbTriplet(rootStyle.getPropertyValue('--tw-primary'), '70 101 97');
+      ctx.fillStyle = `rgba(${lr},${lg},${lb},0.22)`;
       ctx.fillRect(0, 0, width, height);
 
       const cx = mouse.active ? mouse.x : width * 0.5;
@@ -167,11 +180,11 @@ export const SignatureDemo = () => {
       for (const p of parts) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgb(${primaryRgb.replaceAll(' ', ',')} / ${p.a})`;
+        ctx.fillStyle = `rgba(${pr},${pg},${pb},${p.a})`;
         ctx.fill();
       }
 
-      ctx.strokeStyle = `rgb(${primaryRgb.replaceAll(' ', ',')} / 0.12)`;
+      ctx.strokeStyle = `rgba(${pr},${pg},${pb},0.14)`;
       ctx.lineWidth = 1;
       for (let i = 0; i < parts.length; i += 3) {
         for (let j = i + 1; j < Math.min(i + 6, parts.length); j++) {

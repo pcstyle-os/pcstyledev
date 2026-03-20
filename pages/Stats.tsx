@@ -2,12 +2,12 @@ import { BarChart3, Github, Star, Users, GitFork, Activity, Terminal as Terminal
 import { WakaTimeDashboard } from '../components/ui/WakaTimeDashboard';
 import { ContributionHeatmap } from '../components/ui/ContributionHeatmap';
 import { VisualContributionHeatmap } from '../components/ui/VisualContributionHeatmap';
-import { useGitHubStats } from '../hooks/useGitHub';
+import { useGitHubStats, type UseGitHubStatsResult } from '../hooks/useGitHub';
 
 import { motion } from 'framer-motion';
 
-function GitHubMainStats() {
-  const { stats, loading, error } = useGitHubStats();
+function GitHubMainStats({ github }: { github: UseGitHubStatsResult }) {
+  const { stats, loading, error } = github;
 
   if (loading) {
     return (
@@ -43,8 +43,11 @@ function GitHubMainStats() {
               <stat.icon size={12} className="text-primary shrink-0" /> {stat.label}
             </div>
             <span className="text-lg md:text-xl xl:text-2xl font-headline text-on-surface tracking-tight leading-none tabular-nums">
-              {stat.value}
+              {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
             </span>
+            {'sub' in stat && stat.sub ? (
+              <span className="text-[9px] text-on-surface-variant/90 font-body leading-tight">{stat.sub}</span>
+            ) : null}
           </div>
         ))}
       </div>
@@ -52,8 +55,8 @@ function GitHubMainStats() {
   );
 }
 
-function GitHubExtraStats() {
-  const { stats, loading } = useGitHubStats();
+function GitHubExtraStats({ github }: { github: UseGitHubStatsResult }) {
+  const { stats, loading } = github;
 
   if (loading) {
     return (
@@ -113,6 +116,8 @@ function GitHubExtraStats() {
 }
 
 export function Stats() {
+  const github = useGitHubStats()
+
   return (
     <div className="space-y-12 md:space-y-16 pb-12 animate-fadeIn">
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
@@ -135,10 +140,10 @@ export function Stats() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 xl:gap-6 xl:items-stretch">
           {/* Hero spread: contributions hero (~2 cols) + dense profile stats */}
           <div className="md:col-span-1 xl:col-span-2 min-w-0 flex flex-col">
-            <GitHubExtraStats />
+            <GitHubExtraStats github={github} />
           </div>
           <div className="md:col-span-1 xl:col-span-2 min-w-0 flex flex-col">
-            <GitHubMainStats />
+            <GitHubMainStats github={github} />
           </div>
 
           {/* Second row: wide calendar + tall visual sidebar */}
@@ -154,7 +159,7 @@ export function Stats() {
       </section>
 
       <section>
-        <WakaTimeDashboard />
+        <WakaTimeDashboard githubSevenDay={github.stats?.sevenDay} githubLoading={github.loading} />
       </section>
     </div>
   );

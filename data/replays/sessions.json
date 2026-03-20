@@ -1,0 +1,35 @@
+{
+  "sessions": [
+    {
+      "id": "convex-tv-menu",
+      "title": "Convex TV menu: from blank schema to live floor",
+      "summary": "Schema first, then subscriptions, then the public TV surface — with a deliberate failure in the middle.",
+      "narrationUrl": null,
+      "steps": [
+        { "t": 0, "kind": "log", "text": "$ bunx convex dev" },
+        { "t": 600, "kind": "checkpoint", "text": "[schema] products + variantStrength + onHand quantity" },
+        { "t": 1400, "kind": "log", "text": "npx convex codegen" },
+        { "t": 2200, "kind": "fail", "text": "TypeError: subscription closed — TV component mounted before auth context" },
+        { "t": 3200, "kind": "fix", "text": "Split public query (brand slug) vs admin mutation; TV uses read-only token scope" },
+        { "t": 4200, "kind": "log", "text": "vitest convex functions: inventory.adjust idempotent under double webhook" },
+        { "t": 5200, "kind": "ship", "text": "Deployed: counter + back office + 1080p menu board on the same subscription graph" }
+      ]
+    },
+    {
+      "id": "brand-proxy-hardening",
+      "title": "Dual-brand Next.js: middleware panic to green Playwright",
+      "summary": "Host-based routing, Stripe webhooks, and a CSP that almost blocked legitimate OAuth return.",
+      "narrationUrl": null,
+      "steps": [
+        { "t": 0, "kind": "log", "text": "$ next dev --turbo" },
+        { "t": 500, "kind": "checkpoint", "text": "[middleware] host → BrandKey enum + canonical redirect" },
+        { "t": 1200, "kind": "log", "text": "curl -I https://odrodzenieoddechowe.pl | grep content-security-policy" },
+        { "t": 2000, "kind": "fail", "text": "ReportOnly CSP blocked WorkOS callback on preview host" },
+        { "t": 3000, "kind": "fix", "text": "Allowlist preview origins via env; split prod vs preview CSP maps" },
+        { "t": 4000, "kind": "log", "text": "stripe listen --forward-to localhost:3000/api/stripe/webhook" },
+        { "t": 5000, "kind": "checkpoint", "text": "[convex] membership upsert keyed by brand + stripe customer id" },
+        { "t": 6200, "kind": "ship", "text": "playwright e2e (csv matrix): contact → checkout → lesson gate ✓" }
+      ]
+    }
+  ]
+}

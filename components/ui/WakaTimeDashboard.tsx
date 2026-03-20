@@ -1,6 +1,7 @@
-import { Clock, Code2, Monitor, FolderGit2, TrendingUp, Calendar, Zap } from 'lucide-react';
+import { Clock, Code2, Monitor, FolderGit2, TrendingUp, Calendar, Zap, GitMerge, GitCommit, FileDiff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useWakaTimeSummary } from '../../hooks/useWakaTime';
+import type { GitHubSevenDayMetrics } from '../../lib/types';
 import { NeuralLanguageMap } from './NeuralLanguageMap';
 import { ProjectMatrix } from './ProjectMatrix';
 
@@ -62,7 +63,13 @@ function StatCard({
   );
 }
 
-export function WakaTimeDashboard() {
+interface WakaTimeDashboardProps {
+  /** From `/api/github/stats` — avoids a second client fetch when parent already loaded GitHub. */
+  githubSevenDay?: GitHubSevenDayMetrics
+  githubLoading?: boolean
+}
+
+export function WakaTimeDashboard({ githubSevenDay, githubLoading }: WakaTimeDashboardProps = {}) {
   const { summary, loading, error } = useWakaTimeSummary();
   const isGitHubInferred = summary?.source === 'github-inferred';
 
@@ -102,7 +109,7 @@ export function WakaTimeDashboard() {
           </div>
           {isGitHubInferred && (
             <p className="text-[11px] text-on-surface-variant/90 font-body max-w-xl leading-relaxed">
-              Heuristic from your contribution graph and recent pushes — not exact IDE time.
+              Heuristic from your contribution graph and recent pushes — not exact IDE time. Hard numbers below use the GitHub API (same 7-day UTC window).
             </p>
           )}
         </div>
@@ -121,6 +128,43 @@ export function WakaTimeDashboard() {
         />
         <StatCard icon={Code2} label="Languages" value={String(summary.languages.length)} />
       </div>
+
+      {isGitHubInferred && (
+        <div className="space-y-3">
+          <div className="text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
+            GitHub (7 days)
+          </div>
+          {githubLoading && !githubSevenDay ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-5 rounded-2xl bg-surface-container h-24 animate-pulse" />
+              ))}
+            </div>
+          ) : githubSevenDay ? (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <StatCard
+                  icon={FileDiff}
+                  label="Lines added (merged PRs)"
+                  value={githubSevenDay.linesAddedMergedPrs.toLocaleString()}
+                  highlight
+                />
+                <StatCard icon={GitMerge} label="PRs merged" value={String(githubSevenDay.mergedPrs)} />
+                <StatCard icon={GitCommit} label="Commits" value={String(githubSevenDay.commitContributions)} />
+              </div>
+              {githubSevenDay.linesPartial ? (
+                <p className="text-[10px] text-on-surface-variant font-body">
+                  Line total sums additions for up to 100 merged PRs; PR count is complete.
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p className="text-xs text-on-surface-variant font-body">
+              Connect <code className="text-primary">GITHUB_TOKEN</code> on the API to load 7-day PR and commit stats.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-1">

@@ -106,11 +106,43 @@ export interface GitHubContributions {
   weeks: GitHubContributionDay[][]
 }
 
+/** Snapshot for “recent repos” lists (from GitHub REST, sorted by last push). */
+export interface GitHubRecentRepo {
+  name: string
+  fullName: string
+  description: string | null
+  pushedAt: string
+  createdAt: string
+  stars: number
+  language: string | null
+  url: string
+  fork: boolean
+  private?: boolean
+}
+
+/** Rolling 7-day window (UTC) from GitHub GraphQL + search. */
+export interface GitHubSevenDayMetrics {
+  from: string
+  to: string
+  /** contributionsCollection.totalCommitContributions */
+  commitContributions: number
+  /** Merged PRs authored by you (search issueCount; may exceed 100). */
+  mergedPrs: number
+  /** Sum of `additions` on first page of merged PRs (max 100). */
+  linesAddedMergedPrs: number
+  /** True when mergedPrs > 100 — line sum is a lower bound. */
+  linesPartial?: boolean
+}
+
 export interface GitHubStats {
   publicRepos: number
   followers: number
   following: number
   totalStars: number
+  /** When token matches GITHUB_USERNAME (`/user`). */
+  totalPrivateRepos?: number
+  /** public + private owned, when authenticated as that user. */
+  totalOwnedRepos?: number
   totalCommits?: number
   lastCommit?: {
     message: string
@@ -123,6 +155,8 @@ export interface GitHubStats {
     url: string
     commits: number
   }
+  recentRepos?: GitHubRecentRepo[]
+  sevenDay?: GitHubSevenDayMetrics
 }
 
 // combined live status for navbar
