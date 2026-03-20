@@ -1,5 +1,37 @@
 export type ProjectStatus = 'active' | 'maintenance' | 'experimental' | 'prototype' | 'disabled'
 
+/** Evidence line in a project casefile (links, commits, benchmarks). */
+export interface CasefileEvidence {
+  label: string
+  detail?: string
+  href?: string
+}
+
+/** Timeline node for casefile narrative. */
+export interface CasefileTimelineEvent {
+  at: string
+  title: string
+  detail?: string
+}
+
+/** Detective-board style deep dive for a project. */
+export interface ProjectCasefile {
+  problem: string
+  constraints: string
+  failedAttempts?: string[]
+  breakthrough: string
+  outcome: string
+  timeline?: CasefileTimelineEvent[]
+  evidence?: CasefileEvidence[]
+}
+
+export interface ProjectModalData {
+  title: string
+  /** Long-form overview; optional when `casefile` carries the story. */
+  content?: string
+  casefile?: ProjectCasefile
+}
+
 export interface Project {
   id: string
   name: string
@@ -12,10 +44,7 @@ export interface Project {
   icon: string
   createdAt: string
   updatedAt: string
-  modal?: {
-    title: string
-    content: string
-  }
+  modal?: ProjectModalData
 }
 
 export interface ProjectsData {

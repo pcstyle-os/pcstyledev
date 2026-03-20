@@ -1,13 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Link, useOutletContext, useSearchParams } from 'react-router-dom';
 import { ProjectCard } from '../components/ui/ProjectCard';
 import { ProjectModal } from '../components/ui/ProjectModal';
+import { AudiencePathSelector } from '../components/ui/AudiencePathSelector';
 import projectsData from '../data/projects/projects.json';
 import stackConfig from '../data/projects/stack-canonical.json';
-import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { Synth } from '../utils/audio';
-import { Github, Sparkles, FolderKanban } from 'lucide-react';
+import { Github, Sparkles, FolderKanban, FlaskConical } from 'lucide-react';
 import type { Project, ProjectStatus } from '../lib/types';
 import type { ProjectCardVariant } from '../components/ui/ProjectCard';
+import {
+  AUDIENCE_PATH_QUERY_KEY,
+  AUDIENCE_PATH_STORAGE_KEY,
+  getAudiencePathConfig,
+  parseAudiencePathParam,
+  type AudiencePathId,
+} from '../lib/audiencePaths';
 
 interface ContextType {
   soundEnabled: boolean;
@@ -59,6 +67,10 @@ function projectGridCellClass(variant: ProjectCardVariant): string {
 export const Projects = () => {
   const { soundEnabled, synth } = useOutletContext<ContextType>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const pathPresetsAppliedRef = useRef(false);
+  const [audiencePath, setAudiencePath] = useState<AudiencePathId | null>(() =>
+    parseAudiencePathParam(searchParams.get(AUDIENCE_PATH_QUERY_KEY)),
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(() => searchParams.get('q')?.trim() ?? '');
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q')?.trim() ?? '');
@@ -71,6 +83,77 @@ export const Projects = () => {
   const activeNodes = PROJECTS.filter((project) => project.status === 'active').length;
   const experimentalNodes = PROJECTS.filter((project) => project.status === 'experimental').length;
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
+
+  const pathLens = useMemo(() => getAudiencePathConfig(audiencePath), [audiencePath]);
+
+  const applyAudiencePathPresets = useCallback((id: AudiencePathId) => {
+    const cfg = getAudiencePathConfig(id);
+    switch (id) {
+      case 'hire_fast':
+        setSortBy('featured');
+        setSelectedStacks([]);
+        setSelectedStatuses([]);
+        break;
+      case 'technical_deep':
+        setSortBy('status');
+        setSelectedStacks(cfg.stackHint ?? []);
+        setSelectedStatuses([]);
+        break;
+      case 'founder':
+        setSortBy('status');
+        setSelectedStacks([]);
+        setSelectedStatuses(['experimental', 'active']);
+        break;
+      case 'design_proof':
+        setSortBy('featured');
+        setSelectedStacks(cfg.stackHint ?? []);
+        setSelectedStatuses([]);
+        break;
+      default:
+        break;
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    if (audiencePath) return;
+    try {
+      const stored = parseAudiencePathParam(localStorage.getItem(AUDIENCE_PATH_STORAGE_KEY));
+      if (stored) setAudiencePath(stored);
+    } catch {
+      /* ignore */
+    }
+  }, [audiencePath]);
+
+  useEffect(() => {
+    if (!audiencePath) return;
+    try {
+      localStorage.setItem(AUDIENCE_PATH_STORAGE_KEY, audiencePath);
+    } catch {
+      /* ignore */
+    }
+  }, [audiencePath]);
+
+  useLayoutEffect(() => {
+    if (pathPresetsAppliedRef.current) return;
+    const urlPath = parseAudiencePathParam(searchParams.get(AUDIENCE_PATH_QUERY_KEY));
+    if (!urlPath) return;
+    const hasCustomFilters =
+      Boolean(searchParams.get('stack')) ||
+      Boolean(searchParams.get('status')) ||
+      (Boolean(searchParams.get('sort')) && parseSort(searchParams.get('sort')) !== 'featured');
+    if (!hasCustomFilters) {
+      applyAudiencePathPresets(urlPath);
+    }
+    pathPresetsAppliedRef.current = true;
+  }, [searchParams, applyAudiencePathPresets]);
+
+  const handleAudiencePathSelect = useCallback(
+    (id: AudiencePathId) => {
+      setAudiencePath(id);
+      applyAudiencePathPresets(id);
+    },
+    [applyAudiencePathPresets],
+  );
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -200,6 +283,7 @@ export const Projects = () => {
     setSelectedStatuses([]);
     setSearchInput('');
     setSearchQuery('');
+    setAudiencePath(null);
   };
 
   const handleFiltersToggle = () => {
@@ -213,11 +297,12 @@ export const Projects = () => {
     if (selectedStacks.length > 0) nextParams.set('stack', [...selectedStacks].sort().join(','));
     if (selectedStatuses.length > 0) nextParams.set('status', [...selectedStatuses].sort().join(','));
     if (sortBy !== 'featured') nextParams.set('sort', sortBy);
+    if (audiencePath) nextParams.set(AUDIENCE_PATH_QUERY_KEY, audiencePath);
 
     if (nextParams.toString() !== searchParams.toString()) {
       setSearchParams(nextParams, { replace: true });
     }
-  }, [searchParams, searchQuery, selectedStacks, selectedStatuses, sortBy, setSearchParams]);
+  }, [searchParams, searchQuery, selectedStacks, selectedStatuses, sortBy, audiencePath, setSearchParams]);
 
   const activeFilters = [
     ...(searchQuery.trim()
@@ -241,7 +326,16 @@ export const Projects = () => {
       key: `status-${status}`,
       label: status,
       onRemove: () => toggleSelection(status, selectedStatuses, setSelectedStatuses)
-    }))
+    })),
+    ...(audiencePath
+      ? [
+          {
+            key: 'audience-path',
+            label: `lens:${audiencePath.replace(/_/g, ' ')}`,
+            onRemove: () => setAudiencePath(null),
+          },
+        ]
+      : [])
   ];
   const hasActiveFilters = activeFilters.length > 0;
 
@@ -249,9 +343,10 @@ export const Projects = () => {
     <div className="space-y-16 sm:space-y-24 md:space-y-32 animate-fadeIn">
       <section className="relative">
         <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl text-on-surface leading-[0.95] tracking-tight mb-12 md:mb-16 text-glow-soft">
-          The <span className="italic font-light text-primary">translucent</span>
+          {pathLens.heroLead}{' '}
+          <span className="italic font-light text-primary">{pathLens.heroAccent}</span>
           <br />
-          curator.
+          {pathLens.heroRest}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
@@ -264,7 +359,7 @@ export const Projects = () => {
             <div className="relative z-10">
               <p className="font-headline text-5xl sm:text-6xl text-primary mb-2">{totalNodes}</p>
               <p className="text-on-surface-variant font-body font-light max-w-sm leading-relaxed">
-                Projects and experiments in the public catalog — filtered from repository metadata.
+                {pathLens.archiveLine}
               </p>
             </div>
           </div>
@@ -297,11 +392,19 @@ export const Projects = () => {
           >
             <Github size={18} /> View source
           </a>
+          <Link
+            to="/demo"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full editorial-gradient text-on-primary font-body text-sm font-semibold shadow-ambient hover:opacity-90 transition-opacity"
+          >
+            <FlaskConical size={18} /> Signature lab
+          </Link>
           <p className="text-on-surface-variant text-sm font-body">
             Last index update: <span className="text-primary font-medium">{lastUpdated}</span>
           </p>
         </div>
       </section>
+
+      <AudiencePathSelector activePath={audiencePath} onSelect={handleAudiencePathSelect} />
 
       <section className="rounded-[2.5rem] bg-surface-container-low p-6 sm:p-8 md:p-10 relative overflow-hidden">
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary-container/20 rounded-full blur-[100px] pointer-events-none" />
@@ -314,7 +417,7 @@ export const Projects = () => {
             <h2 className="font-headline text-4xl sm:text-5xl md:text-6xl text-on-surface tracking-tight">Projects</h2>
           </div>
           <p className="text-on-surface-variant max-w-md font-body font-light text-base sm:text-lg italic leading-relaxed">
-            Sensory-first interfaces, tools, and systems — filter by stack, status, or keyword.
+            {pathLens.curationLine}
           </p>
         </div>
 

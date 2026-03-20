@@ -210,6 +210,10 @@ html.dark .nav-link-register--active {
     animation: navItemIn 0.48s ease-out both;
     animation-delay: 0.24s;
   }
+  .nav-stagger-5 {
+    animation: navItemIn 0.48s ease-out both;
+    animation-delay: 0.3s;
+  }
 
   @keyframes navItemIn {
     from {
@@ -229,7 +233,8 @@ html.dark .nav-link-register--active {
   .nav-stagger-1,
   .nav-stagger-2,
   .nav-stagger-3,
-  .nav-stagger-4 {
+  .nav-stagger-4,
+  .nav-stagger-5 {
     animation: none;
   }
 }

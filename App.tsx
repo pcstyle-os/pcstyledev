@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutGrid, Terminal as TerminalIcon, BarChart3, User, Mail, Moon, Sun } from 'lucide-react';
+import { LayoutGrid, Terminal as TerminalIcon, BarChart3, User, Mail, Moon, Sun, Sparkles } from 'lucide-react';
 
 import { SystemNotification } from './components/ui/SystemNotification';
 import { PointerSpotlight } from './components/ui/PointerSpotlight';
@@ -11,6 +11,7 @@ import { Projects } from './pages/Projects';
 import { Terminal } from './pages/Terminal';
 import { Identity } from './pages/Identity';
 import { Stats } from './pages/Stats';
+import { SignatureDemo } from './pages/SignatureDemo';
 
 import type { Synth } from './utils/audio';
 
@@ -19,7 +20,7 @@ interface LayoutProps {
   addNotification: (msg: string) => void;
 }
 
-const NAV_STAGGER = ['nav-stagger-1', 'nav-stagger-2', 'nav-stagger-3', 'nav-stagger-4'] as const;
+const NAV_STAGGER = ['nav-stagger-1', 'nav-stagger-2', 'nav-stagger-3', 'nav-stagger-4', 'nav-stagger-5'] as const;
 
 function Layout({ notifications, addNotification }: LayoutProps) {
   const location = useLocation();
@@ -29,6 +30,7 @@ function Layout({ notifications, addNotification }: LayoutProps) {
 
   const navItems = [
     { path: '/', key: 'projects', label: 'Projects' },
+    { path: '/demo', key: 'demo', label: 'Lab' },
     { path: '/stats', key: 'stats', label: 'Stats' },
     { path: '/identity', key: 'identity', label: 'About' },
     { path: '/terminal', key: 'terminal', label: 'Console' },
@@ -37,7 +39,7 @@ function Layout({ notifications, addNotification }: LayoutProps) {
   const isActive = (key: string) =>
     (key === 'projects' && activeTab === 'projects') || activeTab === key;
 
-  const spotlightRoutes = activeTab === 'projects' || activeTab === 'stats';
+  const spotlightRoutes = activeTab === 'projects' || activeTab === 'stats' || activeTab === 'demo';
 
   const handleThemeToggle = () => {
     playToggle();
@@ -160,6 +162,14 @@ function Layout({ notifications, addNotification }: LayoutProps) {
           <LayoutGrid size={22} strokeWidth={isActive('projects') ? 2.2 : 1.8} />
         </Link>
         <Link
+          to="/demo"
+          className={isActive('demo') ? 'text-primary' : 'text-on-surface-variant opacity-70'}
+          aria-current={isActive('demo') ? 'page' : undefined}
+          onClick={() => playNavClick()}
+        >
+          <Sparkles size={22} strokeWidth={isActive('demo') ? 2.2 : 1.8} />
+        </Link>
+        <Link
           to="/stats"
           className={isActive('stats') ? 'text-primary' : 'text-on-surface-variant opacity-70'}
           onClick={() => playNavClick()}
@@ -209,6 +219,7 @@ export default function App() {
           element={<Layout notifications={notifications} addNotification={addNotification} />}
         >
           <Route index element={<Projects />} />
+          <Route path="demo" element={<SignatureDemo />} />
           <Route path="terminal" element={<Terminal />} />
           <Route path="stats" element={<Stats />} />
           <Route path="identity" element={<Identity />} />

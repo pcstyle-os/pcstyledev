@@ -39,8 +39,10 @@ const VARIANT_TILE_CLASS: Record<ProjectCardVariant, string> = {
 const MotionArticle = motion.article;
 
 export const ProjectCard = memo(
-  ({ project, delay, onOpenModal, variant = 'default' }: Props) => {
+    ({ project, delay, onOpenModal, variant = 'default' }: Props) => {
     const isDisabled = project.status === 'disabled';
+    const hasDeepDive =
+      Boolean(project.modal?.content?.trim()) || Boolean(project.modal?.casefile);
     const tileMod = VARIANT_TILE_CLASS[variant];
     const sizeMod = VARIANT_CLASS[variant];
 
@@ -144,7 +146,7 @@ export const ProjectCard = memo(
               <Github size={16} /> Source
             </a>
           )}
-          {!isDisabled && project.modal && onOpenModal && (
+          {!isDisabled && hasDeepDive && onOpenModal && (
             <button
               type="button"
               onClick={() => onOpenModal(project)}
