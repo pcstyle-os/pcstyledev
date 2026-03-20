@@ -106,6 +106,11 @@ export function ReplayTimeline() {
     } else {
       el.pause();
     }
+
+    return () => {
+      el.pause();
+      el.currentTime = 0;
+    };
   }, [session, narrationOn, playing]);
 
   if (!session) {
