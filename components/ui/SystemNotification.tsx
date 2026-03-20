@@ -1,21 +1,19 @@
 import React, { memo } from 'react';
-import { Activity } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 interface Props {
   notifications: string[];
 }
 
 export const SystemNotification = memo(({ notifications }: Props) => (
-  <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[200] space-y-2 pointer-events-none w-[calc(100vw-2rem)] sm:w-auto">
+  <div className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-[200] space-y-2 pointer-events-none w-[calc(100vw-2rem)] sm:w-auto max-w-sm">
     {notifications.map((n, i) => (
       <div
-        key={i}
-        className="bg-black/90 border-l-4 border-[#ff00ff] p-4 text-[11px] font-mono text-[#ff00ff] animate-slideIn backdrop-blur-md shadow-2xl flex items-center gap-4 break-words max-w-full"
+        key={`${n}-${i}`}
+        className="glass-panel-subtle rounded-2xl px-4 py-3 text-sm font-body text-on-surface animate-slideIn shadow-ambient flex items-center gap-3 break-words"
       >
-        <div className="bg-[#ff00ff]/10 p-1">
-          <Activity size={12} className="animate-pulse" />
-        </div>
-        <span className="uppercase tracking-[0.2em] font-black">{n}</span>
+        <Sparkles size={16} className="text-primary shrink-0 opacity-80" />
+        <span className="font-medium tracking-tight">{n}</span>
       </div>
     ))}
   </div>

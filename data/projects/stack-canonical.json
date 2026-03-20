@@ -19,18 +19,26 @@
     "p5.js",
     "Procedural",
     "PWA",
+    "Playwright",
     "Python",
     "PyTorch",
     "React",
     "React Canvas",
+    "Refine",
+    "Resend",
+    "Sentry",
     "Shiki",
     "Socket.IO",
+    "Stripe",
     "Tailwind CSS",
     "Three.js",
     "TypeScript",
     "UI Kit",
+    "Vercel",
+    "Vitest",
     "Vite",
     "WebGL",
+    "WorkOS",
     "UploadThing",
     "@vercel/og",
     "Framer Motion",
@@ -52,7 +60,9 @@
     "ThreeJS": "Three.js",
     "Typescript": "TypeScript",
     "Vanilla JS": "JavaScript",
-    "VanillaJS": "JavaScript"
+    "VanillaJS": "JavaScript",
+    "AuthKit": "WorkOS",
+    "WorkOS AuthKit": "WorkOS"
   },
   "glossary": [
     {
@@ -132,6 +142,10 @@
       "desc": "progressive web app"
     },
     {
+      "label": "Playwright",
+      "desc": "browser e2e testing"
+    },
+    {
       "label": "Python",
       "desc": "backend + scripting"
     },
@@ -144,8 +158,20 @@
       "desc": "UI library"
     },
     {
+      "label": "Refine",
+      "desc": "React admin framework"
+    },
+    {
+      "label": "Resend",
+      "desc": "transactional email"
+    },
+    {
       "label": "React Canvas",
       "desc": "canvas renderer for React"
+    },
+    {
+      "label": "Sentry",
+      "desc": "error monitoring"
     },
     {
       "label": "Shiki",
@@ -154,6 +180,10 @@
     {
       "label": "Socket.IO",
       "desc": "realtime websockets"
+    },
+    {
+      "label": "Stripe",
+      "desc": "payments + billing"
     },
     {
       "label": "Tailwind CSS",
@@ -168,6 +198,14 @@
       "desc": "typed JavaScript"
     },
     {
+      "label": "Vercel",
+      "desc": "hosting + edge"
+    },
+    {
+      "label": "Vitest",
+      "desc": "unit + component tests"
+    },
+    {
       "label": "UI Kit",
       "desc": "component system"
     },
@@ -178,6 +216,10 @@
     {
       "label": "WebGL",
       "desc": "GPU graphics API"
+    },
+    {
+      "label": "WorkOS",
+      "desc": "AuthKit + SSO"
     },
     {
       "label": "UploadThing",

@@ -17,8 +17,8 @@ export const HexClock = () => {
   }, []);
 
   return (
-    <div className="font-mono text-xs text-[#ff00ff] border border-[#ff00ff]/30 px-2 py-1 bg-black/50 backdrop-blur-sm">
-      <span className="opacity-50 mr-1">SYS_TIME:</span>
+    <div className="font-mono text-xs text-primary px-3 py-1.5 rounded-full bg-surface-container-lowest/70 backdrop-blur-sm border border-white/40 shadow-ambient">
+      <span className="text-on-surface-variant mr-1.5 font-body text-[10px] uppercase tracking-wider">Time</span>
       {time}
     </div>
   );

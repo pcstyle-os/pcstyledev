@@ -1,16 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Terminal as TerminalIcon, ShieldAlert } from 'lucide-react';
+import { Terminal as TerminalIcon, ShieldAlert } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import projectsData from '../data/projects/projects.json';
-import { Synth } from '../utils/audio';
 import type { Project } from '../lib/types';
 
 const PROJECTS: Project[] = projectsData.projects as Project[];
 
 interface ContextType {
-  soundEnabled: boolean;
-  synth: Synth | null;
   addNotification: (msg: string) => void;
 }
 
@@ -86,56 +83,53 @@ type HistoryItem = {
   isRoot?: boolean;
 };
 
-// ID Card Component
 const StudentIDCard = () => (
-  <div className="my-4 p-4 max-w-sm perspective-1000 group">
-    <div className="relative w-full aspect-[1.6/1] bg-black border border-[#ff00ff]/50 rounded-lg p-4 transition-transform duration-500 transform style-preserve-3d group-hover:rotate-y-12 group-hover:rotate-x-12 shadow-[0_0_30px_rgba(255,0,255,0.2)]">
-      {/* Holographic Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#ff00ff]/10 to-transparent opacity-50 rounded-lg pointer-events-none" />
-      {/* Header */}
-      <div className="flex justify-between items-start border-b border-[#ff00ff]/30 pb-2 mb-4">
+  <div className="my-4 max-w-sm">
+    <div className="relative w-full rounded-2xl glass-panel p-5 shadow-ambient overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-container/40 to-transparent pointer-events-none" />
+      <div className="relative flex justify-between items-start gap-3 mb-4">
         <div>
-          <h3 className="text-[10px] text-gray-400 uppercase tracking-widest">Politechnika Częstochowska</h3>
-          <h2 className="text-white font-bold text-[10px] leading-tight mt-1 uppercase">Faculty of Artificial Intelligence<br/>& Computer Science</h2>
+          <p className="text-[10px] font-body font-semibold text-on-surface-variant uppercase tracking-widest">
+            Politechnika Częstochowska
+          </p>
+          <h3 className="font-headline text-sm text-on-surface leading-snug mt-1">
+            Faculty of Artificial Intelligence &amp; Computer Science
+          </h3>
         </div>
-        <div className="w-8 h-8 border border-white rounded-full flex items-center justify-center">
-            <span className="text-[8px] font-bold">PCz</span>
+        <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <span className="text-[10px] font-headline font-semibold text-primary">PCz</span>
         </div>
       </div>
-      {/* Content */}
-      <div className="flex gap-4">
-        <div className="w-16 h-20 bg-gray-900 border border-gray-700 rounded flex items-center justify-center">
-             <span className="text-[40px] text-gray-800">?</span>
+      <div className="relative flex gap-4">
+        <div className="w-16 h-20 rounded-xl bg-surface-container flex items-center justify-center">
+          <span className="text-3xl text-on-surface-variant/30 font-headline">?</span>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-2 font-body text-sm">
           <div>
-            <span className="text-[8px] text-[#ff00ff] block">NAME</span>
-            <span className="text-xs text-white font-mono">KRUPA, ADAM</span>
+            <span className="text-[10px] text-primary font-semibold uppercase tracking-wider block">Name</span>
+            <span className="text-on-surface">Krupa, Adam</span>
           </div>
-           <div>
-            <span className="text-[8px] text-[#ff00ff] block">ROLE</span>
-            <span className="text-xs text-white font-mono">STUDENT (AI)</span>
+          <div>
+            <span className="text-[10px] text-primary font-semibold uppercase tracking-wider block">Role</span>
+            <span className="text-on-surface">Student (AI)</span>
           </div>
-           <div>
-            <span className="text-[8px] text-[#ff00ff] block">ID</span>
-            <span className="text-xs text-white font-mono">#1337-AI-2025</span>
+          <div>
+            <span className="text-[10px] text-primary font-semibold uppercase tracking-wider block">ID</span>
+            <span className="text-on-surface-variant">#1337-AI-2025</span>
           </div>
         </div>
-      </div>
-      <div className="absolute bottom-4 right-4">
-        <div className="w-12 h-12 border border-[#ff00ff] rounded-full animate-spin-slow border-t-transparent opacity-50"></div>
       </div>
     </div>
   </div>
 );
 
 export const Terminal = () => {
-  const { soundEnabled, synth, addNotification } = useOutletContext<ContextType>();
+  const { addNotification } = useOutletContext<ContextType>();
   const [input, setInput] = useState('');
   const [currentPath, setCurrentPath] = useState(['~']);
   const [history, setHistory] = useState<HistoryItem[]>([
-    { type: 'sys', content: 'PCSTYLE_OS v2.5.2025 [KERNEL: ACTIVE]' },
-    { type: 'sys', content: 'Type "help" to view available commands.' },
+    { type: 'sys', content: 'pcstyle console — session ready.' },
+    { type: 'sys', content: 'Type "help" for commands.' },
   ]);
   const [isRoot, setIsRoot] = useState(false);
   const [passwordMode, setPasswordMode] = useState(false);
@@ -213,7 +207,7 @@ export const Terminal = () => {
              log({ type: 'sys', content: listOutput });
           } else {
              const fileEls = files.map(([name, node]) => (
-                <span key={name} className={`mr-4 ${node.type === 'dir' ? 'text-blue-400 font-bold' : node.type === 'exec' ? 'text-green-400' : 'text-gray-300'}`}>
+                <span key={name} className={`mr-4 ${node.type === 'dir' ? 'text-primary font-semibold' : node.type === 'exec' ? 'text-on-secondary-container' : 'text-on-surface'}`}>
                   {name}{node.type === 'dir' ? '/' : node.type === 'exec' ? '*' : ''}
                 </span>
              ));
@@ -251,7 +245,7 @@ export const Terminal = () => {
             log({ type: 'error', content: `cat: ${file}: Is a directory` });
           } else if (node.protected && !asRoot) {
              log({ type: 'error', content: 'Access Denied: Root privileges required.' });
-             addNotification('SECURITY_ALERT: UNAUTHORIZED_ACCESS');
+             addNotification('Elevated access required');
           } else {
             log({ type: 'sys', content: node.content || '' });
           }
@@ -395,8 +389,6 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (soundEnabled) synth?.playBlip(800, 'square', 0.05);
-
     if (passwordMode) {
         setPasswordMode(false);
         const password = input.trim();
@@ -411,7 +403,7 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
             }
         } else {
             setHistory(h => [...h, { type: 'error', content: 'Sorry, try again.' }]);
-            addNotification('SUDO: INCORRECT_PASSWORD');
+            addNotification('Incorrect password');
         }
         setPendingCommand(null);
         return;
@@ -444,75 +436,90 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-black/90 backdrop-blur-md border border-[#ff00ff]/30 rounded shadow-[0_0_80px_rgba(255,0,255,0.05)] h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-mono relative overflow-hidden animate-slideUp">
-      {/* Terminal Header */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-[#ff00ff]/10 bg-white/5">
-        <div className="flex items-center gap-2">
-          {isRoot ? <ShieldAlert size={14} className="text-red-500" /> : <TerminalIcon size={14} className="text-[#ff00ff]" />}
-          <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-widest">
-            {isRoot ? 'root@pcstyle:~#' : 'guest@pcstyle:~'}
-          </span>
-        </div>
-        <div className="flex gap-1.5">
-           <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-           <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-        </div>
-      </div>
-      
-      {/* Terminal Output */}
-      <div 
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 scrollbar-custom text-xs sm:text-sm font-medium" 
-        onClick={() => document.getElementById('term-input')?.focus()}
-      >
-        {history.map((line, i) => (
-          <div key={i} className="animate-fadeIn break-words">
-            {line.type === 'user' ? (
-              <div className="flex gap-2 text-white font-bold">
-                <span className={`${line.isRoot ? 'text-red-500' : 'text-green-400'} shrink-0`}>
-                  {line.isRoot ? 'root@pcstyle' : 'guest@pcstyle'}:{line.path}{line.isRoot ? '#' : '$'}
-                </span>
-                <span>{line.content}</span>
-              </div>
-            ) : line.type === 'component' ? (
-               line.content
+    <div className="max-w-4xl mx-auto animate-slideUp">
+      <p className="font-body text-on-surface-variant text-sm mb-4 max-w-xl">
+        A small in-browser shell. Try <span className="text-primary font-medium">help</span>,{' '}
+        <span className="text-primary font-medium">projects</span>, or{' '}
+        <span className="text-primary font-medium">wakatime</span>.
+      </p>
+      <div className="glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-surface-container-low/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            {isRoot ? (
+              <ShieldAlert size={16} className="text-error" />
             ) : (
-              <div className={`
-                pl-4 border-l-2 
-                ${line.type === 'error' ? 'border-red-500 text-red-400' : 
-                  line.type === 'success' ? 'border-green-500 text-gray-300' : 
-                  'border-[#ff00ff]/30 text-gray-400'}
-                py-1 whitespace-pre-wrap font-mono leading-relaxed
-              `}>
-                {line.content}
-              </div>
+              <TerminalIcon size={16} className="text-primary" />
             )}
+            <span className="text-xs text-on-surface-variant font-semibold tracking-tight">
+              {isRoot ? 'root@pcstyle.dev' : 'guest@pcstyle.dev'} · {currentPath.join('/')}
+            </span>
           </div>
-        ))}
-      </div>
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-error/25" />
+            <div className="w-2.5 h-2.5 rounded-full bg-primary/30" />
+            <div className="w-2.5 h-2.5 rounded-full bg-secondary-container/80" />
+          </div>
+        </div>
 
-      {/* Input Area */}
-      <form onSubmit={handleSubmit} className="flex gap-2 items-center bg-black/50 p-2.5 sm:p-3 border-t border-white/10">
-        {!passwordMode && (
-          <span className={`${isRoot ? 'text-red-500' : 'text-green-400'} font-bold text-xs sm:text-sm shrink-0`}>
-            {isRoot ? 'root@pcstyle' : 'guest@pcstyle'}:{currentPath.join('/').replace('~', '~')}{isRoot ? '#' : '$'}
-          </span>
-        )}
-        {passwordMode && (
-            <span className="text-white font-bold text-xs sm:text-sm shrink-0">Password:</span>
-        )}
-        <input 
-          id="term-input"
-          autoFocus
-          type={passwordMode ? "password" : "text"}
-          value={input}
-          onKeyDown={handleKeyDown}
-          onChange={(e) => setInput(e.target.value)}
-          className="bg-transparent border-none outline-none flex-1 text-white text-xs sm:text-sm caret-[#ff00ff]"
-          autoComplete="off"
-        />
-      </form>
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-2 scrollbar-custom text-xs sm:text-sm bg-surface-container-lowest/40"
+          onClick={() => document.getElementById('term-input')?.focus()}
+          role="log"
+        >
+          {history.map((line, i) => (
+            <div key={i} className="animate-fadeIn break-words">
+              {line.type === 'user' ? (
+                <div className="flex gap-2 text-on-surface font-semibold">
+                  <span className={`${line.isRoot ? 'text-error' : 'text-primary'} shrink-0 font-mono text-[11px] sm:text-xs`}>
+                    {line.isRoot ? 'root' : 'guest'}:{line.path}
+                    {line.isRoot ? '#' : '$'}
+                  </span>
+                  <span className="font-mono text-[11px] sm:text-xs">{line.content}</span>
+                </div>
+              ) : line.type === 'component' ? (
+                line.content
+              ) : (
+                <div
+                  className={`pl-4 border-l-2 py-1 whitespace-pre-wrap font-mono text-[11px] sm:text-xs leading-relaxed ${
+                    line.type === 'error'
+                      ? 'border-error text-error'
+                      : line.type === 'success'
+                        ? 'border-primary text-on-surface'
+                        : 'border-primary/25 text-on-surface-variant'
+                  }`}
+                >
+                  {line.content}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 items-center glass-panel-subtle mx-3 mb-3 px-3 py-2.5 rounded-xl"
+        >
+          {!passwordMode && (
+            <span
+              className={`${isRoot ? 'text-error' : 'text-primary'} font-mono font-semibold text-[11px] sm:text-xs shrink-0`}
+            >
+              {isRoot ? 'root' : 'guest'}:{currentPath.join('/')}{isRoot ? '#' : '$'}
+            </span>
+          )}
+          {passwordMode && <span className="text-on-surface font-body text-xs shrink-0">Password</span>}
+          <input
+            id="term-input"
+            autoFocus
+            type={passwordMode ? 'password' : 'text'}
+            value={input}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => setInput(e.target.value)}
+            className="bg-transparent border-none outline-none flex-1 text-on-surface text-xs sm:text-sm caret-primary font-mono min-w-0"
+            autoComplete="off"
+          />
+        </form>
+      </div>
     </div>
   );
 };

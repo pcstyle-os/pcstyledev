@@ -386,7 +386,33 @@
         "title": "zielarz_inventory_core",
         "content": "custom-built inventory management for zielarz, a local vape shop in częstochowa. designed to handle specific domain requirements like liquid strengths (6/12/18mg), longfills, and salts that generic pos systems couldn't support.\n\npowered by convex for real-time updates across multiple screens. includes a customer-facing TV display for live menu availability, a drag-and-drop admin interface, qr code generation, and a complete audit log. it's not just a database; it's the nervous system of the shop."
       }
+    },
+    {
+      "id": "oddech",
+      "name": "Oddech / Re4matik",
+      "desc": "dual-brand next.js + convex platform: course catalog, stripe checkout, workos auth, refine admin, resend, botid, sentry — polish-first marketing and learning.",
+      "stack": [
+        "Next.js",
+        "Convex",
+        "Stripe",
+        "WorkOS",
+        "Refine",
+        "TypeScript",
+        "Tailwind CSS",
+        "Vercel"
+      ],
+      "link": "https://odrodzenieoddechowe.pl",
+      "github": "https://github.com/pc-style/oddech",
+      "status": "active",
+      "pinned": true,
+      "icon": "GraduationCap",
+      "createdAt": "2026-03-20T00:00:00.000Z",
+      "updatedAt": "2026-03-20T00:00:00.000Z",
+      "modal": {
+        "title": "multi_brand_breathwork_platform",
+        "content": "one deployment for odrodzenie oddechowe and re4matik: middleware and proxy map hosts to brand-scoped routes; convex schema and queries filter by brand. public marketing, workshops, faq, contact with validation and bot protection; course purchase flow and authenticated learn area with lessons and media.\n\nadmin: refine for pages, services, workshops, testimonials, pricing, contacts, specialists, manual course access, seeds/migrations. integrations: stripe webhooks, workos authkit + membership sync into convex via signed api routes. quality: typescript strict, vitest, playwright (including csv-driven e2e), eslint with convex rules, csp and hardening (course visibility, webhooks, auth callback allowlist, lesson html sanitization).\n\nlive: odrodzenieoddechowe.pl; re4matik production is re4matik.pl with re4matik.pcstyle.dev used for preview/e2e per infra — repo pc-style/oddech (private)."
+      }
     }
   ],
-  "lastUpdated": "2026-01-14T19:25:00.000Z"
+  "lastUpdated": "2026-03-20T00:00:00.000Z"
 }

@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Synth } from '../../utils/audio';
-
 import { usePerformanceMode } from '../../hooks/usePerformanceMode';
 
-export const AudioVisualizer = ({ synth, isActive }: { synth: Synth | null, isActive: boolean }) => {
+export const AudioVisualizer = ({ synth, isActive }: { synth: Synth | null; isActive: boolean }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLowPerformance = usePerformanceMode();
 
@@ -30,13 +29,7 @@ export const AudioVisualizer = ({ synth, isActive }: { synth: Synth | null, isAc
 
       for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i] / 4;
-        // Gradient color based on height
-        const r = barHeight + (25 * (i / bufferLength));
-        const g = 250 * (i / bufferLength);
-        const b = 255; // Keep it cyan/blue-ish or match magenta?
-
-        // Let's stick to theme
-        ctx.fillStyle = `rgba(255, 0, 255, ${dataArray[i] / 255})`;
+        ctx.fillStyle = `rgba(70, 101, 97, ${dataArray[i] / 320})`;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 1;
       }
@@ -46,7 +39,13 @@ export const AudioVisualizer = ({ synth, isActive }: { synth: Synth | null, isAc
     return () => cancelAnimationFrame(animationId);
   }, [synth, isActive, isLowPerformance]);
 
-  if (!isActive) return <div className="h-8 w-20 bg-gray-900/50 rounded border border-gray-800 flex items-center justify-center opacity-50"><div className="w-full h-[1px] bg-red-500/50"></div></div>;
+  if (!isActive) {
+    return (
+      <div className="h-8 w-20 rounded-full bg-surface-container flex items-center justify-center opacity-60">
+        <div className="w-3/4 h-px bg-on-surface-variant/25 rounded-full" />
+      </div>
+    );
+  }
 
-  return <canvas ref={canvasRef} width={80} height={32} className="opacity-80 mix-blend-screen w-20 h-8" />;
+  return <canvas ref={canvasRef} width={80} height={32} className="opacity-90 w-20 h-8 rounded-md" />;
 };

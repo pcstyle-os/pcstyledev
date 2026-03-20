@@ -1,93 +1,98 @@
-import { useMemo, useState } from 'react'
-import { Calendar } from 'lucide-react'
-import { motion, useMotionValue } from 'framer-motion'
-import { useGitHubContributions } from '../../hooks/useGitHub'
+import { useMemo, useState } from 'react';
+import { Calendar } from 'lucide-react';
+import { motion, useMotionValue } from 'framer-motion';
+import { useGitHubContributions } from '../../hooks/useGitHub';
 
-const LEVEL_COLORS = [
-  'bg-gray-900',
-  'bg-[#ff00ff]/20',
-  'bg-[#ff00ff]/40',
-  'bg-[#ff00ff]/70',
-  'bg-[#ff00ff] shadow-[0_0_4px_#ff00ff]'
-]
+const LEVEL_CLASS = [
+  'bg-surface-variant',
+  'bg-primary/15',
+  'bg-primary/30',
+  'bg-primary/55',
+  'bg-primary',
+];
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export function ContributionHeatmap() {
-  const { contributions, loading, error } = useGitHubContributions()
-  const [hoveredDay, setHoveredDay] = useState<{ date: string; count: number; x?: number; y?: number; isKeyboard?: boolean } | null>(null)
+  const { contributions, loading, error } = useGitHubContributions();
+  const [hoveredDay, setHoveredDay] = useState<{
+    date: string;
+    count: number;
+    x?: number;
+    y?: number;
+    isKeyboard?: boolean;
+  } | null>(null);
 
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
   const displayWeeks = useMemo(() => {
-    if (!contributions?.weeks?.length) return []
-    return contributions.weeks.slice(-17) // Last 120 days (approx 17 weeks)
-  }, [contributions])
+    if (!contributions?.weeks?.length) return [];
+    return contributions.weeks.slice(-17);
+  }, [contributions]);
 
   const monthLabels = useMemo(() => {
-    if (!displayWeeks.length) return []
+    if (!displayWeeks.length) return [];
 
-    const labels: { month: string; col: number }[] = []
-    let lastMonth = -1
+    const labels: { month: string; col: number }[] = [];
+    let lastMonth = -1;
 
     displayWeeks.forEach((week, weekIndex) => {
       if (week.length > 0) {
-        const date = new Date(week[0].date)
-        const month = date.getMonth()
+        const date = new Date(week[0].date);
+        const month = date.getMonth();
         if (month !== lastMonth) {
-          labels.push({ month: MONTHS[month], col: weekIndex })
-          lastMonth = month
+          labels.push({ month: MONTHS[month], col: weekIndex });
+          lastMonth = month;
         }
       }
-    })
+    });
 
-    return labels
-  }, [displayWeeks])
+    return labels;
+  }, [displayWeeks]);
 
   if (loading) {
     return (
-      <div className="p-6 bg-white/5 border border-white/10 overflow-hidden">
+      <div className="p-5 rounded-2xl glass-panel overflow-hidden h-full min-h-[200px]">
         <div className="flex items-center justify-between mb-4">
-          <div className="text-[9px] text-[#ff00ff] uppercase font-black tracking-widest animate-pulse">
-            DOWNLOAD_ACTIVITY_DATA...
+          <div className="text-xs text-primary font-body font-semibold uppercase tracking-widest animate-pulse">
+            Loading activity…
           </div>
         </div>
-        <div className="flex gap-[2px] opacity-20 h-[82px] overflow-hidden">
+        <div className="flex gap-[2px] opacity-30 h-[82px] overflow-hidden">
           {Array.from({ length: 13 }).map((_, weekIndex) => (
             <div key={weekIndex} className="flex flex-col gap-[2px]">
               {Array.from({ length: 7 }).map((_, dayIndex) => (
-                <div key={dayIndex} className="w-[10px] h-[10px] bg-gray-600 animate-pulse" />
+                <div key={dayIndex} className="w-[10px] h-[10px] bg-surface-container rounded-sm animate-pulse" />
               ))}
             </div>
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !contributions) {
     return (
-      <div className="p-6 bg-white/5 border border-white/10">
-        <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">
-          CONTRIBUTION DATA UNAVAILABLE
+      <div className="p-5 rounded-2xl glass-panel h-full min-h-[200px] flex items-center">
+        <div className="text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
+          Contributions unavailable
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div
-      className="p-4 bg-white/5 border border-white/10 h-full relative"
+      className="p-5 rounded-2xl glass-panel h-full relative min-h-[200px]"
       onMouseMove={(e) => {
-        mouseX.set(e.clientX)
-        mouseY.set(e.clientY)
+        mouseX.set(e.clientX);
+        mouseY.set(e.clientY);
       }}
     >
-      {/* Floating Tooltip */}
       {hoveredDay && (
         <motion.div
-          className="fixed z-[100] pointer-events-none px-2 py-1 bg-black/95 border border-[#ff00ff] shadow-[0_0_15px_#ff00ff44] backdrop-blur-sm"
+          className="fixed z-[100] pointer-events-none px-3 py-2 glass-panel rounded-xl shadow-ambient"
           style={{
             left: hoveredDay.isKeyboard ? hoveredDay.x : mouseX,
             top: hoveredDay.isKeyboard ? hoveredDay.y : mouseY,
@@ -95,28 +100,28 @@ export function ContributionHeatmap() {
             y: '-120%',
           }}
         >
-          <div className="text-[10px] font-mono whitespace-nowrap leading-tight">
-            <div className="text-white mb-0.5">{hoveredDay.date}:</div>
-            <div className="text-[#ff00ff] font-bold text-xs">{hoveredDay.count} CONTRIBUTIONS</div>
+          <div className="text-xs font-body whitespace-nowrap leading-tight">
+            <div className="text-on-surface font-medium mb-0.5">{hoveredDay.date}</div>
+            <div className="text-primary font-semibold">{hoveredDay.count} contributions</div>
           </div>
         </motion.div>
       )}
 
-      <div className="flex items-center justify-between gap-10 mb-4">
-        <div className="flex items-center gap-2 text-[9px] text-gray-500 uppercase font-black tracking-widest">
-          <Calendar size={12} className="text-[#ff00ff]" /> ACTIVITY_MAP (120D)
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest">
+          <Calendar size={14} className="text-primary" /> Last ~120 days
         </div>
-        <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest opacity-40">
-          {contributions.totalContributions} TOTAL
-        </span>
+        <span className="text-xs text-on-surface-variant font-body">{contributions.totalContributions} total</span>
       </div>
 
       <div className="relative group">
         <div className="flex gap-2">
-          {/* Days of week labels */}
           <div className="flex flex-col gap-[2px] pt-[20px]">
             {['', 'M', '', 'W', '', 'F', ''].map((day, i) => (
-              <span key={i} className="text-[7px] h-[10px] flex items-center text-gray-700 uppercase font-mono leading-none">
+              <span
+                key={i}
+                className="text-[7px] h-[10px] flex items-center text-on-surface-variant/70 font-body uppercase leading-none"
+              >
                 {day}
               </span>
             ))}
@@ -125,22 +130,18 @@ export function ContributionHeatmap() {
           <div className="flex-1 overflow-hidden">
             <div className="overflow-x-auto scrollbar-custom pb-1">
               <div className="w-fit">
-                {/* month labels */}
                 <div className="h-4 relative mb-1 w-full">
                   {monthLabels.map(({ month, col }) => (
                     <span
                       key={`${month}-${col}`}
-                      className="text-[8px] text-gray-600 uppercase font-mono absolute transition-colors group-hover:text-gray-400"
-                      style={{
-                        left: `${col * 12}px`, // 10px width + 2px gap
-                      }}
+                      className="text-[8px] text-on-surface-variant/80 font-body uppercase absolute"
+                      style={{ left: `${col * 12}px` }}
                     >
                       {month}
                     </span>
                   ))}
                 </div>
 
-                {/* grid */}
                 <div className="flex gap-[2px]">
                   {displayWeeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[2px]">
@@ -151,31 +152,31 @@ export function ContributionHeatmap() {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{
                             delay: (weekIndex * 7 + dayIndex) * 0.002,
-                            duration: 0.3
+                            duration: 0.3,
                           }}
                           role="img"
                           tabIndex={0}
                           aria-label={`${day.date}: ${day.count} contributions`}
-                          className={`w-[10px] h-[10px] ${LEVEL_COLORS[day.level] || LEVEL_COLORS[0]} transition-all hover:scale-150 focus:scale-150 focus:outline-none hover:z-20 focus:z-20 hover:ring-1 focus:ring-1 hover:ring-white/50 focus:ring-[#ff00ff] relative outline-none`}
+                          className={`w-[10px] h-[10px] rounded-[2px] ${LEVEL_CLASS[day.level] || LEVEL_CLASS[0]} transition-transform hover:scale-150 focus:scale-150 focus:outline-none focus:ring-2 focus:ring-primary/30 relative outline-none`}
                           onMouseEnter={() => setHoveredDay({ date: day.date, count: day.count, isKeyboard: false })}
                           onMouseLeave={() => setHoveredDay(null)}
                           onFocus={(e) => {
-                            const rect = e.currentTarget.getBoundingClientRect()
+                            const rect = e.currentTarget.getBoundingClientRect();
                             setHoveredDay({
                               date: day.date,
                               count: day.count,
                               x: rect.left + rect.width / 2,
                               y: rect.top,
-                              isKeyboard: true
-                            })
+                              isKeyboard: true,
+                            });
                           }}
                           onBlur={() => setHoveredDay(null)}
                         />
                       ))}
-                      {/* Fill in missing days if week is short */}
-                      {week.length < 7 && Array.from({ length: 7 - week.length }).map((_, i) => (
-                        <div key={`empty-${i}`} className="w-[10px] h-[10px] bg-transparent" />
-                      ))}
+                      {week.length < 7 &&
+                        Array.from({ length: 7 - week.length }).map((_, i) => (
+                          <div key={`empty-${i}`} className="w-[10px] h-[10px] bg-transparent" />
+                        ))}
                     </div>
                   ))}
                 </div>
@@ -184,17 +185,16 @@ export function ContributionHeatmap() {
           </div>
         </div>
 
-        {/* legend */}
-        <div className="flex items-center gap-1 mt-3 ml-5">
-          <span className="text-[7px] text-gray-700 uppercase font-mono">less</span>
-          <div className="flex gap-[1px]">
-            {LEVEL_COLORS.map((color, i) => (
-              <div key={i} className={`w-[8px] h-[8px] ${color}`} />
+        <div className="flex items-center gap-2 mt-3 ml-5">
+          <span className="text-[7px] text-on-surface-variant/70 uppercase font-body">Less</span>
+          <div className="flex gap-[2px]">
+            {LEVEL_CLASS.map((color, i) => (
+              <div key={i} className={`w-[8px] h-[8px] rounded-[2px] ${color}`} />
             ))}
           </div>
-          <span className="text-[7px] text-gray-700 uppercase font-mono">more</span>
+          <span className="text-[7px] text-on-surface-variant/70 uppercase font-body">More</span>
         </div>
       </div>
     </div>
-  )
+  );
 }

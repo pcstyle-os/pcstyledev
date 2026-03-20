@@ -5,7 +5,7 @@ import projectsData from '../data/projects/projects.json';
 import stackConfig from '../data/projects/stack-canonical.json';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { Synth } from '../utils/audio';
-import { Github } from 'lucide-react';
+import { Github, Sparkles, FolderKanban } from 'lucide-react';
 import type { Project, ProjectStatus } from '../lib/types';
 
 interface ContextType {
@@ -113,24 +113,6 @@ export const Projects = () => {
     });
     return counts;
   }, [normalizedQuery, selectedStacks]);
-
-  const totalStackCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    PROJECTS.forEach((project) => {
-      project.stack.forEach((stack) => {
-        counts.set(stack, (counts.get(stack) ?? 0) + 1);
-      });
-    });
-    return counts;
-  }, []);
-
-  const topStackSet = useMemo(() => {
-    const top = [...totalStackCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([label]) => label);
-    return new Set(top);
-  }, [totalStackCounts]);
 
   const availableStacks = useMemo(
     () => STACKS.filter((stack) => (stackCounts.get(stack) ?? 0) > 0 || selectedStacks.includes(stack)),
@@ -250,219 +232,247 @@ export const Projects = () => {
   const hasActiveFilters = activeFilters.length > 0;
 
   return (
-    <div className="space-y-10 sm:space-y-14 md:space-y-20 animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6 sm:gap-8 md:gap-10 border-l-[6px] border-[#ff00ff] pl-4 sm:pl-6 md:pl-10 py-4">
-        <div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter mb-4 italic leading-none">
-            artifact_nodes
-          </h2>
-          <p className="text-gray-500 max-w-xl text-xs lowercase font-mono opacity-80 leading-relaxed">
-            exploring the junction of human interaction and autonomous code.
-            decrypted from public repository archives.
-          </p>
-          <div className="pt-6">
-            <a
-              href="https://github.com/pc-style/pcstyledev"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-3 px-10 py-4 border border-gray-800 text-gray-400 hover:text-white hover:border-white transition-all font-black uppercase text-[10px] tracking-[0.35em] cursor-none"
-            >
-              <Github size={16} /> show_source
-            </a>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-          <div className="p-4 bg-white/5 border border-white/10">
-            <span className="text-[9px] text-[#ff00ff] block uppercase font-black tracking-widest mb-1">total_nodes</span>
-            <span className="text-3xl font-mono text-white tracking-tighter">{totalNodes}</span>
-          </div>
-          <div className="p-4 bg-white/5 border border-white/10">
-            <span className="text-[9px] text-[#ff00ff] block uppercase font-black tracking-widest mb-1">active_nodes</span>
-            <span className="text-3xl font-mono text-white tracking-tighter">{activeNodes}</span>
-          </div>
-          <div className="p-4 bg-white/5 border border-white/10">
-            <span className="text-[9px] text-[#ff00ff] block uppercase font-black tracking-widest mb-1">exp_nodes</span>
-            <span className="text-3xl font-mono text-white tracking-tighter">{experimentalNodes}</span>
-          </div>
-          <div className="p-4 bg-white/5 border border-white/10">
-            <span className="text-[9px] text-[#ff00ff] block uppercase font-black tracking-widest mb-1">last_updated</span>
-            <span className="text-3xl font-mono text-white tracking-tighter">{lastUpdated}</span>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-16 sm:space-y-24 md:space-y-32 animate-fadeIn">
+      <section className="relative">
+        <h1 className="font-headline text-5xl sm:text-7xl md:text-8xl text-on-surface leading-[0.95] tracking-tight mb-12 md:mb-16 text-glow-soft">
+          The <span className="italic font-light text-primary">translucent</span>
+          <br />
+          curator.
+        </h1>
 
-      <div className="space-y-4 sm:space-y-6 border border-white/10 bg-black/40 p-4 sm:p-6 md:p-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-[10px] text-[#ff00ff] block uppercase font-black tracking-[0.4em]">filter_matrix</span>
-            <p className="text-xs text-gray-500 font-mono lowercase">
-              showing {displayProjects.length} / {PROJECTS.length} nodes
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleFiltersToggle}
-              aria-expanded={filtersOpen}
-              aria-controls="project-filter-panel"
-              className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-3 border border-white/10 text-gray-400 hover:text-white hover:border-white transition-all"
-            >
-              {filtersOpen ? 'hide_filters' : 'show_filters'}
-            </button>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-[10px] uppercase font-black tracking-[0.3em] px-4 py-3 border border-white/10 text-gray-500 hover:text-white hover:border-white transition-all"
-              >
-                clear_filters
-              </button>
-            )}
-          </div>
-        </div>
-
-        {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2">
-            {activeFilters.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                onClick={filter.onRemove}
-                className="px-3 py-2 text-[9px] font-black uppercase tracking-[0.25em] border border-[#ff00ff]/40 text-[#ff00ff] bg-[#ff00ff]/10 hover:bg-transparent transition-all"
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {filtersOpen && (
-          <div id="project-filter-panel" className="space-y-6">
-            <div className="flex flex-col lg:flex-row gap-6 lg:items-end lg:justify-between">
-              <div className="flex-1">
-                <label
-                  htmlFor="project-search"
-                  className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block mb-3"
-                >
-                  search_nodes
-                </label>
-                <input
-                  id="project-search"
-                  type="search"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="name, description, stack"
-                  className="w-full bg-black/60 border border-white/10 text-[11px] uppercase tracking-[0.25em] px-4 py-3 text-gray-300 font-black focus:outline-none focus-visible:border-white/40"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block mb-3">
-                  sort_by
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="bg-black/60 border border-white/10 text-[10px] uppercase tracking-[0.3em] px-4 py-3 text-gray-300 font-black focus:outline-none focus-visible:border-white/40"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="text-black">
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
+          <div className="col-span-1 md:col-span-2 glass-panel p-8 sm:p-10 rounded-[2rem] flex flex-col justify-between min-h-[260px] relative overflow-hidden group">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-container/30 rounded-full blur-3xl group-hover:bg-primary-container/50 transition-all duration-700 pointer-events-none" />
+            <div className="flex items-center gap-3 text-on-surface-variant mb-4 relative z-10">
+              <Sparkles size={20} className="text-primary opacity-80" />
+              <span className="font-body text-xs uppercase tracking-widest font-semibold">Archive</span>
             </div>
+            <div className="relative z-10">
+              <p className="font-headline text-5xl sm:text-6xl text-primary mb-2">{totalNodes}</p>
+              <p className="text-on-surface-variant font-body font-light max-w-sm leading-relaxed">
+                Projects and experiments in the public catalog — filtered from repository metadata.
+              </p>
+            </div>
+          </div>
 
-            {showStackFilter && (
-              <div>
-                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block mb-3">
-                  stack_filter
-                </span>
-                <div className="flex flex-wrap gap-3">
-                  {availableStacks.map((stack) => {
-                    const active = selectedStacks.includes(stack);
-                    const count = stackCounts.get(stack) ?? 0;
-                    const disabled = count === 0 && !active;
-                    const isTopStack = topStackSet.has(stack);
-                    return (
-                      <button
-                        key={stack}
-                        onClick={() => toggleSelection(stack, selectedStacks, setSelectedStacks)}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${active
-                            ? 'border-[#ff00ff] text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_18px_rgba(255,0,255,0.2)]'
-                            : 'border-white/10 text-gray-500 hover:text-white hover:border-white/40'
-                          } ${isTopStack ? 'shadow-[0_0_22px_rgba(255,0,255,0.35)]' : ''} ${disabled ? 'opacity-40 cursor-not-allowed' : ''
-                          }`}
-                        aria-pressed={active}
-                        aria-disabled={disabled}
-                        disabled={disabled}
-                        type="button"
-                      >
-                        {stack} <span className="ml-2 text-[9px] text-gray-600">{count}</span>
-                      </button>
-                    );
-                  })}
+          <div className="glass-panel p-8 rounded-[2rem] flex flex-col justify-between min-h-[200px]">
+            <FolderKanban className="text-primary mb-6" size={28} strokeWidth={1.5} />
+            <div>
+              <p className="font-headline text-4xl text-on-surface mb-1">{String(activeNodes).padStart(2, '0')}</p>
+              <p className="text-on-surface-variant text-sm uppercase tracking-wider font-body font-medium">Active</p>
+            </div>
+          </div>
+
+          <div className="editorial-gradient p-8 rounded-[2rem] flex flex-col justify-between shadow-ambient min-h-[200px]">
+            <div className="flex justify-end">
+              <Sparkles className="text-primary-container opacity-90" size={26} strokeWidth={1.25} />
+            </div>
+            <div className="text-on-primary">
+              <p className="font-headline text-4xl mb-1">{experimentalNodes}</p>
+              <p className="opacity-80 text-sm uppercase tracking-wider font-body font-medium">Experimental</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <a
+            href="https://github.com/pc-style/pcstyledev"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-low text-on-surface font-body text-sm font-semibold hover:bg-surface-container transition-colors shadow-ambient"
+          >
+            <Github size={18} /> View source
+          </a>
+          <p className="text-on-surface-variant text-sm font-body">
+            Last index update: <span className="text-primary font-medium">{lastUpdated}</span>
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-[2.5rem] bg-surface-container-low p-6 sm:p-8 md:p-10 relative overflow-hidden">
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary-container/20 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10">
+          <div>
+            <span className="font-body text-primary font-semibold tracking-widest uppercase text-xs mb-3 block">
+              Curation
+            </span>
+            <h2 className="font-headline text-4xl sm:text-5xl md:text-6xl text-on-surface tracking-tight">Projects</h2>
+          </div>
+          <p className="text-on-surface-variant max-w-md font-body font-light text-base sm:text-lg italic leading-relaxed">
+            Sensory-first interfaces, tools, and systems — filter by stack, status, or keyword.
+          </p>
+        </div>
+
+        <div className="relative z-10 glass-panel rounded-3xl p-5 sm:p-8 space-y-6 mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <p className="font-body text-sm text-on-surface-variant">
+                Showing <span className="text-primary font-semibold">{displayProjects.length}</span> of{' '}
+                <span className="font-semibold text-on-surface">{PROJECTS.length}</span> projects
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleFiltersToggle}
+                aria-expanded={filtersOpen}
+                aria-controls="project-filter-panel"
+                className="text-xs font-body font-semibold uppercase tracking-widest px-5 py-2.5 rounded-full bg-surface-container text-on-surface hover:bg-primary-container/40 transition-colors"
+              >
+                {filtersOpen ? 'Hide filters' : 'Filters & sort'}
+              </button>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-body font-semibold text-on-surface-variant hover:text-primary transition-colors uppercase tracking-widest"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          </div>
+
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={filter.onRemove}
+                  className="px-4 py-2 rounded-full text-xs font-body font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                >
+                  {filter.label} ×
+                </button>
+              ))}
+            </div>
+          )}
+
+          {filtersOpen && (
+            <div id="project-filter-panel" className="space-y-8 pt-2">
+              <div className="flex flex-col lg:flex-row gap-6 lg:items-end lg:justify-between">
+                <div className="flex-1">
+                  <label htmlFor="project-search" className="text-xs font-body font-semibold text-on-surface-variant uppercase tracking-widest block mb-2">
+                    Search
+                  </label>
+                  <input
+                    id="project-search"
+                    type="search"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Name, description, stack…"
+                    className="w-full bg-surface-container-low rounded-xl px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/25"
+                  />
+                </div>
+                <div className="lg:min-w-[200px]">
+                  <label className="text-xs font-body font-semibold text-on-surface-variant uppercase tracking-widest block mb-2">
+                    Sort
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="w-full bg-surface-container-low rounded-xl px-4 py-3 font-body text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25"
+                  >
+                    {SORT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label.replace(/_/g, ' ')}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            )}
 
-            {showStatusFilter && (
-              <div>
-                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-500 block mb-3">
-                  status_filter
-                </span>
-                <div className="flex flex-wrap gap-3">
-                  {availableStatuses.map((status) => {
-                    const active = selectedStatuses.includes(status);
-                    const count = statusCounts.get(status) ?? 0;
-                    const disabled = count === 0 && !active;
-                    return (
-                      <button
-                        key={status}
-                        onClick={() => toggleSelection(status, selectedStatuses, setSelectedStatuses)}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] border transition-all ${active
-                            ? 'border-[#ff00ff] text-[#ff00ff] bg-[#ff00ff]/10 shadow-[0_0_18px_rgba(255,0,255,0.2)]'
-                            : 'border-white/10 text-gray-500 hover:text-white hover:border-white/40'
+              {showStackFilter && (
+                <div>
+                  <span className="text-xs font-body font-semibold text-on-surface-variant uppercase tracking-widest block mb-3">
+                    Stack
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {availableStacks.map((stack) => {
+                      const active = selectedStacks.includes(stack);
+                      const count = stackCounts.get(stack) ?? 0;
+                      const disabled = count === 0 && !active;
+                      return (
+                        <button
+                          key={stack}
+                          type="button"
+                          onClick={() => toggleSelection(stack, selectedStacks, setSelectedStacks)}
+                          className={`px-4 py-2 rounded-full text-xs font-body font-medium transition-all ${
+                            active
+                              ? 'bg-primary text-on-primary shadow-ambient'
+                              : 'bg-surface-container text-on-surface-variant hover:text-primary hover:bg-primary-container/30'
                           } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                        aria-pressed={active}
-                        aria-disabled={disabled}
-                        disabled={disabled}
-                        type="button"
-                      >
-                        {status} <span className="ml-2 text-[9px] text-gray-600">{count}</span>
-                      </button>
-                    );
-                  })}
+                          aria-pressed={active}
+                          aria-disabled={disabled}
+                          disabled={disabled}
+                        >
+                          {stack}{' '}
+                          <span className="opacity-70">{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-        {displayProjects.length === 0 ? (
-          <div className="col-span-full border border-white/10 bg-black/40 p-10 text-center">
-            <p className="text-[11px] uppercase tracking-[0.4em] text-gray-600 font-black">no_nodes_match_filters</p>
-          </div>
-        ) : (
-          displayProjects.map((p, idx) => (
-            <ProjectCard
-              key={p.id}
-              project={p}
-              soundEnabled={soundEnabled}
-              synth={synth}
-              delay={idx * 50}
-              onOpenModal={setActiveModalProject}
-            />
-          ))
-        )}
-      </div>
+              {showStatusFilter && (
+                <div>
+                  <span className="text-xs font-body font-semibold text-on-surface-variant uppercase tracking-widest block mb-3">
+                    Status
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {availableStatuses.map((status) => {
+                      const active = selectedStatuses.includes(status);
+                      const count = statusCounts.get(status) ?? 0;
+                      const disabled = count === 0 && !active;
+                      return (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => toggleSelection(status, selectedStatuses, setSelectedStatuses)}
+                          className={`px-4 py-2 rounded-full text-xs font-body font-medium transition-all ${
+                            active
+                              ? 'bg-primary text-on-primary shadow-ambient'
+                              : 'bg-surface-container text-on-surface-variant hover:text-primary hover:bg-primary-container/30'
+                          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                          aria-pressed={active}
+                          aria-disabled={disabled}
+                          disabled={disabled}
+                        >
+                          {status}{' '}
+                          <span className="opacity-70">{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
-      <ProjectModal
-        project={activeModalProject}
-        onClose={() => setActiveModalProject(null)}
-      />
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+          {displayProjects.length === 0 ? (
+            <div className="col-span-full glass-panel rounded-[2rem] p-12 text-center">
+              <p className="font-body text-on-surface-variant">No projects match these filters.</p>
+            </div>
+          ) : (
+            displayProjects.map((p, idx) => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                soundEnabled={soundEnabled}
+                synth={synth}
+                delay={idx * 50}
+                onOpenModal={setActiveModalProject}
+              />
+            ))
+          )}
+        </div>
+      </section>
+
+      <ProjectModal project={activeModalProject} onClose={() => setActiveModalProject(null)} />
     </div>
   );
 };
