@@ -1,0 +1,18 @@
+---
+description: After shipping changes — commit, push, and verify CI or deploy logs
+alwaysApply: true
+---
+
+# Push and verify logs
+
+When the user asks to **ship**, **push**, **deploy**, or similar after code changes (or when finishing a non-trivial feature they clearly want on the remote):
+
+1. **Quality gate** — Run `bun run build` (and `bun run lint` if the project has it) before committing when changes are substantial.
+2. **Commit** — Stage relevant files; use a clear conventional message (`feat:`, `fix:`, `chore:`, etc.).
+3. **Push** — Push the correct branch to `origin` (or the branch the user specifies).
+4. **Wait / check logs**
+   - If **GitHub Actions** exist: `gh run list --repo <owner/repo> --branch <branch> --limit 5`, then `gh run watch <run-id>` on the latest run for that push until it completes (or poll `gh run view <id> --log-failed` on failure).
+   - **This repo** (`pcstyle-os/pcstyledev`): there are often **no** Actions on `main`; say so explicitly and tell the user to confirm **Vercel** (or their host) deployment logs in the dashboard if they use connected git deploys.
+5. **Report** — Summarize commit SHA, push result, and CI/deploy outcome (success, skipped, or where to look).
+
+Do **not** skip push when the user asked for it unless there is nothing to commit and the branch is already synced.
