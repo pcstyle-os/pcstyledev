@@ -11,10 +11,12 @@ function GitHubMainStats() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3 md:gap-4 h-full">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-5 rounded-2xl bg-surface-container min-h-[100px] animate-pulse" />
-        ))}
+      <div className="rounded-2xl glass-panel shadow-ambient p-4 md:p-5 h-full min-h-[140px] xl:min-h-[180px] animate-pulse">
+        <div className="grid grid-cols-2 gap-3 h-full">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl bg-surface-container/80 min-h-[52px]" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -29,22 +31,24 @@ function GitHubMainStats() {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4 h-full">
-      {mainStats.map((stat) => (
-        <motion.div
-          key={stat.label}
-          whileHover={{ y: -2 }}
-          className="p-5 rounded-2xl bg-surface-container-lowest/70 backdrop-blur-sm shadow-ambient flex flex-col justify-center transition-shadow hover:shadow-ambient"
-        >
-          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest mb-2">
-            <stat.icon size={14} className="text-primary" /> {stat.label}
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+      className="rounded-2xl glass-panel shadow-ambient p-4 md:p-5 h-full flex flex-col justify-center"
+    >
+      <div className="grid grid-cols-2 gap-x-5 gap-y-2.5">
+        {mainStats.map((stat) => (
+          <div key={stat.label} className="flex flex-col justify-center gap-0.5 min-w-0">
+            <div className="flex items-center gap-1.5 text-[10px] text-on-surface-variant font-body font-semibold uppercase tracking-widest">
+              <stat.icon size={12} className="text-primary shrink-0" /> {stat.label}
+            </div>
+            <span className="text-lg md:text-xl xl:text-2xl font-headline text-on-surface tracking-tight leading-none tabular-nums">
+              {stat.value}
+            </span>
           </div>
-          <span className="text-2xl md:text-3xl font-headline text-on-surface tracking-tight leading-none">
-            {stat.value}
-          </span>
-        </motion.div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -54,8 +58,14 @@ function GitHubExtraStats() {
   if (loading) {
     return (
       <div className="flex flex-col gap-3 md:gap-4 h-full">
-        <div className="p-5 rounded-2xl bg-surface-container min-h-[100px] animate-pulse flex-1" />
-        <div className="p-5 rounded-2xl bg-surface-container min-h-[100px] animate-pulse flex-1" />
+        <div className="rounded-2xl glass-panel shadow-ambient min-h-[160px] xl:min-h-[200px] flex-1 animate-pulse p-6 md:p-8">
+          <div className="h-3 w-40 rounded bg-surface-container mb-4" />
+          <div className="h-14 xl:h-20 w-48 rounded-lg bg-surface-container" />
+        </div>
+        <div className="rounded-2xl glass-panel shadow-ambient min-h-[88px] animate-pulse p-4">
+          <div className="h-2.5 w-28 rounded bg-surface-container mb-2" />
+          <div className="h-4 w-full max-w-xs rounded bg-surface-container" />
+        </div>
       </div>
     );
   }
@@ -67,12 +77,13 @@ function GitHubExtraStats() {
       {stats.totalCommits !== undefined && (
         <motion.div
           whileHover={{ y: -2 }}
-          className="p-5 rounded-2xl bg-surface-container-lowest/70 backdrop-blur-sm shadow-ambient md:flex-1 flex flex-col justify-center"
+          transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+          className="rounded-2xl glass-panel shadow-ambient flex flex-col justify-center flex-1 p-6 md:p-8 xl:p-10 xl:min-h-[200px]"
         >
-          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest mb-2">
+          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest mb-3 xl:mb-4">
             <Activity size={14} className="text-primary" /> Contributions (all-time)
           </div>
-          <span className="text-2xl md:text-4xl font-headline text-on-surface tracking-tight leading-none">
+          <span className="text-4xl md:text-5xl xl:text-6xl font-headline text-on-surface tracking-tighter leading-none tabular-nums">
             {stats.totalCommits.toLocaleString()}
           </span>
         </motion.div>
@@ -82,16 +93,17 @@ function GitHubExtraStats() {
         <motion.button
           type="button"
           whileHover={{ y: -2 }}
-          className="p-5 rounded-2xl bg-surface-container-lowest/70 backdrop-blur-sm shadow-ambient text-left md:flex-1 flex flex-col justify-center transition-colors hover:bg-primary-container/20"
+          transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+          className="rounded-2xl glass-panel shadow-ambient text-left p-4 md:p-5 flex flex-col justify-center transition-colors hover:bg-primary-container/15"
           onClick={() => window.open(stats.mostActiveRepo?.url || stats.lastCommit?.url, '_blank')}
         >
-          <div className="flex items-center gap-2 text-xs text-on-surface-variant font-body font-semibold uppercase tracking-widest mb-2">
-            <TerminalIcon size={14} className="text-primary" /> Active focus
+          <div className="flex items-center gap-2 text-[10px] text-on-surface-variant font-body font-semibold uppercase tracking-widest mb-1.5">
+            <TerminalIcon size={12} className="text-primary" /> Active focus
           </div>
-          <div className="truncate text-base md:text-lg font-headline text-on-surface mb-1">
+          <div className="truncate text-sm md:text-base font-headline text-on-surface mb-0.5">
             {(stats.mostActiveRepo?.name || stats.lastCommit?.repo || '').split('/').pop()}
           </div>
-          <div className="text-xs text-on-surface-variant font-body">
+          <div className="text-[11px] text-on-surface-variant font-body">
             {stats.mostActiveRepo?.commits ?? 'Recent'} commits · open repo
           </div>
         </motion.button>
@@ -116,22 +128,27 @@ export function Stats() {
       </div>
 
       <section className="space-y-6">
-        <div className="flex items-center gap-2 text-xs text-primary font-body font-semibold uppercase tracking-widest">
-          <Github size={16} /> GitHub
+        <div className="label-editorial flex items-center gap-2 text-xs text-primary">
+          <Github size={16} className="shrink-0" /> GitHub
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 xl:gap-6 xl:items-stretch">
+          {/* Hero spread: contributions hero (~2 cols) + dense profile stats */}
+          <div className="md:col-span-1 xl:col-span-2 min-w-0 flex flex-col">
+            <GitHubExtraStats />
+          </div>
+          <div className="md:col-span-1 xl:col-span-2 min-w-0 flex flex-col">
             <GitHubMainStats />
           </div>
-          <div className="md:col-span-1 xl:col-span-1">
+
+          {/* Second row: wide calendar + tall visual sidebar */}
+          <div className="md:col-span-2 xl:col-span-3 min-w-0 flex flex-col">
             <ContributionHeatmap />
           </div>
-          <div className="md:col-span-1 xl:col-span-1">
-            <VisualContributionHeatmap />
-          </div>
-          <div className="md:col-span-1 xl:col-span-1">
-            <GitHubExtraStats />
+          <div className="md:col-span-2 xl:col-span-1 min-w-0 flex flex-col xl:min-h-[280px]">
+            <div className="flex-1 min-h-[220px] xl:min-h-0 xl:h-full flex flex-col">
+              <VisualContributionHeatmap />
+            </div>
           </div>
         </div>
       </section>

@@ -436,13 +436,13 @@ RANGE: ${data.range?.start || '?'} — ${data.range?.end || '?'}
   };
 
   return (
-    <div className="max-w-4xl mx-auto animate-slideUp">
+    <div className="terminal-chassis max-w-4xl mx-auto animate-slideUp">
       <p className="font-body text-on-surface-variant text-sm mb-4 max-w-xl">
         A small in-browser shell. Try <span className="text-primary font-medium">help</span>,{' '}
         <span className="text-primary font-medium">projects</span>, or{' '}
         <span className="text-primary font-medium">wakatime</span>.
       </p>
-      <div className="glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden">
+      <div className="terminal-skin glass-panel rounded-[1.75rem] shadow-ambient h-[70vh] sm:h-[480px] md:h-[550px] lg:h-[600px] flex flex-col font-body relative overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-surface-container-low/80 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             {isRoot ? (

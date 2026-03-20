@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useMemo, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Box, Zap } from 'lucide-react';
 import { useGitHubContributions } from '../../hooks/useGitHub';
 
@@ -31,22 +31,11 @@ function voxelFill(day: { level: number; color?: string }) {
 export function VisualContributionHeatmap() {
   const { contributions, loading, error } = useGitHubContributions();
   const [hovered, setHovered] = useState<{ date: string; count: number } | null>(null);
+  const [tipPos, setTipPos] = useState({ x: 0, y: 0 });
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 22, stiffness: 120 };
-  const rotateX = useSpring(useTransform(mouseY, [0, 500], [8, -4]), springConfig);
-  const rotateZ = useSpring(useTransform(mouseX, [0, 1000], [-6, 6]), springConfig);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
+  const updateTipFromEvent = useCallback((clientX: number, clientY: number) => {
+    setTipPos({ x: clientX, y: clientY });
+  }, []);
 
   const displayWeeks = useMemo(() => {
     if (!contributions?.weeks?.length) return [];
@@ -92,20 +81,20 @@ export function VisualContributionHeatmap() {
       </div>
 
       {hovered && (
-        <motion.div
-          className="fixed z-[100] pointer-events-none px-3 py-2 glass-panel rounded-xl shadow-ambient"
+        <div
+          role="tooltip"
+          className="fixed z-[200] pointer-events-none px-3 py-2 rounded-xl border border-primary/35 bg-surface-container-lowest/95 text-on-surface shadow-lg backdrop-blur-md dark:border-primary/40 dark:bg-surface-container-low/95"
           style={{
-            left: mouseX,
-            top: mouseY,
-            x: '-50%',
-            y: '-120%',
+            left: tipPos.x,
+            top: tipPos.y,
+            transform: 'translate(-50%, calc(-100% - 10px))',
           }}
         >
           <div className="text-xs font-body whitespace-nowrap leading-tight">
-            <div className="text-on-surface font-medium mb-0.5">{hovered.date}</div>
-            <div className="text-primary font-semibold">{hovered.count} contributions</div>
+            <div className="font-medium mb-0.5 text-on-surface">{hovered.date}</div>
+            <div className="font-semibold text-primary">{hovered.count} contributions</div>
           </div>
-        </motion.div>
+        </div>
       )}
 
       <div className="flex-1 flex items-center justify-center p-4 relative">
@@ -113,8 +102,7 @@ export function VisualContributionHeatmap() {
           className="relative"
           style={{
             perspective: 1200,
-            rotateX,
-            rotateZ,
+            transform: 'rotateX(6deg) rotateZ(-2deg)',
             transformStyle: 'preserve-3d',
           }}
         >
@@ -134,8 +122,14 @@ export function VisualContributionHeatmap() {
                         backgroundColor: fill,
                         boxShadow: LEVEL_SHADOWS[L],
                       }}
-                      onMouseEnter={() => setHovered({ date: day.date, count: day.count })}
-                      onMouseLeave={() => setHovered(null)}
+                      onPointerEnter={(e) => {
+                        setHovered({ date: day.date, count: day.count });
+                        updateTipFromEvent(e.clientX, e.clientY);
+                      }}
+                      onPointerMove={(e) => {
+                        updateTipFromEvent(e.clientX, e.clientY);
+                      }}
+                      onPointerLeave={() => setHovered(null)}
                       transition={{
                         delay: (weekIndex * 7 + dayIndex) * 0.004,
                         duration: 0.6,
@@ -150,7 +144,7 @@ export function VisualContributionHeatmap() {
                       }}
                     >
                       <div
-                        className="absolute top-0 left-0 w-full h-[10px] rounded-[2px]"
+                        className="pointer-events-none absolute top-0 left-0 w-full h-[10px] rounded-[2px]"
                         style={{
                           backgroundColor: fill,
                           transform: 'translateY(-4px) rotateX(90deg)',
@@ -161,7 +155,7 @@ export function VisualContributionHeatmap() {
                         <div className="absolute inset-0 bg-white/25 opacity-0 group-hover/voxel:opacity-50 transition-opacity rounded-[2px]" />
                       </div>
                       <div
-                        className="absolute top-0 left-0 h-full w-[10px] rounded-[2px]"
+                        className="pointer-events-none absolute top-0 left-0 h-full w-[10px] rounded-[2px]"
                         style={{
                           backgroundColor: fill,
                           transform: 'translateX(-4px) rotateY(90deg)',
@@ -169,7 +163,7 @@ export function VisualContributionHeatmap() {
                         }}
                       />
                       <div
-                        className="absolute top-0 right-0 h-full w-[10px] rounded-[2px]"
+                        className="pointer-events-none absolute top-0 right-0 h-full w-[10px] rounded-[2px]"
                         style={{
                           backgroundColor: fill,
                           transform: 'translateX(4px) rotateY(90deg)',

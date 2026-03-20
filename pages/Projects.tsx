@@ -7,6 +7,7 @@ import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { Synth } from '../utils/audio';
 import { Github, Sparkles, FolderKanban } from 'lucide-react';
 import type { Project, ProjectStatus } from '../lib/types';
+import type { ProjectCardVariant } from '../components/ui/ProjectCard';
 
 interface ContextType {
   soundEnabled: boolean;
@@ -41,6 +42,19 @@ const parseSort = (value: string | null): SortOption => {
   const match = SORT_OPTIONS.find((option) => option.value === value);
   return match ? match.value : 'featured';
 };
+
+/** Visual rhythm for the project mosaic: full-width beats + occasional tall tiles. */
+function projectTileVariant(index: number): ProjectCardVariant {
+  if (index % 5 === 0) return 'wide';
+  if (index % 4 === 2) return 'tall';
+  return 'default';
+}
+
+function projectGridCellClass(variant: ProjectCardVariant): string {
+  if (variant === 'wide') return 'md:col-span-2 xl:col-span-3';
+  if (variant === 'tall') return 'md:row-span-2';
+  return '';
+}
 
 export const Projects = () => {
   const { soundEnabled, synth } = useOutletContext<ContextType>();
@@ -452,22 +466,27 @@ export const Projects = () => {
           )}
         </div>
 
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:grid-flow-dense md:auto-rows-min gap-6 md:gap-8">
           {displayProjects.length === 0 ? (
             <div className="col-span-full glass-panel rounded-[2rem] p-12 text-center">
               <p className="font-body text-on-surface-variant">No projects match these filters.</p>
             </div>
           ) : (
-            displayProjects.map((p, idx) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                soundEnabled={soundEnabled}
-                synth={synth}
-                delay={idx * 50}
-                onOpenModal={setActiveModalProject}
-              />
-            ))
+            displayProjects.map((p, idx) => {
+              const variant = projectTileVariant(idx);
+              return (
+                <div key={p.id} className={`min-w-0 ${projectGridCellClass(variant)}`}>
+                  <ProjectCard
+                    project={p}
+                    soundEnabled={soundEnabled}
+                    synth={synth}
+                    delay={idx * 50}
+                    variant={variant}
+                    onOpenModal={setActiveModalProject}
+                  />
+                </div>
+              );
+            })
           )}
         </div>
       </section>
