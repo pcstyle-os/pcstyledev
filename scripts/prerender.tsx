@@ -11,6 +11,7 @@ import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router';
 import { HelmetProvider, type FilledContext } from 'react-helmet-async';
 import { AppTree } from '../App';
+import { VisualSkinProvider } from '../hooks/useVisualSkin';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
@@ -33,9 +34,11 @@ function renderRoute(location: string) {
   const helmetContext = {};
   const app = renderToString(
     <HelmetProvider context={helmetContext}>
-      <StaticRouter location={location}>
-        <AppTree notifications={[]} addNotification={() => {}} />
-      </StaticRouter>
+      <VisualSkinProvider>
+        <StaticRouter location={location}>
+          <AppTree notifications={[]} addNotification={() => {}} synth={null} />
+        </StaticRouter>
+      </VisualSkinProvider>
     </HelmetProvider>,
   );
   const { helmet } = helmetContext as FilledContext;

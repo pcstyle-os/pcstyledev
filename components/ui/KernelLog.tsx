@@ -20,7 +20,7 @@ export const KernelLog = () => {
   }, [lines]);
 
   return (
-    <div className="fixed top-24 left-6 z-0 hidden xl:block opacity-20 font-mono text-[9px] text-[#ff00ff] space-y-1 select-none pointer-events-none">
+    <div className="fixed top-24 left-6 z-[45] hidden xl:block opacity-20 font-mono text-[9px] text-[#ff00ff] space-y-1 select-none pointer-events-none">
       {logs.map((log, i) => (
         <div key={i} className="flex gap-2">
           <span className="opacity-40">[{Math.random().toString(36).substring(7)}]</span>

@@ -4,12 +4,20 @@
     <script>
       (function () {
         try {
-          var k = "pcstyle-theme";
-          var t = localStorage.getItem(k);
-          var d = t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);
           var r = document.documentElement;
-          r.classList.remove("light", "dark");
-          r.classList.add(d ? "dark" : "light");
+          var sk = localStorage.getItem("pcstyle-skin");
+          var skin = sk === "editorial" || sk === "artifact" ? sk : "artifact";
+          r.dataset.skin = skin;
+          if (skin === "artifact") {
+            r.classList.remove("light");
+            r.classList.add("dark");
+          } else {
+            var k = "pcstyle-theme";
+            var t = localStorage.getItem(k);
+            var d = t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);
+            r.classList.remove("light", "dark");
+            r.classList.add(d ? "dark" : "light");
+          }
         } catch (e) {}
       })();
     </script>

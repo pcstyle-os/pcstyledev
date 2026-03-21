@@ -17,6 +17,7 @@ import {
   type AudiencePathId,
 } from '../lib/audiencePaths';
 import { SeoHome } from '../components/Seo';
+import { useVisualSkin } from '../hooks/useVisualSkin';
 
 interface ContextType {
   soundEnabled: boolean;
@@ -66,6 +67,7 @@ function projectGridCellClass(variant: ProjectCardVariant): string {
 }
 
 export const Projects = () => {
+  const { skin } = useVisualSkin();
   const { soundEnabled, synth } = useOutletContext<ContextType>();
   const [searchParams, setSearchParams] = useSearchParams();
   const pathPresetsAppliedRef = useRef(false);
@@ -621,16 +623,23 @@ export const Projects = () => {
           )}
         </div>
 
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:grid-flow-dense md:auto-rows-min gap-6 md:gap-8">
+        <div
+          className={
+            skin === 'artifact'
+              ? 'relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'
+              : 'relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:grid-flow-dense md:auto-rows-min gap-6 md:gap-8'
+          }
+        >
           {displayProjects.length === 0 ? (
             <div className="col-span-full glass-panel rounded-[2rem] p-12 text-center">
               <p className="font-body text-on-surface-variant">No projects match these filters.</p>
             </div>
           ) : (
             displayProjects.map((p, idx) => {
-              const variant = projectTileVariant(idx);
+              const variant = skin === 'artifact' ? 'default' : projectTileVariant(idx);
+              const cellClass = skin === 'artifact' ? '' : projectGridCellClass(variant);
               return (
-                <div key={p.id} className={`min-w-0 ${projectGridCellClass(variant)}`}>
+                <div key={p.id} className={`min-w-0 ${cellClass}`}>
                   <ProjectCard
                     project={p}
                     soundEnabled={soundEnabled}

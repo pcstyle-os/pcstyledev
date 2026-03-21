@@ -20,7 +20,7 @@ export const NeuralCursor = () => {
   }, [mouse]);
 
   return (
-    <div className="hidden lg:block pointer-events-none fixed inset-0 z-[500]">
+    <div className="hidden lg:block pointer-events-none fixed inset-0 z-[30]">
       <div
         className="absolute w-4 h-4 border border-[#ff00ff] rounded-full transition-transform duration-75 ease-out"
         style={{ transform: `translate(${mouse.x - 8}px, ${mouse.y - 8}px)` }}

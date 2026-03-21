@@ -4,7 +4,7 @@ export type ThemeMode = 'light' | 'dark';
 
 const STORAGE_KEY = 'pcstyle-theme';
 
-function getStoredTheme(): ThemeMode | null {
+export function getStoredTheme(): ThemeMode | null {
   if (typeof window === 'undefined') return null;
   try {
     const v = localStorage.getItem(STORAGE_KEY);
@@ -15,12 +15,12 @@ function getStoredTheme(): ThemeMode | null {
   return null;
 }
 
-function getSystemDark(): boolean {
+export function getSystemDark(): boolean {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-function applyDomTheme(mode: ThemeMode) {
+export function applyDomTheme(mode: ThemeMode) {
   const root = document.documentElement;
   root.classList.remove('light', 'dark');
   root.classList.add(mode === 'dark' ? 'dark' : 'light');
@@ -47,6 +47,23 @@ export function useTheme() {
   });
 
   useEffect(() => {
+    const handleSkin = () => {
+      if (typeof document === 'undefined') return;
+      if (document.documentElement.dataset.skin !== 'editorial') return;
+      const s = getStoredTheme();
+      setThemeState(s ?? (getSystemDark() ? 'dark' : 'light'));
+    };
+    window.addEventListener('pcstyle-visual-skin', handleSkin);
+    return () => window.removeEventListener('pcstyle-visual-skin', handleSkin);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    if (root.dataset.skin === 'artifact') {
+      applyDomTheme('dark');
+      return;
+    }
     applyDomTheme(theme);
   }, [theme]);
 

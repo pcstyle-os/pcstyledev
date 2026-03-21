@@ -27,9 +27,13 @@ export const AudioVisualizer = ({ synth, isActive }: { synth: Synth | null; isAc
       let barHeight;
       let x = 0;
 
+      const rgb =
+        typeof document !== 'undefined' && document.documentElement.dataset.skin === 'artifact'
+          ? '255, 0, 255'
+          : '70, 101, 97';
       for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i] / 4;
-        ctx.fillStyle = `rgba(70, 101, 97, ${dataArray[i] / 320})`;
+        ctx.fillStyle = `rgba(${rgb}, ${dataArray[i] / 320})`;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 1;
       }

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileText, LayoutList, Search, AlertTriangle, Lightbulb, Trophy, Link2 } from 'lucide-react';
+import { X, FileText, LayoutList, Search, AlertTriangle, Lightbulb, Trophy, Link2, Terminal } from 'lucide-react';
 import type { Project } from '../../lib/types';
 import { GlitchText } from './GlitchText';
+import { useVisualSkin } from '../../hooks/useVisualSkin';
 
 interface Props {
   project: Project | null;
@@ -30,6 +31,8 @@ function hasModalBody(modal: Project['modal']): modal is NonNullable<Project['mo
 }
 
 export const ProjectModal = ({ project, onClose }: Props) => {
+  const { skin } = useVisualSkin();
+  const isArtifact = skin === 'artifact';
   const [tab, setTab] = useState<TabId>('overview');
 
   const content = project?.modal?.content;
@@ -59,48 +62,98 @@ export const ProjectModal = ({ project, onClose }: Props) => {
       {project ? (
         <motion.div
           key={project.id}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6"
           initial="hidden"
           animate="visible"
           exit="hidden"
         >
           <motion.div
-            className="absolute inset-0 bg-on-surface/25 backdrop-blur-md"
+            className={
+              isArtifact
+                ? 'absolute inset-0 bg-black/80 backdrop-blur-sm'
+                : 'absolute inset-0 bg-on-surface/25 backdrop-blur-md'
+            }
             variants={backdropVariants}
             onClick={onClose}
           />
           <motion.div
-            className="relative glass-panel w-full max-w-2xl overflow-hidden rounded-[2rem] shadow-ambient max-h-[90vh] flex flex-col"
+            className={
+              isArtifact
+                ? 'relative bg-black border border-[#ff00ff]/30 w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(255,0,255,0.1)] max-h-[90vh] flex flex-col'
+                : 'relative glass-panel w-full max-w-2xl overflow-hidden rounded-[2rem] shadow-ambient max-h-[90vh] flex flex-col'
+            }
             variants={modalVariants}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
-            <div className="flex items-center justify-between px-6 py-4 bg-surface-container-low/50 gap-3">
-              <div className="flex items-center gap-2 text-primary min-w-0">
-                <FileText size={18} strokeWidth={1.75} className="shrink-0" />
-                <span className="text-xs font-body font-semibold uppercase tracking-widest truncate">{title}</span>
+            <div
+              className={
+                isArtifact
+                  ? 'flex items-center justify-between p-4 border-b border-white/10 bg-white/5 gap-3'
+                  : 'flex items-center justify-between px-6 py-4 bg-surface-container-low/50 gap-3'
+              }
+            >
+              <div
+                className={`flex items-center gap-2 min-w-0 ${isArtifact ? 'text-[#ff00ff]' : 'text-primary'}`}
+              >
+                {isArtifact ? (
+                  <Terminal size={16} className="shrink-0" />
+                ) : (
+                  <FileText size={18} strokeWidth={1.75} className="shrink-0" />
+                )}
+                <span
+                  className={
+                    isArtifact
+                      ? 'text-[10px] font-black uppercase tracking-widest truncate'
+                      : 'text-xs font-body font-semibold uppercase tracking-widest truncate'
+                  }
+                >
+                  {title}
+                </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {showTabs && (
-                  <div className="hidden sm:flex rounded-full bg-surface-container-low p-1 border border-primary/10">
+                  <div
+                    className={
+                      isArtifact
+                        ? 'hidden sm:flex gap-1 border border-[#ff00ff]/30 p-0.5'
+                        : 'hidden sm:flex rounded-full bg-surface-container-low p-1 border border-primary/10'
+                    }
+                  >
                     <button
                       type="button"
                       onClick={() => setTab('overview')}
-                      className={`px-3 py-1.5 rounded-full text-[10px] font-body font-semibold uppercase tracking-wider transition-colors ${
-                        activeTab === 'overview'
-                          ? 'bg-primary text-on-primary'
-                          : 'text-on-surface-variant hover:text-primary'
-                      }`}
+                      className={
+                        isArtifact
+                          ? `px-3 py-1.5 text-[9px] font-black uppercase tracking-wider transition-colors ${
+                              activeTab === 'overview'
+                                ? 'bg-[#ff00ff] text-black'
+                                : 'text-gray-500 hover:text-[#ff00ff]'
+                            }`
+                          : `px-3 py-1.5 rounded-full text-[10px] font-body font-semibold uppercase tracking-wider transition-colors ${
+                              activeTab === 'overview'
+                                ? 'bg-primary text-on-primary'
+                                : 'text-on-surface-variant hover:text-primary'
+                            }`
+                      }
                     >
                       Overview
                     </button>
                     <button
                       type="button"
                       onClick={() => setTab('casefile')}
-                      className={`px-3 py-1.5 rounded-full text-[10px] font-body font-semibold uppercase tracking-wider transition-colors ${
-                        activeTab === 'casefile'
-                          ? 'bg-primary text-on-primary'
-                          : 'text-on-surface-variant hover:text-primary'
-                      }`}
+                      className={
+                        isArtifact
+                          ? `px-3 py-1.5 text-[9px] font-black uppercase tracking-wider transition-colors ${
+                              activeTab === 'casefile'
+                                ? 'bg-[#ff00ff] text-black'
+                                : 'text-gray-500 hover:text-[#ff00ff]'
+                            }`
+                          : `px-3 py-1.5 rounded-full text-[10px] font-body font-semibold uppercase tracking-wider transition-colors ${
+                              activeTab === 'casefile'
+                                ? 'bg-primary text-on-primary'
+                                : 'text-on-surface-variant hover:text-primary'
+                            }`
+                      }
                     >
                       Casefile
                     </button>
@@ -109,7 +162,11 @@ export const ProjectModal = ({ project, onClose }: Props) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
+                  className={
+                    isArtifact
+                      ? 'p-2 text-gray-500 hover:text-white transition-colors'
+                      : 'p-2 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors'
+                  }
                   aria-label="Close"
                 >
                   <X size={22} />
@@ -118,22 +175,40 @@ export const ProjectModal = ({ project, onClose }: Props) => {
             </div>
 
             {showTabs && (
-              <div className="flex sm:hidden px-6 pt-2 gap-2 border-b border-primary/10">
+              <div
+                className={
+                  isArtifact
+                    ? 'flex sm:hidden px-4 pt-2 gap-2 border-b border-white/10'
+                    : 'flex sm:hidden px-6 pt-2 gap-2 border-b border-primary/10'
+                }
+              >
                 <button
                   type="button"
                   onClick={() => setTab('overview')}
-                  className={`flex-1 py-2 text-xs font-body font-semibold uppercase tracking-wider border-b-2 transition-colors ${
-                    activeTab === 'overview' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'
-                  }`}
+                  className={
+                    isArtifact
+                      ? `flex-1 py-2 text-[10px] font-black uppercase tracking-wider border-b-2 transition-colors ${
+                          activeTab === 'overview' ? 'border-[#ff00ff] text-[#ff00ff]' : 'border-transparent text-gray-500'
+                        }`
+                      : `flex-1 py-2 text-xs font-body font-semibold uppercase tracking-wider border-b-2 transition-colors ${
+                          activeTab === 'overview' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'
+                        }`
+                  }
                 >
                   Overview
                 </button>
                 <button
                   type="button"
                   onClick={() => setTab('casefile')}
-                  className={`flex-1 py-2 text-xs font-body font-semibold uppercase tracking-wider border-b-2 transition-colors ${
-                    activeTab === 'casefile' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'
-                  }`}
+                  className={
+                    isArtifact
+                      ? `flex-1 py-2 text-[10px] font-black uppercase tracking-wider border-b-2 transition-colors ${
+                          activeTab === 'casefile' ? 'border-[#ff00ff] text-[#ff00ff]' : 'border-transparent text-gray-500'
+                        }`
+                      : `flex-1 py-2 text-xs font-body font-semibold uppercase tracking-wider border-b-2 transition-colors ${
+                          activeTab === 'casefile' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'
+                        }`
+                  }
                 >
                   Casefile
                 </button>
@@ -141,12 +216,24 @@ export const ProjectModal = ({ project, onClose }: Props) => {
             )}
 
             <div className="p-6 sm:p-8 overflow-y-auto scrollbar-custom">
-              <h2 className="font-headline text-2xl sm:text-3xl mb-6 tracking-tight text-on-surface">
+              <h2
+                className={
+                  isArtifact
+                    ? 'text-2xl sm:text-3xl font-black mb-6 uppercase tracking-tighter text-white'
+                    : 'font-headline text-2xl sm:text-3xl mb-6 tracking-tight text-on-surface'
+                }
+              >
                 <GlitchText text={project.name} />
               </h2>
 
               {activeTab === 'overview' && content?.trim() && (
-                <p className="text-on-surface-variant font-body text-base leading-relaxed whitespace-pre-wrap mb-10">
+                <p
+                  className={
+                    isArtifact
+                      ? 'text-gray-500 font-mono text-sm leading-relaxed lowercase whitespace-pre-wrap mb-10 opacity-90'
+                      : 'text-on-surface-variant font-body text-base leading-relaxed whitespace-pre-wrap mb-10'
+                  }
+                >
                   {content}
                 </p>
               )}
@@ -157,11 +244,13 @@ export const ProjectModal = ({ project, onClose }: Props) => {
                     icon={<Search size={16} strokeWidth={1.75} />}
                     label="Problem"
                     body={casefile.problem}
+                    isArtifact={isArtifact}
                   />
                   <CasefileBlock
                     icon={<LayoutList size={16} strokeWidth={1.75} />}
                     label="Constraints"
                     body={casefile.constraints}
+                    isArtifact={isArtifact}
                   />
                   {casefile.failedAttempts && casefile.failedAttempts.length > 0 && (
                     <div>
@@ -180,11 +269,13 @@ export const ProjectModal = ({ project, onClose }: Props) => {
                     icon={<Lightbulb size={16} strokeWidth={1.75} />}
                     label="Breakthrough"
                     body={casefile.breakthrough}
+                    isArtifact={isArtifact}
                   />
                   <CasefileBlock
                     icon={<Trophy size={16} strokeWidth={1.75} />}
                     label="Outcome"
                     body={casefile.outcome}
+                    isArtifact={isArtifact}
                   />
 
                   {casefile.timeline && casefile.timeline.length > 0 && (
@@ -245,7 +336,11 @@ export const ProjectModal = ({ project, onClose }: Props) => {
                 {project.stack.map((s) => (
                   <span
                     key={s}
-                    className="text-xs font-body font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full"
+                    className={
+                      isArtifact
+                        ? 'text-[10px] text-gray-600 font-black border border-gray-800 px-3 py-1 uppercase'
+                        : 'text-xs font-body font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full'
+                    }
                   >
                     {s}
                   </span>
@@ -260,14 +355,42 @@ export const ProjectModal = ({ project, onClose }: Props) => {
   );
 };
 
-function CasefileBlock({ icon, label, body }: { icon: ReactNode; label: string; body: string }) {
+function CasefileBlock({
+  icon,
+  label,
+  body,
+  isArtifact,
+}: {
+  icon: ReactNode;
+  label: string;
+  body: string;
+  isArtifact: boolean;
+}) {
   return (
     <div>
-      <div className="flex items-center gap-2 text-primary mb-3">
+      <div
+        className={`flex items-center gap-2 mb-3 ${
+          isArtifact ? 'text-[#ff00ff]' : 'text-primary'
+        }`}
+      >
         {icon}
-        <span className="text-xs font-body font-semibold uppercase tracking-widest">{label}</span>
+        <span
+          className={
+            isArtifact
+              ? 'text-[10px] font-black uppercase tracking-widest'
+              : 'text-xs font-body font-semibold uppercase tracking-widest'
+          }
+        >
+          {label}
+        </span>
       </div>
-      <p className="text-on-surface-variant font-body text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+      <p
+        className={
+          isArtifact
+            ? 'text-gray-500 font-mono text-sm leading-relaxed whitespace-pre-wrap'
+            : 'text-on-surface-variant font-body text-sm sm:text-base leading-relaxed whitespace-pre-wrap'
+        }
+      >
         {body}
       </p>
     </div>
