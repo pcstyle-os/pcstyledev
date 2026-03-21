@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
   Terminal as TerminalIcon,
@@ -22,6 +22,7 @@ import { HexClock } from './components/ui/HexClock';
 import { LiveCodingStatus } from './components/ui/LiveCodingStatus';
 import { AudioVisualizer } from './components/ui/AudioVisualizer';
 import { SystemNotification } from './components/ui/SystemNotification';
+import { BootSequence } from './components/ui/BootSequence';
 import { PointerSpotlight } from './components/ui/PointerSpotlight';
 import { useTheme } from './hooks/useTheme';
 import { useUiSound } from './hooks/useUiSound';
@@ -52,12 +53,104 @@ const NAV_STAGGER = [
   'nav-stagger-6',
 ] as const;
 
+const ARTIFACT_NAV = [
+  { path: '/', key: 'projects', label: 'projects' },
+  { path: '/hire', key: 'hire', label: 'hire' },
+  { path: '/demo', key: 'demo', label: 'lab' },
+  { path: '/stats', key: 'stats', label: 'stats' },
+  { path: '/identity', key: 'identity', label: 'identity' },
+  { path: '/terminal', key: 'terminal', label: 'terminal' },
+] as const;
+
+function BootGate({
+  children,
+  onBootComplete,
+}: {
+  children: React.ReactNode;
+  onBootComplete?: () => void;
+}) {
+  const { skin } = useVisualSkin();
+  const [bootDone, setBootDone] = useState(() => {
+    if (typeof document === 'undefined') return true;
+    return document.documentElement.dataset.skin !== 'artifact';
+  });
+
+  useEffect(() => {
+    if (skin === 'editorial') setBootDone(true);
+  }, [skin]);
+
+  if (skin === 'artifact' && !bootDone) {
+    return (
+      <BootSequence
+        onComplete={() => {
+          setBootDone(true);
+          onBootComplete?.();
+        }}
+      />
+    );
+  }
+
+  return <>{children}</>;
+}
+
 function Layout({ notifications, addNotification, synth }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { skin, toggleSkin } = useVisualSkin();
   const { isDark, toggleTheme } = useTheme();
   const { soundEnabled, setSoundEnabled, playNavClick, playToggle } = useUiSound();
   const activeTab = location.pathname.substring(1) || 'projects';
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [isHacked, setIsHacked] = useState(false);
+  const [isSuperHacker, setIsSuperHacker] = useState(false);
+
+  useEffect(() => {
+    if (skin !== 'artifact') return;
+    const sequence = [
+      'ArrowUp',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowLeft',
+      'ArrowRight',
+      'b',
+      'a',
+    ];
+    let history: string[] = [];
+    const handler = (e: KeyboardEvent) => {
+      history = [...history, e.key];
+      if (history.length > sequence.length) history.shift();
+      if (JSON.stringify(history) === JSON.stringify(sequence)) {
+        setIsSuperHacker((prev) => !prev);
+        if (soundEnabled) synth?.playBlip(1200, 'sawtooth', 0.5);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [skin, soundEnabled, synth]);
+
+  useEffect(() => {
+    if (skin !== 'artifact' || !isSuperHacker) return;
+    addNotification('ROOT_ACCESS_GRANTED: OVERDRIVE_MODE');
+  }, [skin, isSuperHacker, addNotification]);
+
+  const handleLogoClick = useCallback(() => {
+    if (skin !== 'artifact') return;
+    const newCount = logoClicks + 1;
+    setLogoClicks(newCount);
+    addNotification(`INPUT_OVERRIDE: ${newCount}/5`);
+    if (soundEnabled) synth?.playBlip(200 + newCount * 100, 'sine');
+    if (newCount >= 5) {
+      setIsHacked(true);
+      addNotification('SYSTEM_FAILURE_SIMULATED');
+      setTimeout(() => {
+        setIsHacked(false);
+        setLogoClicks(0);
+      }, 3000);
+    }
+  }, [skin, logoClicks, soundEnabled, synth, addNotification]);
 
   const navItems = [
     { path: '/', key: 'projects', label: 'Projects' },
@@ -93,23 +186,34 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
 
   if (skin === 'artifact') {
     return (
-      <>
+      <div
+        className={`relative min-h-screen bg-black text-gray-300 font-mono selection:bg-[#ff00ff] selection:text-black overflow-x-hidden cursor-none transition-all duration-1000 ${
+          isHacked ? 'animate-artifact-shake' : ''
+        }`}
+        style={{ filter: isSuperHacker ? 'hue-rotate(90deg) contrast(1.2)' : undefined }}
+      >
         <MatrixBackground />
         <CRTOverlay />
-        <div className="relative z-[40] transition-all duration-1000 min-h-screen bg-black text-on-surface">
+        <div className="relative z-10 transition-all duration-1000">
           <header className="border-b border-[#ff00ff]/20 bg-black/95 backdrop-blur-xl sticky top-0 z-50 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 py-2 sm:py-4 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
               <div className="flex items-center gap-4 sm:gap-6 group w-full md:w-auto justify-between md:justify-start">
-                <Link
-                  to="/"
-                  className="w-10 h-10 md:w-12 md:h-12 bg-[#ff00ff] flex items-center justify-center text-black font-black italic text-xl md:text-2xl active:scale-90 transition-all shadow-[0_0_15px_#ff00ff66] shrink-0"
-                  onClick={() => {
-                    playNavClick();
-                    addNotification('ACCESSING_ROOT');
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={handleLogoClick}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleLogoClick();
+                    }
                   }}
+                  onDoubleClick={() => navigate('/')}
+                  className="w-10 h-10 md:w-12 md:h-12 bg-[#ff00ff] cursor-none flex items-center justify-center text-black font-black italic text-xl md:text-2xl active:scale-90 transition-all shadow-[0_0_15px_#ff00ff66] shrink-0"
+                  title="Double-click: home"
                 >
                   PC
-                </Link>
+                </div>
                 <div className="hidden sm:block min-w-0">
                   <h1 className="text-xl font-bold tracking-tighter text-white uppercase group-hover:text-[#ff00ff] transition-colors">
                     pcstyle<span className="text-[#ff00ff]/40">.dev</span>
@@ -122,7 +226,7 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
 
               <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 w-full md:w-auto">
                 <nav className="flex items-center justify-center gap-1 sm:gap-3 md:gap-6 lg:gap-10 w-full overflow-x-auto no-scrollbar scroll-smooth py-1">
-                  {navItems.map((item) => {
+                  {ARTIFACT_NAV.map((item) => {
                     const active = isActive(item.key);
                     return (
                       <Link
@@ -130,7 +234,8 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
                         to={item.path}
                         onClick={() => {
                           playNavClick();
-                          addNotification(`ACCESSING_${item.key.toUpperCase()}`);
+                          addNotification(`ACCESSING_${item.label.toUpperCase()}`);
+                          if (soundEnabled) synth?.playBlip(600, 'sine', 0.05);
                         }}
                         className={`text-[9px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.4em] transition-all relative px-2 py-2 md:py-3 flex-shrink-0 ${
                           active ? 'text-[#ff00ff] font-black' : 'text-gray-600 hover:text-white'
@@ -145,7 +250,7 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
                   })}
                 </nav>
 
-                <div className="flex gap-2 sm:gap-4 items-center justify-center md:ml-4 flex-wrap">
+                <div className="flex gap-4 items-center justify-center md:ml-4 scale-75 md:scale-100 flex-wrap">
                   <button
                     type="button"
                     onClick={handleSkinToggle}
@@ -155,7 +260,7 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
                     Editorial
                   </button>
                   <HexClock />
-                  <div className="hidden md:block h-4 w-px bg-[#ff00ff]/20 mx-1" />
+                  <div className="hidden md:block h-4 w-[1px] bg-[#ff00ff]/20 mx-2" />
                   <AudioVisualizer synth={synth} isActive={soundEnabled} />
                   <button
                     type="button"
@@ -182,7 +287,7 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
             <Outlet context={outletContext} />
           </main>
 
-          <footer className="p-8 sm:p-12 md:p-20 border-t border-[#ff00ff]/10 mt-auto">
+          <footer className="p-8 sm:p-12 md:p-20 border-t border-[#ff00ff]/10">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 md:gap-10">
               <div className="flex flex-col items-center md:items-start gap-3">
                 <p className="text-[12px] text-[#ff00ff] font-black uppercase tracking-[0.5em] opacity-30">
@@ -192,24 +297,15 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
                   protocol_reserved: 777-99-ALPHA
                 </span>
               </div>
-              <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-gray-700 text-[10px] uppercase font-black tracking-[0.2em]">
-                <a
-                  href="https://github.com/pc-style"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-[#ff00ff] transition-colors"
-                >
-                  GitHub
-                </a>
-                <Link to="/identity" className="hover:text-[#ff00ff] transition-colors">
-                  Contact
-                </Link>
-                <Link to="/stats" className="hover:text-[#ff00ff] transition-colors">
-                  Metrics
-                </Link>
-                <Link to="/hire" className="hover:text-[#ff00ff] transition-colors">
-                  Hire
-                </Link>
+              <div className="flex gap-6 sm:gap-10 md:gap-16 text-gray-700">
+                {['privacy', 'network', 'source'].map((link) => (
+                  <span
+                    key={link}
+                    className="text-[10px] uppercase font-black cursor-none hover:text-[#ff00ff] transition-all tracking-[0.3em]"
+                  >
+                    {link}
+                  </span>
+                ))}
               </div>
             </div>
           </footer>
@@ -238,7 +334,11 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
           >
             <Sparkles size={22} strokeWidth={isActive('demo') ? 2.2 : 1.8} />
           </Link>
-          <Link to="/stats" className={isActive('stats') ? 'text-[#ff00ff]' : 'text-gray-600'} onClick={() => playNavClick()}>
+          <Link
+            to="/stats"
+            className={isActive('stats') ? 'text-[#ff00ff]' : 'text-gray-600'}
+            onClick={() => playNavClick()}
+          >
             <BarChart3 size={22} strokeWidth={isActive('stats') ? 2.2 : 1.8} />
           </Link>
           <Link
@@ -248,7 +348,11 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
           >
             <Briefcase size={22} strokeWidth={isActive('hire') ? 2.2 : 1.8} />
           </Link>
-          <Link to="/identity" className={isActive('identity') ? 'text-[#ff00ff]' : 'text-gray-600'} onClick={() => playNavClick()}>
+          <Link
+            to="/identity"
+            className={isActive('identity') ? 'text-[#ff00ff]' : 'text-gray-600'}
+            onClick={() => playNavClick()}
+          >
             <User size={22} strokeWidth={isActive('identity') ? 2.2 : 1.8} />
           </Link>
           <Link
@@ -262,7 +366,7 @@ function Layout({ notifications, addNotification, synth }: LayoutProps) {
             <Mail size={22} strokeWidth={1.8} />
           </a>
         </nav>
-      </>
+      </div>
     );
   }
 
@@ -469,7 +573,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <VisualSkinProvider>
-        <AppTree notifications={notifications} addNotification={addNotification} synth={synth} />
+        <BootGate onBootComplete={() => addNotification('UPLINK_STABLE')}>
+          <AppTree notifications={notifications} addNotification={addNotification} synth={synth} />
+        </BootGate>
       </VisualSkinProvider>
 
       <style>{`
@@ -485,9 +591,15 @@ export default function App() {
           from { transform: translateX(12px); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
         }
+        @keyframes artifactShake {
+          0%, 100% { transform: translate(0,0); filter: contrast(1); }
+          10% { transform: translate(-10px, -5px); filter: hue-rotate(90deg) brightness(2); }
+          50% { transform: translate(10px, 5px); filter: invert(1); }
+        }
         .animate-fadeIn { animation: fadeIn 0.7s ease-out forwards; }
         .animate-slideUp { animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slideIn { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-artifact-shake { animation: artifactShake 0.2s infinite; }
       `}</style>
     </BrowserRouter>
   );

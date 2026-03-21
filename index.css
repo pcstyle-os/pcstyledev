@@ -139,6 +139,37 @@ html[data-skin="artifact"] .site-atmosphere {
   display: none;
 }
 
+/* January 2026 cyber shell: JetBrains, hidden cursor (desktop), scrollbar */
+html[data-skin="artifact"] body {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  background-color: #000;
+  cursor: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-skin="artifact"] body {
+    cursor: auto;
+  }
+  html[data-skin="artifact"] .cursor-none {
+    cursor: auto !important;
+  }
+}
+
+html[data-skin="artifact"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html[data-skin="artifact"] ::-webkit-scrollbar-track {
+  background: #000;
+}
+html[data-skin="artifact"] ::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+html[data-skin="artifact"] ::-webkit-scrollbar-thumb:hover {
+  background: #ff00ff;
+}
+
 html[data-skin="artifact"] .glass-panel {
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(12px);

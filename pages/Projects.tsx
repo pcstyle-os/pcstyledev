@@ -18,6 +18,7 @@ import {
 } from '../lib/audiencePaths';
 import { SeoHome } from '../components/Seo';
 import { useVisualSkin } from '../hooks/useVisualSkin';
+import { ProjectsArtifactView } from './ProjectsArtifactView';
 
 interface ContextType {
   soundEnabled: boolean;
@@ -249,6 +250,24 @@ export const Projects = () => {
     return counts;
   }, [normalizedQuery, selectedStacks]);
 
+  const totalStackCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    PROJECTS.forEach((project) => {
+      project.stack.forEach((stack) => {
+        counts.set(stack, (counts.get(stack) ?? 0) + 1);
+      });
+    });
+    return counts;
+  }, []);
+
+  const topStackSet = useMemo(() => {
+    const top = [...totalStackCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label]) => label);
+    return new Set(top);
+  }, [totalStackCounts]);
+
   const availableStacks = useMemo(
     () => STACKS.filter((stack) => (stackCounts.get(stack) ?? 0) > 0 || selectedStacks.includes(stack)),
     [selectedStacks, stackCounts]
@@ -377,6 +396,46 @@ export const Projects = () => {
       : [])
   ];
   const hasActiveFilters = activeFilters.length > 0;
+
+  if (skin === 'artifact') {
+    return (
+      <ProjectsArtifactView
+        totalNodes={totalNodes}
+        activeNodes={activeNodes}
+        experimentalNodes={experimentalNodes}
+        lastUpdated={lastUpdated}
+        displayProjects={displayProjects}
+        projectCount={PROJECTS.length}
+        filtersOpen={filtersOpen}
+        handleFiltersToggle={handleFiltersToggle}
+        hasActiveFilters={hasActiveFilters}
+        clearFilters={clearFilters}
+        activeFilters={activeFilters}
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showStackFilter={showStackFilter}
+        availableStacks={availableStacks}
+        stackCounts={stackCounts}
+        topStackSet={topStackSet}
+        selectedStacks={selectedStacks}
+        setSelectedStacks={setSelectedStacks}
+        showStatusFilter={showStatusFilter}
+        availableStatuses={availableStatuses}
+        statusCounts={statusCounts}
+        selectedStatuses={selectedStatuses}
+        setSelectedStatuses={setSelectedStatuses}
+        soundEnabled={soundEnabled}
+        synth={synth}
+        activeModalProject={activeModalProject}
+        setActiveModalProject={setActiveModalProject}
+        audiencePath={audiencePath}
+        onAudiencePathSelect={handleAudiencePathSelect}
+        toggleSelection={toggleSelection}
+      />
+    );
+  }
 
   return (
     <div className="space-y-16 sm:space-y-24 md:space-y-32 animate-fadeIn">
@@ -623,23 +682,16 @@ export const Projects = () => {
           )}
         </div>
 
-        <div
-          className={
-            skin === 'artifact'
-              ? 'relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'
-              : 'relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:grid-flow-dense md:auto-rows-min gap-6 md:gap-8'
-          }
-        >
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:grid-flow-dense md:auto-rows-min gap-6 md:gap-8">
           {displayProjects.length === 0 ? (
             <div className="col-span-full glass-panel rounded-[2rem] p-12 text-center">
               <p className="font-body text-on-surface-variant">No projects match these filters.</p>
             </div>
           ) : (
             displayProjects.map((p, idx) => {
-              const variant = skin === 'artifact' ? 'default' : projectTileVariant(idx);
-              const cellClass = skin === 'artifact' ? '' : projectGridCellClass(variant);
+              const variant = projectTileVariant(idx);
               return (
-                <div key={p.id} className={`min-w-0 ${cellClass}`}>
+                <div key={p.id} className={`min-w-0 ${projectGridCellClass(variant)}`}>
                   <ProjectCard
                     project={p}
                     soundEnabled={soundEnabled}
