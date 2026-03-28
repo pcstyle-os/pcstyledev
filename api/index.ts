@@ -120,8 +120,8 @@ function setCache(key: string, data: unknown, ttl = DEFAULT_CACHE_TTL) {
   cache.set(key, { data, expires: Date.now() + ttl })
 }
 
-// Robust fetch for Edge Runtime
-async function fetchWithRetry(url: string, options: RequestInit = {}): Promise<Response> {
+// Deduped fetch with timeout for Edge Runtime
+async function fetchDeduped(url: string, options: RequestInit = {}): Promise<Response> {
   const cacheKey = `${options.method || 'GET'}:${url}`
 
   if (inflight.has(cacheKey)) {
@@ -222,7 +222,7 @@ routes.get('/wakatime/summary', async (c) => {
 
   try {
     const auth = btoa(`${apiKey}:`)
-    const res = await fetchWithRetry(
+    const res = await fetchDeduped(
       'https://wakatime.com/api/v1/users/current/summaries?range=last_7_days',
       { headers: { Authorization: `Basic ${auth}` } }
     )
@@ -295,7 +295,7 @@ routes.get('/wakatime/status', async (c) => {
 
   try {
     const auth = btoa(`${apiKey}:`)
-    const res = await fetchWithRetry(
+    const res = await fetchDeduped(
       'https://wakatime.com/api/v1/users/current/statusbar/today',
       { headers: { Authorization: `Basic ${auth}` } }
     )
@@ -356,7 +356,7 @@ async function fetchSevenDayMetrics(token: string, username: string): Promise<Gi
       }
     }
   `
-  const res = await fetchWithRetry('https://api.github.com/graphql', {
+  const res = await fetchDeduped('https://api.github.com/graphql', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -419,7 +419,7 @@ routes.get('/github/contributions', async (c) => {
         }
       }
     `
-    const res = await fetchWithRetry('https://api.github.com/graphql', {
+    const res = await fetchDeduped('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -464,7 +464,7 @@ routes.get('/github/stats', async (c) => {
     let totalOwnedRepos: number | undefined
     let authUserMatched = false
 
-    const authUserRes = await fetchWithRetry('https://api.github.com/user', {
+    const authUserRes = await fetchDeduped('https://api.github.com/user', {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (authUserRes.ok) {
@@ -480,7 +480,7 @@ routes.get('/github/stats', async (c) => {
     }
 
     if (!authUserMatched) {
-      const userRes = await fetchWithRetry(`https://api.github.com/users/${username}`, {
+      const userRes = await fetchDeduped(`https://api.github.com/users/${username}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!userRes.ok) throw new Error(`GitHub User Error: ${userRes.status}`)
@@ -494,7 +494,7 @@ routes.get('/github/stats', async (c) => {
       ? 'https://api.github.com/user/repos?per_page=100&sort=pushed&affiliation=owner'
       : `https://api.github.com/users/${username}/repos?per_page=100`
 
-    const reposRes = await fetchWithRetry(reposUrl, {
+    const reposRes = await fetchDeduped(reposUrl, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const repos = reposRes.ok ? await reposRes.json() : []
@@ -520,7 +520,7 @@ routes.get('/github/stats', async (c) => {
         private: Boolean(r.private),
       }))
 
-    const eventsRes = await fetchWithRetry(`https://api.github.com/users/${username}/events/public?per_page=100`, {
+    const eventsRes = await fetchDeduped(`https://api.github.com/users/${username}/events/public?per_page=100`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     const events = eventsRes.ok ? await eventsRes.json() : []
@@ -572,7 +572,7 @@ routes.get('/github/stats', async (c) => {
         }
       }
     `
-    const contribRes = await fetchWithRetry('https://api.github.com/graphql', {
+    const contribRes = await fetchDeduped('https://api.github.com/graphql', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: contribQuery, variables: { username } })
@@ -645,7 +645,7 @@ routes.get('/github/coding-estimate', async (c) => {
         }
       }
     `
-    const calRes = await fetchWithRetry('https://api.github.com/graphql', {
+    const calRes = await fetchDeduped('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -682,7 +682,7 @@ routes.get('/github/coding-estimate', async (c) => {
 
     const dailyAverage = Math.round(totalSeconds / 7)
 
-    const eventsRes = await fetchWithRetry(
+    const eventsRes = await fetchDeduped(
       `https://api.github.com/users/${username}/events/public?per_page=100`,
       {
         headers: {
@@ -722,7 +722,7 @@ routes.get('/github/coding-estimate', async (c) => {
     const topRepos = projectEntries.slice(0, 10)
     await Promise.all(
       topRepos.map(async ([repoName, commits]) => {
-        const langRes = await fetchWithRetry(`https://api.github.com/repos/${repoName}/languages`, {
+        const langRes = await fetchDeduped(`https://api.github.com/repos/${repoName}/languages`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/vnd.github+json',
@@ -789,7 +789,7 @@ routes.get('/github/activity-status', async (c) => {
   }
 
   try {
-    const res = await fetchWithRetry(
+    const res = await fetchDeduped(
       `https://api.github.com/users/${username}/events/public?per_page=25`,
       {
         headers: {

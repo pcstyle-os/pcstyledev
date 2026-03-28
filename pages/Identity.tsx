@@ -92,24 +92,24 @@ export const Identity = () => {
           </div>
 
           <div className="flex flex-wrap gap-4 mt-12">
-            <button
-              type="button"
-              onClick={handleDecrypt}
-              className={`inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full font-body text-sm font-semibold transition-all ${
-                decrypted
-                  ? 'bg-primary text-on-primary'
-                  : 'glass-panel text-on-surface hover:bg-surface-container-lowest/80'
-              }`}
-            >
-              {decrypted ? <Unlock size={18} /> : <Lock size={18} />}
-              {decrypted ? (
-                <a href={`mailto:${emailText}`} className="break-all">
-                  {emailText}
-                </a>
-              ) : (
+            {decrypted ? (
+              <a
+                href={`mailto:${emailText}`}
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full font-body text-sm font-semibold transition-all bg-primary text-on-primary break-all"
+              >
+                <Unlock size={18} />
+                {emailText}
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDecrypt}
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full font-body text-sm font-semibold transition-all glass-panel text-on-surface hover:bg-surface-container-lowest/80"
+              >
+                <Lock size={18} />
                 <span>Reveal email</span>
-              )}
-            </button>
+              </button>
+            )}
             <a
               href="https://github.com/pc-style"
               target="_blank"

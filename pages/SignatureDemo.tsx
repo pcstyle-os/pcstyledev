@@ -256,7 +256,6 @@ export const SignatureDemo = () => {
         onPointerMove={simpleMode ? undefined : onPointerMove}
         onPointerDown={onPointerDown}
         onPointerLeave={simpleMode ? undefined : onPointerLeave}
-        role="application"
         aria-label="Interactive particle field demo"
       >
         {!simpleMode && (

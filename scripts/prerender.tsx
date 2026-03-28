@@ -1,7 +1,9 @@
 /**
  * After `vite build`, merges react-helmet-async output into HTML.
- * - `/` → dist/index.html (head only; shared SPA shell keeps empty #root to avoid hydration mismatches).
- * - `/identity`, `/hire` → dist/<route>/index.html (full SSR markup for crawlers).
+ * - `/` -> dist/index.html (head only; shared SPA shell keeps empty #root to avoid hydration mismatches).
+ * - `/identity`, `/hire` -> dist/<route>/index.html (full SSR markup for crawlers).
+ *
+ * Uses eager imports (not React.lazy) because renderToString doesn't support Suspense.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -9,9 +11,13 @@ import { fileURLToPath } from 'node:url';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router';
+import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider, type FilledContext } from 'react-helmet-async';
-import { AppTree } from '../App';
 import { VisualSkinProvider } from '../hooks/useVisualSkin';
+import { EditorialLayout } from '../components/layout/EditorialLayout';
+import { Projects } from '../pages/Projects';
+import { Hire } from '../pages/Hire';
+import { Identity } from '../pages/Identity';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
@@ -32,11 +38,18 @@ function mergeHead(html: string, helmet: FilledContext['helmet']): string {
 
 function renderRoute(location: string) {
   const helmetContext = {};
+  const layoutProps = { notifications: [], addNotification: () => {}, synth: null };
   const app = renderToString(
     <HelmetProvider context={helmetContext}>
       <VisualSkinProvider>
         <StaticRouter location={location}>
-          <AppTree notifications={[]} addNotification={() => {}} synth={null} />
+          <Routes>
+            <Route path="/" element={<EditorialLayout {...layoutProps} />}>
+              <Route index element={<Projects />} />
+              <Route path="hire" element={<Hire />} />
+              <Route path="identity" element={<Identity />} />
+            </Route>
+          </Routes>
         </StaticRouter>
       </VisualSkinProvider>
     </HelmetProvider>,
