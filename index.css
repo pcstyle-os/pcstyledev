@@ -1,3 +1,78 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  /* Colors — mapped from CSS variable RGB triplets */
+  --color-surface: rgb(var(--tw-surface));
+  --color-on-surface: rgb(var(--tw-on-surface));
+  --color-on-surface-variant: rgb(var(--tw-on-surface-variant));
+  --color-primary: rgb(var(--tw-primary));
+  --color-primary-container: rgb(var(--tw-primary-container));
+  --color-on-primary: rgb(var(--tw-on-primary));
+  --color-surface-container-low: rgb(var(--tw-surface-container-low));
+  --color-surface-container-lowest: rgb(var(--tw-surface-container-lowest));
+  --color-surface-container: rgb(var(--tw-surface-container));
+  --color-surface-variant: rgb(var(--tw-surface-variant));
+  --color-secondary-container: rgb(var(--tw-secondary-container));
+  --color-on-secondary-container: rgb(var(--tw-on-secondary-container));
+  --color-error: rgb(var(--tw-error));
+  --color-background: rgb(var(--tw-background));
+  --color-on-background: rgb(var(--tw-on-background));
+
+  /* Static colors (hardcoded hex — not theme-dependent) */
+  --color-on-tertiary-fixed: #4a4042;
+  --color-inverse-primary: #d6f8f3;
+  --color-on-secondary-fixed-variant: #42615b;
+  --color-surface-container-high: #e4e9e8;
+  --color-surface-tint: #466561;
+  --color-on-tertiary-container: #5d5354;
+  --color-outline-variant: #acb3b2;
+  --color-on-primary-container: #395754;
+  --color-on-primary-fixed-variant: #43615e;
+  --color-error-dim: #67040d;
+  --color-primary-fixed: #c8e9e5;
+  --color-secondary-fixed-dim: #b9dcd3;
+  --color-secondary-fixed: #c7eae1;
+  --color-inverse-surface: #0b0f0f;
+  --color-on-tertiary-fixed-variant: #675c5e;
+  --color-on-primary-fixed: #264442;
+  --color-primary-fixed-dim: #badbd7;
+  --color-tertiary: #675c5e;
+  --color-surface-container-highest: #dde4e3;
+  --color-tertiary-fixed-dim: #e5d7d9;
+  --color-on-error-container: #6e0a12;
+  --color-surface-bright: #f8faf9;
+  --color-on-error: #fff7f6;
+  --color-secondary-dim: #3a5952;
+  --color-secondary: #46655e;
+  --color-tertiary-fixed: #f4e5e7;
+  --color-outline: #757c7b;
+  --color-tertiary-container: #f4e5e7;
+  --color-on-tertiary: #fff7f7;
+  --color-surface-dim: #d4dbda;
+  --color-inverse-on-surface: #9b9d9d;
+  --color-on-secondary: #e3fff7;
+  --color-primary-dim: #3a5955;
+  --color-error-container: #fa746f;
+  --color-on-secondary-fixed: #26453f;
+  --color-tertiary-dim: #5b5152;
+
+  /* Font families */
+  --font-headline: "Noto Serif", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-label: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Box shadow */
+  --shadow-ambient: var(--shadow-ambient);
+}
+
 /* Ethereal light + red-pink / black dark — CSS variables for Tailwind rgb(.../alpha) */
 
 :root {
